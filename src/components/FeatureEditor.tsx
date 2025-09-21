@@ -5,7 +5,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import hljs from 'highlight.js/lib/core';
 import gherkin from 'highlight.js/lib/languages/gherkin';
-import 'highlight.js/styles/github.css';
 
 export function FeatureEditor() {
   const [featureContent, setFeatureContent] = useState(`Feature: User Registration

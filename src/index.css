@@ -146,39 +146,45 @@ All colors MUST be HSL.
   
   /* Custom highlight.js styles for Gherkin */
   .hljs-keyword {
-    color: hsl(var(--primary));
-    font-weight: 600;
+    color: hsl(var(--primary)) !important;
+    font-weight: 600 !important;
   }
   
   .hljs-title {
-    color: hsl(var(--primary));
-    font-weight: 600;
-    font-size: 1.125em;
+    color: hsl(var(--primary)) !important;
+    font-weight: 600 !important;
+    font-size: 1.125em !important;
   }
   
   .hljs-string {
-    color: hsl(var(--accent));
+    color: hsl(var(--accent)) !important;
   }
   
   .hljs-comment {
-    color: hsl(var(--muted-foreground));
-    font-style: italic;
+    color: hsl(var(--muted-foreground)) !important;
+    font-style: italic !important;
   }
   
   .hljs-built_in {
-    color: hsl(var(--given));
+    color: hsl(var(--given)) !important;
   }
   
   .hljs-name {
-    color: hsl(var(--when));
+    color: hsl(var(--when)) !important;
   }
   
   .hljs-function {
-    color: hsl(var(--then));
+    color: hsl(var(--then)) !important;
   }
   
   .hljs-meta {
-    color: hsl(var(--scenario));
-    font-weight: 600;
+    color: hsl(var(--scenario)) !important;
+    font-weight: 600 !important;
+  }
+  
+  /* Override any default hljs styles */
+  .hljs {
+    background: transparent !important;
+    color: hsl(var(--foreground)) !important;
   }
 }
