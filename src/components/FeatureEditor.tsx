@@ -134,11 +134,11 @@ export function FeatureEditor() {
         <Textarea
           value={featureContent}
           onChange={(e) => setFeatureContent(e.target.value)}
-          className="absolute inset-0 w-full h-full resize-none border-0 rounded-none focus:ring-0 font-mono text-sm leading-relaxed p-6 bg-transparent"
+          className="absolute inset-0 w-full h-full resize-none border-0 rounded-none focus:ring-0 font-mono text-sm leading-relaxed p-6 bg-transparent text-transparent caret-foreground selection:bg-primary/20"
           placeholder="Enter your feature file content using Gherkin syntax..."
         />
         <div className="absolute inset-0 pointer-events-none p-6 font-mono text-sm whitespace-pre-wrap overflow-hidden">
-          <div className="opacity-0 select-none">
+          <div className="select-none">
             {formatContent(featureContent)}
           </div>
         </div>
