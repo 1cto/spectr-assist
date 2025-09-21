@@ -85,11 +85,53 @@ export function FeatureEditor() {
 
   const getHighlightedContent = (content: string) => {
     try {
+      // Register Gherkin language if not already registered
+      if (!hljs.getLanguage('gherkin')) {
+        hljs.registerLanguage('gherkin', gherkin);
+      }
+      
       const highlighted = hljs.highlight(content, { language: 'gherkin' });
       return highlighted.value;
     } catch (error) {
-      return hljs.highlightAuto(content).value;
+      console.warn('Highlighting failed, using custom highlighting:', error);
+      // Fallback to custom highlighting if hljs fails
+      return customHighlight(content);
     }
+  };
+
+  const customHighlight = (content: string) => {
+    return content
+      .split('\n')
+      .map(line => {
+        const trimmedLine = line.trim();
+        let highlightedLine = line;
+        
+        if (trimmedLine.startsWith('Feature:')) {
+          highlightedLine = line.replace(/Feature:/, '<span class="hljs-title">Feature:</span>');
+        } else if (trimmedLine.startsWith('Scenario:') || trimmedLine.startsWith('Scenario Outline:')) {
+          highlightedLine = line.replace(/(Scenario.*?:)/, '<span class="hljs-meta">$1</span>');
+        } else if (trimmedLine.startsWith('Background:')) {
+          highlightedLine = line.replace(/Background:/, '<span class="hljs-keyword">Background:</span>');
+        } else if (trimmedLine.startsWith('Given')) {
+          highlightedLine = line.replace(/Given/, '<span class="hljs-built_in">Given</span>');
+        } else if (trimmedLine.startsWith('When')) {
+          highlightedLine = line.replace(/When/, '<span class="hljs-name">When</span>');
+        } else if (trimmedLine.startsWith('Then')) {
+          highlightedLine = line.replace(/Then/, '<span class="hljs-function">Then</span>');
+        } else if (trimmedLine.startsWith('And')) {
+          highlightedLine = line.replace(/And/, '<span class="hljs-keyword">And</span>');
+        } else if (trimmedLine.startsWith('But')) {
+          highlightedLine = line.replace(/But/, '<span class="hljs-keyword">But</span>');
+        } else if (trimmedLine.startsWith('As a') || trimmedLine.startsWith('I want') || trimmedLine.startsWith('So that')) {
+          highlightedLine = `<span class="hljs-comment">${line}</span>`;
+        }
+        
+        // Highlight strings in quotes
+        highlightedLine = highlightedLine.replace(/"([^"]*)"/g, '<span class="hljs-string">"$1"</span>');
+        
+        return highlightedLine;
+      })
+      .join('\n');
   };
 
   return (

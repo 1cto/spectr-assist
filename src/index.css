@@ -152,7 +152,7 @@ All colors MUST be HSL.
   
   .hljs-title {
     color: hsl(var(--primary)) !important;
-    font-weight: 600 !important;
+    font-weight: 700 !important;
     font-size: 1.125em !important;
   }
   
@@ -166,19 +166,22 @@ All colors MUST be HSL.
   }
   
   .hljs-built_in {
-    color: hsl(var(--given)) !important;
+    color: hsl(262 83% 58%) !important; /* Given - purple */
+    font-weight: 600 !important;
   }
   
   .hljs-name {
-    color: hsl(var(--when)) !important;
+    color: hsl(32 95% 44%) !important; /* When - orange */
+    font-weight: 600 !important;
   }
   
   .hljs-function {
-    color: hsl(var(--then)) !important;
+    color: hsl(142 76% 36%) !important; /* Then - green */
+    font-weight: 600 !important;
   }
   
   .hljs-meta {
-    color: hsl(var(--scenario)) !important;
+    color: hsl(142 76% 36%) !important; /* Scenario - green */
     font-weight: 600 !important;
   }
   
