@@ -47,6 +47,25 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // BA App specific colors
+        panel: {
+          DEFAULT: "hsl(var(--panel-bg))",
+          border: "hsl(var(--panel-border))",
+        },
+        editor: "hsl(var(--editor-bg))",
+        chat: "hsl(var(--chat-bg))",
+        syntax: {
+          keyword: "hsl(var(--keyword))",
+          scenario: "hsl(var(--scenario))",
+          given: "hsl(var(--given))",
+          when: "hsl(var(--when))",
+          then: "hsl(var(--then))",
+        },
+        estimate: {
+          low: "hsl(var(--estimate-low))",
+          medium: "hsl(var(--estimate-medium))",
+          high: "hsl(var(--estimate-high))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -62,6 +81,14 @@ export default {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      backgroundImage: {
+        'gradient-primary': 'var(--gradient-primary)',
+        'gradient-panel': 'var(--gradient-panel)',
+      },
+      boxShadow: {
+        'panel': 'var(--shadow-panel)',
+        'card': 'var(--shadow-card)',
       },
       keyframes: {
         "accordion-down": {
