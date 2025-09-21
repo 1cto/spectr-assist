@@ -1,8 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FileCode, Download, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import hljs from 'highlight.js/lib/core';
+import gherkin from 'highlight.js/lib/languages/gherkin';
+import 'highlight.js/styles/github.css';
 
 export function FeatureEditor() {
   const [featureContent, setFeatureContent] = useState(`Feature: User Registration
@@ -44,6 +47,10 @@ export function FeatureEditor() {
 
   const { toast } = useToast();
 
+  useEffect(() => {
+    hljs.registerLanguage('gherkin', gherkin);
+  }, []);
+
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(featureContent);
@@ -77,35 +84,13 @@ export function FeatureEditor() {
     });
   };
 
-  const formatContent = (content: string) => {
-    return content.split('\n').map((line, index) => {
-      const trimmedLine = line.trim();
-      let className = 'text-foreground';
-      
-      if (trimmedLine.startsWith('Feature:')) {
-        className = 'text-syntax-keyword font-semibold text-lg';
-      } else if (trimmedLine.startsWith('Scenario:') || trimmedLine.startsWith('Scenario Outline:')) {
-        className = 'text-syntax-scenario font-semibold';
-      } else if (trimmedLine.startsWith('Background:')) {
-        className = 'text-syntax-keyword font-semibold';
-      } else if (trimmedLine.startsWith('Given')) {
-        className = 'text-syntax-given';
-      } else if (trimmedLine.startsWith('When')) {
-        className = 'text-syntax-when';
-      } else if (trimmedLine.startsWith('Then')) {
-        className = 'text-syntax-then';
-      } else if (trimmedLine.startsWith('And') || trimmedLine.startsWith('But')) {
-        className = 'text-muted-foreground';
-      } else if (trimmedLine.startsWith('As a') || trimmedLine.startsWith('I want') || trimmedLine.startsWith('So that')) {
-        className = 'text-muted-foreground italic';
-      }
-
-      return (
-        <div key={index} className={`${className} leading-relaxed`}>
-          {line}
-        </div>
-      );
-    });
+  const getHighlightedContent = (content: string) => {
+    try {
+      const highlighted = hljs.highlight(content, { language: 'gherkin' });
+      return highlighted.value;
+    } catch (error) {
+      return hljs.highlightAuto(content).value;
+    }
   };
 
   return (
@@ -138,9 +123,12 @@ export function FeatureEditor() {
           placeholder="Enter your feature file content using Gherkin syntax..."
         />
         <div className="absolute inset-0 pointer-events-none p-6 font-mono text-sm whitespace-pre-wrap overflow-hidden">
-          <div className="select-none">
-            {formatContent(featureContent)}
-          </div>
+          <div 
+            className="select-none leading-relaxed"
+            dangerouslySetInnerHTML={{ 
+              __html: getHighlightedContent(featureContent) 
+            }}
+          />
         </div>
       </div>
 

@@ -143,4 +143,42 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground;
   }
+  
+  /* Custom highlight.js styles for Gherkin */
+  .hljs-keyword {
+    color: hsl(var(--primary));
+    font-weight: 600;
+  }
+  
+  .hljs-title {
+    color: hsl(var(--primary));
+    font-weight: 600;
+    font-size: 1.125em;
+  }
+  
+  .hljs-string {
+    color: hsl(var(--accent));
+  }
+  
+  .hljs-comment {
+    color: hsl(var(--muted-foreground));
+    font-style: italic;
+  }
+  
+  .hljs-built_in {
+    color: hsl(var(--given));
+  }
+  
+  .hljs-name {
+    color: hsl(var(--when));
+  }
+  
+  .hljs-function {
+    color: hsl(var(--then));
+  }
+  
+  .hljs-meta {
+    color: hsl(var(--scenario));
+    font-weight: 600;
+  }
 }
