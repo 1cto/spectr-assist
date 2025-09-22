@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { FileCode, Download, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import hljs from 'highlight.js/lib/core';
 import gherkin from 'highlight.js/lib/languages/gherkin';
@@ -157,7 +156,7 @@ export function FeatureEditor() {
         </div>
       </div>
 
-      <ScrollArea className="flex-1">
+      <div className="flex-1 overflow-auto">
         <div className="relative min-h-full">
           <Textarea
             value={featureContent}
@@ -175,7 +174,7 @@ export function FeatureEditor() {
             />
           </div>
         </div>
-      </ScrollArea>
+      </div>
 
       <div className="p-4 border-t border-panel-border bg-gradient-panel">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
