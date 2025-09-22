@@ -191,3 +191,14 @@ All colors MUST be HSL.
     color: hsl(var(--foreground)) !important;
   }
 }
+
+@layer utilities {
+  /* Hide native scrollbars when we mirror textarea scroll on overlay */
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+}

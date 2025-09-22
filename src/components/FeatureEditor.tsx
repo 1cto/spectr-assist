@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { FileCode, Download, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -49,6 +49,15 @@ export function FeatureEditor() {
   useEffect(() => {
     hljs.registerLanguage('gherkin', gherkin);
   }, []);
+
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
+  const handleScrollSync = () => {
+    if (textareaRef.current && overlayRef.current) {
+      overlayRef.current.scrollTop = textareaRef.current.scrollTop;
+      overlayRef.current.scrollLeft = textareaRef.current.scrollLeft;
+    }
+  };
 
   const handleCopy = async () => {
     try {
@@ -159,12 +168,14 @@ export function FeatureEditor() {
       <div className="flex-1 overflow-hidden">
         <div className="relative h-full">
           <Textarea
+            ref={textareaRef}
             value={featureContent}
             onChange={(e) => setFeatureContent(e.target.value)}
+            onScroll={handleScrollSync}
             className="w-full h-full resize-none border-0 rounded-none focus:ring-0 font-mono text-sm leading-relaxed p-6 bg-transparent text-transparent caret-foreground selection:bg-primary/20 overflow-auto"
             placeholder="Enter your feature file content using Gherkin syntax..."
           />
-          <div className="absolute inset-0 pointer-events-none p-6 font-mono text-sm whitespace-pre-wrap overflow-auto">
+          <div className="absolute inset-0 pointer-events-none p-6 font-mono text-sm whitespace-pre-wrap overflow-auto no-scrollbar" ref={overlayRef}>
             <div 
               className="select-none leading-relaxed"
               dangerouslySetInnerHTML={{ 
