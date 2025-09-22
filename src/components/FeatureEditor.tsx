@@ -156,16 +156,15 @@ export function FeatureEditor() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto">
-        <div className="relative min-h-full">
+      <div className="flex-1 overflow-hidden">
+        <div className="relative h-full">
           <Textarea
             value={featureContent}
             onChange={(e) => setFeatureContent(e.target.value)}
-            className="w-full min-h-full resize-none border-0 rounded-none focus:ring-0 font-mono text-sm leading-relaxed p-6 bg-transparent text-transparent caret-foreground selection:bg-primary/20"
+            className="w-full h-full resize-none border-0 rounded-none focus:ring-0 font-mono text-sm leading-relaxed p-6 bg-transparent text-transparent caret-foreground selection:bg-primary/20 overflow-auto"
             placeholder="Enter your feature file content using Gherkin syntax..."
-            style={{ minHeight: '600px' }}
           />
-          <div className="absolute inset-0 pointer-events-none p-6 font-mono text-sm whitespace-pre-wrap">
+          <div className="absolute inset-0 pointer-events-none p-6 font-mono text-sm whitespace-pre-wrap overflow-auto">
             <div 
               className="select-none leading-relaxed"
               dangerouslySetInnerHTML={{ 
