@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { FileCode, Download, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import hljs from 'highlight.js/lib/core';
 import gherkin from 'highlight.js/lib/languages/gherkin';
@@ -156,22 +157,25 @@ export function FeatureEditor() {
         </div>
       </div>
 
-      <div className="flex-1 relative">
-        <Textarea
-          value={featureContent}
-          onChange={(e) => setFeatureContent(e.target.value)}
-          className="absolute inset-0 w-full h-full resize-none border-0 rounded-none focus:ring-0 font-mono text-sm leading-relaxed p-6 bg-transparent text-transparent caret-foreground selection:bg-primary/20"
-          placeholder="Enter your feature file content using Gherkin syntax..."
-        />
-        <div className="absolute inset-0 pointer-events-none p-6 font-mono text-sm whitespace-pre-wrap overflow-hidden">
-          <div 
-            className="select-none leading-relaxed"
-            dangerouslySetInnerHTML={{ 
-              __html: getHighlightedContent(featureContent) 
-            }}
+      <ScrollArea className="flex-1">
+        <div className="relative min-h-full">
+          <Textarea
+            value={featureContent}
+            onChange={(e) => setFeatureContent(e.target.value)}
+            className="w-full min-h-full resize-none border-0 rounded-none focus:ring-0 font-mono text-sm leading-relaxed p-6 bg-transparent text-transparent caret-foreground selection:bg-primary/20"
+            placeholder="Enter your feature file content using Gherkin syntax..."
+            style={{ minHeight: '600px' }}
           />
+          <div className="absolute inset-0 pointer-events-none p-6 font-mono text-sm whitespace-pre-wrap">
+            <div 
+              className="select-none leading-relaxed"
+              dangerouslySetInnerHTML={{ 
+                __html: getHighlightedContent(featureContent) 
+              }}
+            />
+          </div>
         </div>
-      </div>
+      </ScrollArea>
 
       <div className="p-4 border-t border-panel-border bg-gradient-panel">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
