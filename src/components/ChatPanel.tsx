@@ -29,7 +29,7 @@ export function ChatPanel({ featureContent }: ChatPanelProps) {
   const sessionId = useRef(`session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
   const { toast } = useToast();
 
-  const sendToWebhook = async (chatInput: string) => {
+  const sendToWebhook = async (chatInput: string): Promise<string> => {
     try {
       const credentials = btoa('n8n_BA_Assistant:wqB0*r@Cxpoo2tTt');
       
@@ -50,10 +50,8 @@ export function ChatPanel({ featureContent }: ChatPanelProps) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      toast({
-        title: "Message sent",
-        description: "Your message has been sent to the webhook successfully.",
-      });
+      const responseData = await response.text();
+      return responseData || "I received your message and processed it successfully.";
     } catch (error) {
       console.error('Failed to send to webhook:', error);
       toast({
@@ -61,6 +59,7 @@ export function ChatPanel({ featureContent }: ChatPanelProps) {
         description: "There was an error sending your message to the webhook.",
         variant: "destructive",
       });
+      throw error;
     }
   };
 
@@ -77,19 +76,28 @@ export function ChatPanel({ featureContent }: ChatPanelProps) {
     setMessages(prev => [...prev, userMessage]);
     setInput("");
 
-    // Send to webhook
-    await sendToWebhook(input);
-
-    // Simulate AI response
-    setTimeout(() => {
+    try {
+      // Send to webhook and wait for response
+      const webhookResponse = await sendToWebhook(input);
+      
+      // Add AI response with actual webhook response
       const aiResponse: Message = {
         id: (Date.now() + 1000).toString(),
-        content: "I understand you want to work on that requirement. Let me help you structure it properly using Gherkin syntax.",
+        content: webhookResponse,
         sender: "assistant",
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, aiResponse]);
-    }, 1000);
+    } catch (error) {
+      // Add error message if webhook fails
+      const errorResponse: Message = {
+        id: (Date.now() + 1000).toString(),
+        content: "Sorry, I'm having trouble connecting to the service right now. Please try again later.",
+        sender: "assistant",
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, errorResponse]);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
