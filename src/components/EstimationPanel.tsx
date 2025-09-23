@@ -12,7 +12,11 @@ interface EstimationData {
   riskLevel: "Low" | "Medium" | "High";
 }
 
-export function EstimationPanel() {
+interface EstimationPanelProps {
+  featureContent: string;
+}
+
+export function EstimationPanel({ featureContent }: EstimationPanelProps) {
   const [estimation, setEstimation] = useState<EstimationData>({
     complexity: "Medium",
     effort: 8,
@@ -21,22 +25,57 @@ export function EstimationPanel() {
     riskLevel: "Low",
   });
 
-  // Simulate real-time estimation updates based on feature content
+  // Analyze feature content and update estimation
   useEffect(() => {
-    const interval = setInterval(() => {
-      // Randomly update estimation values to simulate AI analysis
-      const complexities: ("Low" | "Medium" | "High")[] = ["Low", "Medium", "High"];
-      const risks: ("Low" | "Medium" | "High")[] = ["Low", "Medium", "High"];
+    const analyzeFeature = () => {
+      const scenarios = (featureContent.match(/Scenario:/g) || []).length;
+      const steps = (featureContent.match(/\s+(Given|When|Then|And)\s+/g) || []).length;
+      const hasBackground = featureContent.includes("Background:");
+      const hasExamples = featureContent.includes("Examples:");
       
-      setEstimation(prev => ({
-        ...prev,
-        confidence: Math.max(60, Math.min(95, prev.confidence + (Math.random() - 0.5) * 10)),
-        effort: Math.max(1, Math.min(21, prev.effort + Math.round((Math.random() - 0.5) * 2))),
-      }));
-    }, 10000);
+      let complexity: "Low" | "Medium" | "High" = "Low";
+      let effort = 3;
+      let duration = "1-2 days";
+      let confidence = 85;
+      let riskLevel: "Low" | "Medium" | "High" = "Low";
 
-    return () => clearInterval(interval);
-  }, []);
+      // Complexity based on scenarios and steps
+      if (scenarios >= 4 || steps >= 15) {
+        complexity = "High";
+        effort = 13;
+        duration = "1-2 weeks";
+        confidence = 65;
+        riskLevel = "Medium";
+      } else if (scenarios >= 2 || steps >= 8) {
+        complexity = "Medium";
+        effort = 8;
+        duration = "3-5 days";
+        confidence = 75;
+        riskLevel = "Low";
+      }
+
+      // Adjust for background and examples
+      if (hasBackground) effort += 1;
+      if (hasExamples) effort += 2;
+
+      // User registration is a common but important feature
+      if (featureContent.toLowerCase().includes("registration") || 
+          featureContent.toLowerCase().includes("sign up")) {
+        riskLevel = "Medium";
+        confidence = Math.max(70, confidence - 5);
+      }
+
+      setEstimation({
+        complexity,
+        effort: Math.min(21, effort),
+        duration,
+        confidence,
+        riskLevel,
+      });
+    };
+
+    analyzeFeature();
+  }, [featureContent]);
 
   const getComplexityColor = (complexity: string) => {
     switch (complexity) {

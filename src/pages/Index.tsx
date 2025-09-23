@@ -77,7 +77,7 @@ const Index = () => {
           <div className="h-full flex flex-col">
             {/* Estimation Panel (Upper) */}
             <div className="p-4 border-b border-panel-border">
-              <EstimationPanel />
+              <EstimationPanel featureContent={featureContent} />
             </div>
 
             {/* Tips Panel (Lower) */}
