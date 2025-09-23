@@ -14,9 +14,10 @@ interface Message {
 
 interface ChatPanelProps {
   featureContent: string;
+  onFeatureChange: (content: string) => void;
 }
 
-export function ChatPanel({ featureContent }: ChatPanelProps) {
+export function ChatPanel({ featureContent, onFeatureChange }: ChatPanelProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -29,7 +30,7 @@ export function ChatPanel({ featureContent }: ChatPanelProps) {
   const sessionId = useRef(`session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
   const { toast } = useToast();
 
-  const sendToWebhook = async (chatInput: string): Promise<string> => {
+  const sendToWebhook = async (chatInput: string): Promise<any> => {
     try {
       const credentials = btoa('n8n_BA_Assistant:wqB0*r@Cxpoo2tTt');
       
@@ -50,8 +51,14 @@ export function ChatPanel({ featureContent }: ChatPanelProps) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const responseData = await response.text();
-      return responseData || "I received your message and processed it successfully.";
+      const responseText = await response.text();
+      try {
+        const jsonResponse = JSON.parse(responseText);
+        return jsonResponse;
+      } catch {
+        // If not JSON, return as text
+        return { output: responseText || "I received your message and processed it successfully." };
+      }
     } catch (error) {
       console.error('Failed to send to webhook:', error);
       toast({
@@ -80,10 +87,20 @@ export function ChatPanel({ featureContent }: ChatPanelProps) {
       // Send to webhook and wait for response
       const webhookResponse = await sendToWebhook(input);
       
+      // Use output field for chat response
+      const chatContent = (webhookResponse && typeof webhookResponse === 'object' && webhookResponse.output) 
+        ? webhookResponse.output 
+        : (typeof webhookResponse === 'string' ? webhookResponse : "I received your message and processed it successfully.");
+      
+      // Update feature content if provided
+      if (webhookResponse && typeof webhookResponse === 'object' && webhookResponse.feature) {
+        onFeatureChange(webhookResponse.feature);
+      }
+      
       // Add AI response with actual webhook response
       const aiResponse: Message = {
         id: (Date.now() + 1000).toString(),
-        content: webhookResponse,
+        content: chatContent,
         sender: "assistant",
         timestamp: new Date(),
       };

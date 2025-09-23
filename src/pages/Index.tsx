@@ -61,7 +61,10 @@ const Index = () => {
       <div className="flex-1 flex overflow-hidden">
         {/* Left Panel - Chat */}
         <div className="w-80 flex-shrink-0">
-          <ChatPanel featureContent={featureContent} />
+        <ChatPanel 
+          featureContent={featureContent} 
+          onFeatureChange={setFeatureContent}
+        />
         </div>
 
         {/* Center Panel - Feature Editor */}
