@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Send, Bot, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useToast } from "@/hooks/use-toast";
 
 interface Message {
   id: string;
@@ -11,7 +12,11 @@ interface Message {
   timestamp: Date;
 }
 
-export function ChatPanel() {
+interface ChatPanelProps {
+  featureContent: string;
+}
+
+export function ChatPanel({ featureContent }: ChatPanelProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -21,8 +26,45 @@ export function ChatPanel() {
     },
   ]);
   const [input, setInput] = useState("");
+  const sessionId = useRef(`session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
+  const { toast } = useToast();
 
-  const handleSend = () => {
+  const sendToWebhook = async (chatInput: string) => {
+    try {
+      const credentials = btoa('n8n_BA_Assistant:wqB0*r@Cxpoo2tTt');
+      
+      const response = await fetch('https://n8n.1service.live/webhook/46d6f75e-eae5-4998-897c-ef45ddc012b3', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Basic ${credentials}`
+        },
+        body: JSON.stringify({
+          sessionId: sessionId.current,
+          chatInput,
+          feature: featureContent
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      toast({
+        title: "Message sent",
+        description: "Your message has been sent to the webhook successfully.",
+      });
+    } catch (error) {
+      console.error('Failed to send to webhook:', error);
+      toast({
+        title: "Failed to send",
+        description: "There was an error sending your message to the webhook.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSend = async () => {
     if (!input.trim()) return;
 
     const userMessage: Message = {
@@ -34,6 +76,9 @@ export function ChatPanel() {
 
     setMessages(prev => [...prev, userMessage]);
     setInput("");
+
+    // Send to webhook
+    await sendToWebhook(input);
 
     // Simulate AI response
     setTimeout(() => {
