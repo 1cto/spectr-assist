@@ -34,7 +34,7 @@ export function ChatPanel({ featureContent, onFeatureChange }: ChatPanelProps) {
     try {
       const credentials = btoa('n8n_BA_Assistant:wqB0*r@Cxpoo2tTt');
       
-      const response = await fetch('https://n8n.1service.live/webhook/46d6f75e-eae5-4998-897c-ef45ddc012b3', {
+      const response = await fetch('https://n8n.1service.live/webhook/bb24ae75-b8ce-4395-8f43-6d7a8dd52b71', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
