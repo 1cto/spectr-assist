@@ -1,1 +1,4 @@
 project_id = "vyqbhilwuuqgcywtlsdf"
+
+[functions.receive-metrics]
+verify_jwt = false

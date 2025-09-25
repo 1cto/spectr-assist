@@ -3,6 +3,7 @@ import { Clock, TrendingUp, AlertCircle, CheckCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { supabase } from "@/integrations/supabase/client";
 
 interface EstimationData {
   complexity: "Low" | "Medium" | "High";
@@ -10,6 +11,13 @@ interface EstimationData {
   duration: string;
   confidence: number; // percentage
   riskLevel: "Low" | "Medium" | "High";
+}
+
+interface QualityMetrics {
+  scenarioCoverage?: string;
+  acceptanceCriteria?: string;
+  edgeCases?: string;
+  [key: string]: any; // Allow for additional custom metrics
 }
 
 interface EstimationPanelProps {
@@ -23,6 +31,12 @@ export function EstimationPanel({ featureContent }: EstimationPanelProps) {
     duration: "3-5 days",
     confidence: 75,
     riskLevel: "Low",
+  });
+
+  const [qualityMetrics, setQualityMetrics] = useState<QualityMetrics>({
+    scenarioCoverage: "Good",
+    acceptanceCriteria: "Moderate", 
+    edgeCases: "Needs Work"
   });
 
   // Analyze feature content and update estimation
@@ -76,6 +90,36 @@ export function EstimationPanel({ featureContent }: EstimationPanelProps) {
 
     analyzeFeature();
   }, [featureContent]);
+
+  // Listen for quality metrics updates from external tools
+  useEffect(() => {
+    const channel = supabase
+      .channel('quality-metrics')
+      .on('broadcast', { event: 'metrics-update' }, (payload) => {
+        console.log('Received quality metrics:', payload);
+        
+        // Update quality metrics with received data
+        if (payload.payload) {
+          setQualityMetrics(prev => ({
+            ...prev,
+            ...payload.payload
+          }));
+          
+          // If estimation data is included, update that too
+          if (payload.payload.estimation) {
+            setEstimation(prev => ({
+              ...prev,
+              ...payload.payload.estimation
+            }));
+          }
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   const getComplexityColor = (complexity: string) => {
     switch (complexity) {
@@ -159,17 +203,17 @@ export function EstimationPanel({ featureContent }: EstimationPanelProps) {
           <div className="space-y-3">
             <div className="flex justify-between items-center">
               <span className="text-sm text-muted-foreground">Scenario Coverage</span>
-              <span className="font-medium text-estimate-low">Good</span>
+              <span className="font-medium text-estimate-low">{qualityMetrics.scenarioCoverage}</span>
             </div>
             
             <div className="flex justify-between items-center">
               <span className="text-sm text-muted-foreground">Acceptance Criteria</span>
-              <span className="font-medium text-estimate-medium">Moderate</span>
+              <span className="font-medium text-estimate-medium">{qualityMetrics.acceptanceCriteria}</span>
             </div>
             
             <div className="flex justify-between items-center">
               <span className="text-sm text-muted-foreground">Edge Cases</span>
-              <span className="font-medium text-estimate-high">Needs Work</span>
+              <span className="font-medium text-estimate-high">{qualityMetrics.edgeCases}</span>
             </div>
           </div>
         </CardContent>
