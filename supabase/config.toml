@@ -2,3 +2,6 @@ project_id = "vyqbhilwuuqgcywtlsdf"
 
 [functions.receive-metrics]
 verify_jwt = false
+
+[functions.receive-feature]
+verify_jwt = false

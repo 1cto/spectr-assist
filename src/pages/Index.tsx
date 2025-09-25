@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChatPanel } from "@/components/ChatPanel";
 import { FeatureEditor } from "@/components/FeatureEditor";
 import { EstimationPanel } from "@/components/EstimationPanel";
 import { TipsPanel } from "@/components/TipsPanel";
+import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
   const [featureContent, setFeatureContent] = useState(`Feature: User Registration
@@ -41,6 +42,23 @@ const Index = () => {
     And I click the "Register" button
     Then I should see an error message "Passwords do not match"
     And the registration should not proceed`);
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('feature-updates')
+      .on('broadcast', { event: 'feature-update' }, (payload) => {
+        console.log('Received feature update:', payload);
+        if (payload.payload?.content || payload.payload?.text) {
+          setFeatureContent(payload.payload.content || payload.payload.text);
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
   return (
     <div className="h-screen bg-background flex flex-col">
       {/* Header */}
