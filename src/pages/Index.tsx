@@ -1,19 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import { ChatPanel, ChatPanelHandle } from "@/components/ChatPanel";
+import { ChatPanel } from "@/components/ChatPanel";
 import { FeatureEditor } from "@/components/FeatureEditor";
+import { EstimationPanel } from "@/components/EstimationPanel";
 import { TipsPanel } from "@/components/TipsPanel";
 import { supabase } from "@/integrations/supabase/client";
-
-interface QualityMetrics {
-  "alternative scenarios"?: number;
-  "alternative scenarios justification"?: string;
-  "given-when-then"?: number;
-  "given-when-then justification"?: string;
-  "specifications"?: number;
-  "specifications justification"?: string;
-  "overall"?: number;
-  [key: string]: any;
-}
 
 const Index = () => {
   const [featureContent, setFeatureContent] = useState(`Feature: User Registration
@@ -52,8 +42,6 @@ const Index = () => {
     And I click the "Register" button
     Then I should see an error message "Passwords do not match"
     And the registration should not proceed`);
-  const [qualityMetrics, setQualityMetrics] = useState<QualityMetrics>({});
-  const [chatPanelRef, setChatPanelRef] = useState<ChatPanelHandle | null>(null);
   const loadingChannelRef = useRef<any>(null);
 
   useEffect(() => {
@@ -83,28 +71,11 @@ const Index = () => {
       })
       .subscribe();
 
-    const metricsCh = supabase
-      .channel('quality-metrics')
-      .on('broadcast', { event: 'metrics-update' }, (payload) => {
-        console.log('Index: Received metrics update:', payload);
-        if (payload.payload) {
-          setQualityMetrics(payload.payload);
-        }
-      })
-      .subscribe();
-
     return () => {
       if (featureCh) supabase.removeChannel(featureCh);
       if (loadingCh) supabase.removeChannel(loadingCh);
-      if (metricsCh) supabase.removeChannel(metricsCh);
     };
   }, []);
-
-  const handleSendMessage = (message: string) => {
-    if (chatPanelRef) {
-      chatPanelRef.addMessage('user', message);
-    }
-  };
 
   return (
     <div className="h-screen bg-background flex flex-col">
@@ -129,7 +100,6 @@ const Index = () => {
         <ChatPanel 
           featureContent={featureContent} 
           onFeatureChange={setFeatureContent}
-          ref={setChatPanelRef}
         />
         </div>
 
@@ -138,13 +108,18 @@ const Index = () => {
           <FeatureEditor value={featureContent} onChange={setFeatureContent} />
         </div>
 
-        {/* Right Panel - Tips */}
+        {/* Right Panel - Estimation & Tips */}
         <div className="w-80 flex-shrink-0 bg-panel border-l border-panel-border overflow-hidden">
-          <div className="h-full p-4 overflow-auto">
-            <TipsPanel 
-              metrics={qualityMetrics}
-              onSendMessage={handleSendMessage}
-            />
+          <div className="h-full flex flex-col">
+            {/* Estimation Panel (Upper) */}
+            <div className="p-4 border-b border-panel-border">
+              <EstimationPanel featureContent={featureContent} />
+            </div>
+
+            {/* Tips Panel (Lower) */}
+            <div className="flex-1 p-4 overflow-auto">
+              <TipsPanel />
+            </div>
           </div>
         </div>
       </div>
