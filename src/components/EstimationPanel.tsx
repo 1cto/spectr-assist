@@ -143,6 +143,10 @@ export function EstimationPanel({ featureContent }: EstimationPanelProps) {
         console.log('EstimationPanel: Received feature-received signal');
         setLoadingState(prev => ({ ...prev, waitingForFeature: false, waitingForMetrics: true }));
       })
+      .on('broadcast', { event: 'waiting-for-metrics' }, () => {
+        console.log('EstimationPanel: Received waiting-for-metrics signal');
+        setLoadingState(prev => ({ ...prev, waitingForFeature: false, waitingForMetrics: true }));
+      })
       .on('broadcast', { event: 'metrics-received' }, () => {
         console.log('EstimationPanel: Received metrics-received signal');
         setLoadingState(prev => ({ ...prev, waitingForMetrics: false }));
