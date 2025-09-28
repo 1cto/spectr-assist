@@ -206,7 +206,7 @@ export function FeatureEditor({ value: featureContent, onChange: setFeatureConte
             onChange={(e) => setFeatureContent(e.target.value)}
             onScroll={handleScrollSync}
             className="w-full h-full resize-none border-0 rounded-none focus:ring-0 font-mono text-sm leading-relaxed p-6 bg-transparent text-transparent caret-foreground selection:bg-primary/20 overflow-auto"
-            placeholder="Enter your feature file content using Gherkin syntax..."
+            placeholder="Feature:&#10;  Background:&#10;  Scenario:"
           />
           <div className="absolute inset-0 pointer-events-none p-6 font-mono text-sm whitespace-pre-wrap overflow-auto no-scrollbar" ref={overlayRef}>
             <div 

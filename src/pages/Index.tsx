@@ -6,42 +6,7 @@ import { TipsPanel } from "@/components/TipsPanel";
 import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
-  const [featureContent, setFeatureContent] = useState(`Feature: User Registration
-  As a new user
-  I want to create an account
-  So that I can access the platform
-
-  Background:
-    Given the registration page is displayed
-    And the form fields are visible
-
-  Scenario: Successful user registration
-    Given I am on the registration page
-    When I enter a valid email address
-    And I enter a strong password
-    And I confirm the password correctly
-    And I accept the terms and conditions
-    And I click the "Register" button
-    Then I should see a success message
-    And I should receive a confirmation email
-    And I should be redirected to the welcome page
-
-  Scenario: Registration with invalid email
-    Given I am on the registration page
-    When I enter an invalid email address
-    And I enter a valid password
-    And I click the "Register" button
-    Then I should see an error message "Please enter a valid email address"
-    And the registration should not proceed
-
-  Scenario: Password mismatch
-    Given I am on the registration page
-    When I enter a valid email address
-    And I enter a password in the password field
-    And I enter a different password in the confirm password field
-    And I click the "Register" button
-    Then I should see an error message "Passwords do not match"
-    And the registration should not proceed`);
+  const [featureContent, setFeatureContent] = useState("");
   const loadingChannelRef = useRef<any>(null);
   const chatPanelRef = useRef<ChatPanelRef>(null);
 
