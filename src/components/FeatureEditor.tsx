@@ -11,9 +11,10 @@ import gherkin from 'highlight.js/lib/languages/gherkin';
 interface FeatureEditorProps {
   value: string;
   onChange: (value: string) => void;
+  sessionId: string;
 }
 
-export function FeatureEditor({ value: featureContent, onChange: setFeatureContent }: FeatureEditorProps) {
+export function FeatureEditor({ value: featureContent, onChange: setFeatureContent, sessionId }: FeatureEditorProps) {
   const { toast } = useToast();
   const [waitingForFeature, setWaitingForFeature] = useState(false);
   const [progressVisible, setProgressVisible] = useState(false);
@@ -26,7 +27,7 @@ export function FeatureEditor({ value: featureContent, onChange: setFeatureConte
   useEffect(() => {
     console.log('FeatureEditor: Setting up loading-state channel listener');
     const channel = supabase
-      .channel('loading-state', { config: { broadcast: { self: true }}})
+      .channel(`loading-state-${sessionId}`, { config: { broadcast: { self: true }}})
       .on('broadcast', { event: 'waiting-for-feature' }, () => {
         console.log('FeatureEditor: Received waiting-for-feature signal');
         setWaitingForFeature(true);
@@ -73,7 +74,7 @@ export function FeatureEditor({ value: featureContent, onChange: setFeatureConte
       if (progressTimerRef.current) clearInterval(progressTimerRef.current);
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [sessionId]);
 
   useEffect(() => {
     hljs.registerLanguage('gherkin', gherkin);

@@ -27,8 +27,8 @@ const Index = () => {
       .channel(`feature-updates-${sessionId.current}`)
       .on('broadcast', { event: 'feature-update' }, (payload) => {
         console.log('Received feature update:', payload);
-        if (payload?.content || payload?.text) {
-          setFeatureContent(payload.content || payload.text);
+        if (payload.payload?.content || payload.payload?.text) {
+          setFeatureContent(payload.payload.content || payload.payload.text);
           // Notify Feature File that feature has been received to stop spinner and start QM spinner
           loadingChannelRef.current?.send({ type: 'broadcast', event: 'feature-received' });
           loadingChannelRef.current?.send({ type: 'broadcast', event: 'waiting-for-metrics' });
@@ -80,12 +80,13 @@ const Index = () => {
             ref={chatPanelRef}
             featureContent={featureContent} 
             onFeatureChange={setFeatureContent}
+            sessionId={sessionId.current}
           />
           </div>
 
           {/* Center Panel - Feature Editor */}
           <div className="flex-1 min-w-0">
-            <FeatureEditor value={featureContent} onChange={setFeatureContent} />
+            <FeatureEditor value={featureContent} onChange={setFeatureContent} sessionId={sessionId.current} />
           </div>
 
           {/* Right Panel - Estimation & Tips */}

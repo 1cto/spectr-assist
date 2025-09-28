@@ -90,8 +90,8 @@ export function EstimationPanel({ featureContent, sessionId }: EstimationPanelPr
         console.log('Received quality metrics:', payload);
         
         // Update quality metrics with received data
-        if (payload) {
-          const { timestamp, sessionId, ...metrics } = payload;
+        if (payload.payload) {
+          const { timestamp, sessionId: sid, ...metrics } = payload.payload as any;
           setQualityMetrics(prev => ({
             ...prev,
             ...metrics
