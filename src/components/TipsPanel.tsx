@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Lightbulb, Star, AlertTriangle, BookOpen, Target } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,49 +13,59 @@ interface Tip {
   category: string;
 }
 
-export function TipsPanel() {
-  const [tips] = useState<Tip[]>([
-    {
-      id: "1",
-      type: "improvement",
-      title: "Add negative test scenarios",
-      description: "Consider adding scenarios that test error conditions and edge cases to ensure comprehensive coverage.",
-      priority: "High",
-      category: "Test Coverage",
-    },
-    {
-      id: "2",
-      type: "best-practice",
-      title: "Use concrete examples",
-      description: "Replace generic data with specific, realistic examples to make scenarios more understandable.",
-      priority: "Medium",
-      category: "Clarity",
-    },
-    {
-      id: "3",
-      type: "warning",
-      title: "Scenario is too complex",
-      description: "Break down complex scenarios into smaller, focused scenarios for better maintainability.",
-      priority: "High",
-      category: "Structure",
-    },
-    {
-      id: "4",
-      type: "suggestion",
-      title: "Consider data tables",
-      description: "Use scenario outlines with examples tables to test multiple data variations efficiently.",
-      priority: "Low",
-      category: "Optimization",
-    },
-    {
-      id: "5",
-      type: "best-practice",
-      title: "Improve Given statements",
-      description: "Make Given statements more specific about the initial state and context.",
-      priority: "Medium",
-      category: "Structure",
-    },
-  ]);
+interface QualityMetrics {
+  "alternative scenarios"?: number;
+  "alternative scenarios justification"?: string;
+  "given-when-then"?: number;
+  "given-when-then justification"?: string;
+  "specifications"?: number;
+  "specifications justification"?: string;
+  "overall"?: number;
+  [key: string]: any;
+}
+
+interface TipsPanelProps {
+  metrics?: QualityMetrics;
+  onSendMessage?: (message: string) => void;
+}
+
+export function TipsPanel({ metrics = {}, onSendMessage }: TipsPanelProps) {
+  const [tips, setTips] = useState<Tip[]>([]);
+
+  // Generate tips from low-scoring metrics (0, 1, 2)
+  useEffect(() => {
+    const metricsToCheck = [
+      { key: "alternative scenarios", type: "improvement", category: "Test Coverage" },
+      { key: "given-when-then", type: "warning", category: "Structure" },
+      { key: "specifications", type: "best-practice", category: "Clarity" }
+    ];
+
+    const newTips: Tip[] = [];
+    
+    metricsToCheck.forEach(({ key, type, category }) => {
+      const score = metrics[key];
+      const justification = metrics[`${key} justification`];
+      
+      if (typeof score === 'number' && score <= 2 && justification) {
+        newTips.push({
+          id: key,
+          type: type as "improvement" | "warning" | "best-practice",
+          title: key.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
+          description: justification,
+          priority: score === 0 ? "High" : score === 1 ? "Medium" : "Low",
+          category
+        });
+      }
+    });
+
+    setTips(newTips);
+  }, [metrics]);
+
+  const handleTipClick = (tip: Tip) => {
+    if (onSendMessage) {
+      onSendMessage(`Fix it ${tip.title}: ${tip.description}`);
+    }
+  };
 
   const getTipIcon = (type: string) => {
     switch (type) {
@@ -97,10 +107,11 @@ export function TipsPanel() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {tips.map((tip) => (
+            {tips.length > 0 ? tips.map((tip) => (
               <div
                 key={tip.id}
-                className="p-3 border border-border rounded-lg hover:border-primary/30 transition-colors"
+                className="p-3 border border-border rounded-lg hover:border-primary/30 transition-colors cursor-pointer"
+                onClick={() => handleTipClick(tip)}
               >
                 <div className="flex items-start gap-3">
                   <div className={`mt-0.5 ${getTipColor(tip.type)}`}>
@@ -124,13 +135,19 @@ export function TipsPanel() {
                         {tip.category}
                       </span>
                       <Button variant="ghost" size="sm" className="text-xs h-6 px-2">
-                        Apply
+                        Fix it
                       </Button>
                     </div>
                   </div>
                 </div>
               </div>
-            ))}
+            )) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <AlertTriangle className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">No issues found</p>
+                <p className="text-xs">Quality metrics look good!</p>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

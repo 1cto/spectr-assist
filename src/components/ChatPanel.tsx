@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from "react";
 import { Send, Bot, User, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,7 +19,12 @@ interface ChatPanelProps {
   onFeatureChange: (content: string) => void;
 }
 
-export function ChatPanel({ featureContent, onFeatureChange }: ChatPanelProps) {
+export interface ChatPanelHandle {
+  addMessage: (sender: "user" | "assistant", content: string) => void;
+}
+
+export const ChatPanel = forwardRef<ChatPanelHandle, ChatPanelProps>(
+  ({ featureContent, onFeatureChange }, ref) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -40,6 +45,19 @@ export function ChatPanel({ featureContent, onFeatureChange }: ChatPanelProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout>();
   const { toast } = useToast();
+
+  // Expose methods to parent via ref
+  useImperativeHandle(ref, () => ({
+    addMessage: (sender: "user" | "assistant", content: string) => {
+      const newMessage: Message = {
+        id: Date.now().toString(),
+        content,
+        sender,
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, newMessage]);
+    }
+  }));
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -342,4 +360,6 @@ export function ChatPanel({ featureContent, onFeatureChange }: ChatPanelProps) {
       </div>
     </div>
   );
-}
+});
+
+ChatPanel.displayName = 'ChatPanel';
