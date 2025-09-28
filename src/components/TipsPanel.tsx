@@ -30,49 +30,6 @@ interface TipsPanelProps {
 }
 
 export function TipsPanel({ onSendMessage }: TipsPanelProps) {
-  const [staticTips] = useState<Tip[]>([
-    {
-      id: "1",
-      type: "improvement",
-      title: "Add negative test scenarios",
-      description: "Consider adding scenarios that test error conditions and edge cases to ensure comprehensive coverage.",
-      priority: "High",
-      category: "Test Coverage",
-    },
-    {
-      id: "2",
-      type: "best-practice",
-      title: "Use concrete examples",
-      description: "Replace generic data with specific, realistic examples to make scenarios more understandable.",
-      priority: "Medium",
-      category: "Clarity",
-    },
-    {
-      id: "3",
-      type: "warning",
-      title: "Scenario is too complex",
-      description: "Break down complex scenarios into smaller, focused scenarios for better maintainability.",
-      priority: "High",
-      category: "Structure",
-    },
-    {
-      id: "4",
-      type: "suggestion",
-      title: "Consider data tables",
-      description: "Use scenario outlines with examples tables to test multiple data variations efficiently.",
-      priority: "Low",
-      category: "Optimization",
-    },
-    {
-      id: "5",
-      type: "best-practice",
-      title: "Improve Given statements",
-      description: "Make Given statements more specific about the initial state and context.",
-      priority: "Medium",
-      category: "Structure",
-    },
-  ]);
-
   const [qualityMetrics, setQualityMetrics] = useState<QualityMetrics>({});
   const [metricsTips, setMetricsTips] = useState<Tip[]>([]);
 
@@ -190,9 +147,6 @@ export function TipsPanel({ onSendMessage }: TipsPanelProps) {
     }
   };
 
-  // Combine metrics tips with static tips, prioritizing metrics tips
-  const allTips = [...metricsTips, ...staticTips];
-
   return (
     <div className="space-y-4">
       <Card className="shadow-card">
@@ -204,8 +158,8 @@ export function TipsPanel({ onSendMessage }: TipsPanelProps) {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {allTips.length > 0 ? (
-              allTips.map((tip) => (
+            {metricsTips.length > 0 ? (
+              metricsTips.map((tip) => (
                 <div
                   key={tip.id}
                   className="p-3 border border-border rounded-lg hover:border-primary/30 transition-colors"
