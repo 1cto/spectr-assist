@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
-import { FileCode, Download, Copy, Loader2 } from "lucide-react";
+import { FileCode, Download, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import hljs from 'highlight.js/lib/core';
@@ -15,6 +16,9 @@ interface FeatureEditorProps {
 export function FeatureEditor({ value: featureContent, onChange: setFeatureContent }: FeatureEditorProps) {
   const { toast } = useToast();
   const [waitingForFeature, setWaitingForFeature] = useState(false);
+  const [progressVisible, setProgressVisible] = useState(false);
+  const [progressValue, setProgressValue] = useState(0);
+  const progressTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Listen to loading-state to swap the Feature File icon with a spinner while waiting
   useEffect(() => {
@@ -24,13 +28,36 @@ export function FeatureEditor({ value: featureContent, onChange: setFeatureConte
       .on('broadcast', { event: 'waiting-for-feature' }, () => {
         console.log('FeatureEditor: Received waiting-for-feature signal');
         setWaitingForFeature(true);
+        setProgressVisible(true);
+        setProgressValue(12);
+        if (progressTimerRef.current) clearInterval(progressTimerRef.current);
+        progressTimerRef.current = setInterval(() => {
+          setProgressValue((v) => Math.min(v + 3 + Math.random() * 5, 90));
+        }, 400);
       })
       .on('broadcast', { event: 'feature-received' }, () => {
         console.log('FeatureEditor: Received feature-received signal');
         setWaitingForFeature(false);
+        setProgressVisible(true);
+        setProgressValue((v) => Math.max(v, 70));
+      })
+      .on('broadcast', { event: 'waiting-for-metrics' }, () => {
+        console.log('FeatureEditor: Received waiting-for-metrics signal');
+        setProgressVisible(true);
+        setProgressValue((v) => Math.max(v, 85));
+      })
+      .on('broadcast', { event: 'metrics-received' }, () => {
+        console.log('FeatureEditor: Received metrics-received signal');
+        if (progressTimerRef.current) clearInterval(progressTimerRef.current);
+        setProgressValue(100);
+        setTimeout(() => {
+          setProgressVisible(false);
+          setProgressValue(0);
+        }, 300);
       })
       .subscribe();
     return () => {
+      if (progressTimerRef.current) clearInterval(progressTimerRef.current);
       supabase.removeChannel(channel);
     };
   }, []);
@@ -137,7 +164,7 @@ export function FeatureEditor({ value: featureContent, onChange: setFeatureConte
       <div className="p-4 border-b border-panel-border bg-gradient-panel flex items-center justify-between">
         <div className="flex items-center gap-2">
           {waitingForFeature ? (
-            <Loader2 className="w-5 h-5 text-primary animate-spin" />
+            <FileCode className="w-5 h-5 text-primary" />
           ) : (
             <FileCode className="w-5 h-5 text-primary" />
           )}
@@ -180,12 +207,17 @@ export function FeatureEditor({ value: featureContent, onChange: setFeatureConte
       </div>
 
       <div className="p-4 border-t border-panel-border bg-gradient-panel">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="flex items-center gap-4 text-sm text-muted-foreground">
           <div className="flex items-center gap-4">
             <span>Lines: {featureContent.split('\n').length}</span>
             <span>Scenarios: {(featureContent.match(/Scenario:/g) || []).length}</span>
             <span>Steps: {(featureContent.match(/^\s*(Given|When|Then|And|But)/gm) || []).length}</span>
           </div>
+          {progressVisible && (
+            <div className="flex-1">
+              <Progress value={progressValue} className="h-2" />
+            </div>
+          )}
         </div>
       </div>
     </div>
