@@ -14,9 +14,13 @@ interface EstimationData {
 }
 
 interface QualityMetrics {
-  scenarioCoverage?: string;
-  acceptanceCriteria?: string;
-  edgeCases?: string;
+  "alternative scenarios"?: number;
+  "alternative scenarios justification"?: string;
+  "given-when-then"?: number;
+  "given-when-then justification"?: string;
+  "specifications"?: number;
+  "specifications justification"?: string;
+  "overall"?: number;
   [key: string]: any; // Allow for additional custom metrics
 }
 
@@ -34,10 +38,36 @@ export function EstimationPanel({ featureContent }: EstimationPanelProps) {
   });
 
   const [qualityMetrics, setQualityMetrics] = useState<QualityMetrics>({
-    scenarioCoverage: "Good",
-    acceptanceCriteria: "Moderate", 
-    edgeCases: "Needs Work"
+    "alternative scenarios": 2,
+    "alternative scenarios justification": "Basic scenario coverage",
+    "given-when-then": 2, 
+    "given-when-then justification": "Moderate step structure",
+    "specifications": 2,
+    "specifications justification": "Clear but basic specifications",
+    "overall": 6
   });
+
+  // Convert numeric score to text label
+  const getScoreLabel = (score?: number): string => {
+    switch (score) {
+      case 0: return "Bad";
+      case 1: return "Needs Work";
+      case 2: return "Moderate";
+      case 3: return "Good";
+      default: return "Unknown";
+    }
+  };
+
+  // Get color class based on score
+  const getScoreColor = (score?: number): string => {
+    switch (score) {
+      case 0: return "text-estimate-high"; // Bad - red
+      case 1: return "text-estimate-medium"; // Needs Work - orange
+      case 2: return "text-estimate-medium"; // Moderate - orange
+      case 3: return "text-estimate-low"; // Good - green
+      default: return "text-muted-foreground";
+    }
+  };
 
   // Analyze feature content and update estimation
   useEffect(() => {
@@ -200,21 +230,59 @@ export function EstimationPanel({ featureContent }: EstimationPanelProps) {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-3">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Scenario Coverage</span>
-              <span className="font-medium text-estimate-low">{qualityMetrics.scenarioCoverage}</span>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Alternative Scenarios</span>
+                <span className={`font-medium ${getScoreColor(qualityMetrics["alternative scenarios"])}`}>
+                  {getScoreLabel(qualityMetrics["alternative scenarios"])} ({qualityMetrics["alternative scenarios"] || 0}/3)
+                </span>
+              </div>
+              {qualityMetrics["alternative scenarios justification"] && (
+                <p className="text-xs text-muted-foreground ml-2">
+                  {qualityMetrics["alternative scenarios justification"]}
+                </p>
+              )}
             </div>
             
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Acceptance Criteria</span>
-              <span className="font-medium text-estimate-medium">{qualityMetrics.acceptanceCriteria}</span>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Given-When-Then</span>
+                <span className={`font-medium ${getScoreColor(qualityMetrics["given-when-then"])}`}>
+                  {getScoreLabel(qualityMetrics["given-when-then"])} ({qualityMetrics["given-when-then"] || 0}/3)
+                </span>
+              </div>
+              {qualityMetrics["given-when-then justification"] && (
+                <p className="text-xs text-muted-foreground ml-2">
+                  {qualityMetrics["given-when-then justification"]}
+                </p>
+              )}
             </div>
             
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Edge Cases</span>
-              <span className="font-medium text-estimate-high">{qualityMetrics.edgeCases}</span>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Specifications</span>
+                <span className={`font-medium ${getScoreColor(qualityMetrics["specifications"])}`}>
+                  {getScoreLabel(qualityMetrics["specifications"])} ({qualityMetrics["specifications"] || 0}/3)
+                </span>
+              </div>
+              {qualityMetrics["specifications justification"] && (
+                <p className="text-xs text-muted-foreground ml-2">
+                  {qualityMetrics["specifications justification"]}
+                </p>
+              )}
             </div>
+
+            {qualityMetrics["overall"] !== undefined && (
+              <div className="pt-2 border-t">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-muted-foreground">Overall Score</span>
+                  <span className="font-bold text-primary">
+                    {qualityMetrics["overall"]}/9
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
