@@ -81,7 +81,7 @@ serve(async (req) => {
     });
     
     // Also trigger the metrics-received event for chat coordination
-    const chatChannel = supabase.channel('metrics-received-chat');
+    const chatChannel = supabase.channel('quality-metrics-chat');
     await chatChannel.send({
       type: 'broadcast',
       event: 'metrics-update',

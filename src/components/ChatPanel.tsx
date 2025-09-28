@@ -174,8 +174,10 @@ export function ChatPanel({ featureContent, onFeatureChange }: ChatPanelProps) {
       
       // Wait for metrics to be received, then start typing simulation
       const metricsChannel = supabase
-        .channel('metrics-received-chat')
+        .channel('quality-metrics-chat')
         .on('broadcast', { event: 'metrics-update' }, () => {
+          console.log('Metrics received in chat, starting typing simulation');
+          
           // Signal metrics received
           supabase.channel('loading-state').send({
             type: 'broadcast',
@@ -193,8 +195,9 @@ export function ChatPanel({ featureContent, onFeatureChange }: ChatPanelProps) {
         .subscribe();
       
       // Fallback: if no metrics received within 10 seconds, show response anyway
-      setTimeout(() => {
-        if (waitingForResponse && !isTyping) {
+      const fallbackTimer = setTimeout(() => {
+        console.log('Fallback timeout triggered, showing response anyway');
+        if (waitingForResponse) {
           simulateTyping(finalResponse, () => {
             setWaitingForResponse(false);
           });
@@ -212,6 +215,12 @@ export function ChatPanel({ featureContent, onFeatureChange }: ChatPanelProps) {
       };
       setMessages(prev => [...prev, errorResponse]);
       setWaitingForResponse(false);
+      
+      // Signal that we're no longer waiting
+      supabase.channel('loading-state').send({
+        type: 'broadcast',
+        event: 'metrics-received',
+      });
     }
   };
 
