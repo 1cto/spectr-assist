@@ -134,7 +134,7 @@ export function EstimationPanel({ featureContent }: EstimationPanelProps) {
   // Listen for loading state updates and quality metrics updates
   useEffect(() => {
     const loadingChannel = supabase
-      .channel('loading-state')
+      .channel('loading-state', { config: { broadcast: { self: true }}})
       .on('broadcast', { event: 'waiting-for-feature' }, () => {
         console.log('EstimationPanel: Received waiting-for-feature signal');
         setLoadingState(prev => ({ ...prev, waitingForFeature: true }));

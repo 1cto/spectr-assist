@@ -20,7 +20,7 @@ export function FeatureEditor({ value: featureContent, onChange: setFeatureConte
   useEffect(() => {
     console.log('FeatureEditor: Setting up loading-state channel listener');
     const channel = supabase
-      .channel('loading-state')
+      .channel('loading-state', { config: { broadcast: { self: true }}})
       .on('broadcast', { event: 'waiting-for-feature' }, () => {
         console.log('FeatureEditor: Received waiting-for-feature signal');
         setWaitingForFeature(true);

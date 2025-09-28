@@ -53,7 +53,7 @@ export function ChatPanel({ featureContent, onFeatureChange }: ChatPanelProps) {
   useEffect(() => {
     // Loading-state channel (used for spinners and sync)
     const loadingCh = supabase
-      .channel('loading-state')
+      .channel('loading-state', { config: { broadcast: { self: true }}})
       .on('broadcast', { event: 'metrics-received' }, () => {
         console.log('ChatPanel: metrics-received via loading-state');
         if (waitingRef.current && finalResponseRef.current) {

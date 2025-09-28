@@ -45,7 +45,7 @@ const Index = () => {
   const loadingChannelRef = useRef<any>(null);
 
   useEffect(() => {
-    const loadingCh = supabase.channel('loading-state').subscribe();
+    const loadingCh = supabase.channel('loading-state', { config: { broadcast: { self: true }}}).subscribe();
     loadingChannelRef.current = loadingCh;
 
     const featureCh = supabase
