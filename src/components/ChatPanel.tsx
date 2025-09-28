@@ -55,18 +55,12 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
 
   // Setup realtime channels for loading-state and metrics to coordinate spinners and typing
   useEffect(() => {
-    // Loading-state channel (used for spinners and sync)
+    // Loading-state channel (used for spinners and sync only)
     const loadingCh = supabase
       .channel('loading-state', { config: { broadcast: { self: true }}})
       .on('broadcast', { event: 'metrics-received' }, () => {
-        console.log('ChatPanel: metrics-received via loading-state');
-        if (waitingRef.current && finalResponseRef.current) {
-          simulateTyping(finalResponseRef.current, () => {
-            setWaitingForResponse(false);
-          });
-          waitingRef.current = false;
-          if (fallbackTimerRef.current) clearTimeout(fallbackTimerRef.current);
-        }
+        console.log('ChatPanel: metrics-received via loading-state (coordination only)');
+        // Only used for coordination, no response handling here
       })
       .subscribe();
     loadingChannelRef.current = loadingCh;
