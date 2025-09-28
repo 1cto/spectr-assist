@@ -44,10 +44,11 @@ export default function Auth() {
 
       const redirectUrl = `${window.location.origin}/`;
       
-      const { error } = await supabase.auth.signInWithOAuth({
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: redirectUrl,
+          skipBrowserRedirect: true,
         },
       });
 
@@ -58,6 +59,13 @@ export default function Auth() {
           title: "Authentication Error",
           description: error.message,
         });
+      } else if (data?.url) {
+        // Break out of the iframe to avoid Google refusing to load in an embedded context
+        if (window.top) {
+          window.top.location.href = data.url;
+        } else {
+          window.location.href = data.url;
+        }
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'An unexpected error occurred';
