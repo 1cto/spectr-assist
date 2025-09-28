@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { ChatPanel } from "@/components/ChatPanel";
+import { ChatPanel, ChatPanelRef } from "@/components/ChatPanel";
 import { FeatureEditor } from "@/components/FeatureEditor";
 import { EstimationPanel } from "@/components/EstimationPanel";
 import { TipsPanel } from "@/components/TipsPanel";
@@ -43,6 +43,13 @@ const Index = () => {
     Then I should see an error message "Passwords do not match"
     And the registration should not proceed`);
   const loadingChannelRef = useRef<any>(null);
+  const chatPanelRef = useRef<ChatPanelRef>(null);
+
+  const handleSendMessage = (message: string) => {
+    if (chatPanelRef.current) {
+      chatPanelRef.current.sendMessage(message);
+    }
+  };
 
   useEffect(() => {
     const loadingCh = supabase.channel('loading-state', { config: { broadcast: { self: true }}}).subscribe();
@@ -98,6 +105,7 @@ const Index = () => {
         {/* Left Panel - Chat */}
         <div className="w-80 flex-shrink-0">
         <ChatPanel 
+          ref={chatPanelRef}
           featureContent={featureContent} 
           onFeatureChange={setFeatureContent}
         />
@@ -118,7 +126,7 @@ const Index = () => {
 
             {/* Tips Panel (Lower) */}
             <div className="flex-1 p-4 overflow-auto">
-              <TipsPanel />
+              <TipsPanel onSendMessage={handleSendMessage} />
             </div>
           </div>
         </div>

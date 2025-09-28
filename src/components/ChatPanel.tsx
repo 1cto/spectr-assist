@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from "react";
 import { Send, Bot, User, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,7 +19,11 @@ interface ChatPanelProps {
   onFeatureChange: (content: string) => void;
 }
 
-export function ChatPanel({ featureContent, onFeatureChange }: ChatPanelProps) {
+export interface ChatPanelRef {
+  sendMessage: (message: string) => void;
+}
+
+export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureContent, onFeatureChange }, ref) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -258,6 +262,88 @@ export function ChatPanel({ featureContent, onFeatureChange }: ChatPanelProps) {
     }
   };
 
+  // Expose sendMessage function through ref
+  useImperativeHandle(ref, () => ({
+    sendMessage: (message: string) => {
+      // Create a user message directly and trigger the send flow
+      const userMessage: Message = {
+        id: Date.now().toString(),
+        content: message,
+        sender: "user",
+        timestamp: new Date(),
+      };
+
+      setMessages(prev => [...prev, userMessage]);
+      setWaitingForResponse(true);
+      waitingRef.current = true;
+
+      console.log('Starting new message flow - signaling waiting-for-feature');
+      
+      // Signal that we're waiting for feature update
+      loadingChannelRef.current?.send({ type: 'broadcast', event: 'waiting-for-feature' });
+      const tempLoadingCh = supabase.channel('loading-state', { config: { broadcast: { self: true }}});
+      tempLoadingCh.subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          tempLoadingCh.send({ type: 'broadcast', event: 'waiting-for-feature' });
+          setTimeout(() => supabase.removeChannel(tempLoadingCh), 500);
+        }
+      });
+
+      // Send the message to webhook
+      sendToWebhook(message).then((webhookResponse) => {
+        // Use output field for chat response
+        const chatContent = (webhookResponse && typeof webhookResponse === 'object' && webhookResponse.output) 
+          ? webhookResponse.output 
+          : (typeof webhookResponse === 'string' ? webhookResponse : "I received your message and processed it successfully.");
+        
+        // Update feature content if provided
+        if (webhookResponse && typeof webhookResponse === 'object' && webhookResponse.feature) {
+          onFeatureChange(webhookResponse.feature);
+          // Signal feature received
+          loadingChannelRef.current?.send({
+            type: 'broadcast',
+            event: 'feature-received',
+          });
+        }
+        
+        // Store the final response to show after typing simulation
+        finalResponseRef.current = chatContent;
+        
+        // Fallback: if no metrics received within 10 seconds, show response anyway
+        fallbackTimerRef.current = setTimeout(() => {
+          if (waitingRef.current && finalResponseRef.current) {
+            simulateTyping(finalResponseRef.current, () => {
+              setWaitingForResponse(false);
+            });
+            waitingRef.current = false;
+          }
+        }, 10000);
+        
+      }).catch((error) => {
+        // Add error message if webhook fails
+        const errorResponse: Message = {
+          id: (Date.now() + 1000).toString(),
+          content: "Sorry, I'm having trouble connecting to the service right now. Please try again later.",
+          sender: "assistant",
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, errorResponse]);
+        setWaitingForResponse(false);
+        waitingRef.current = false;
+        
+        // Signal that we're no longer waiting for any loading states
+        loadingChannelRef.current?.send({
+          type: 'broadcast',
+          event: 'feature-received',
+        });
+        loadingChannelRef.current?.send({
+          type: 'broadcast',
+          event: 'metrics-received',
+        });
+      });
+    }
+  }));
+
   // Clean up timeouts on unmount
   useEffect(() => {
     return () => {
@@ -342,4 +428,4 @@ export function ChatPanel({ featureContent, onFeatureChange }: ChatPanelProps) {
       </div>
     </div>
   );
-}
+});
