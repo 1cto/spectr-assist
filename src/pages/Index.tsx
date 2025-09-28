@@ -99,7 +99,7 @@ const Index = () => {
 
               {/* Tips Panel (Lower) */}
               <div className="flex-1 p-4 overflow-auto">
-                <TipsPanel onSendMessage={handleSendMessage} />
+                <TipsPanel onSendMessage={handleSendMessage} sessionId={sessionId.current} />
               </div>
             </div>
           </div>

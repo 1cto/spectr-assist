@@ -27,16 +27,17 @@ interface QualityMetrics {
 
 interface TipsPanelProps {
   onSendMessage?: (message: string) => void;
+  sessionId: string;
 }
 
-export function TipsPanel({ onSendMessage }: TipsPanelProps) {
+export function TipsPanel({ onSendMessage, sessionId }: TipsPanelProps) {
   const [qualityMetrics, setQualityMetrics] = useState<QualityMetrics>({});
   const [metricsTips, setMetricsTips] = useState<Tip[]>([]);
 
   // Listen for quality metrics updates
   useEffect(() => {
     const metricsChannel = supabase
-      .channel('quality-metrics')
+      .channel(`quality-metrics-${sessionId}`)
       .on('broadcast', { event: 'metrics-update' }, (payload) => {
         console.log('TipsPanel: Received quality metrics:', payload);
         
@@ -50,7 +51,7 @@ export function TipsPanel({ onSendMessage }: TipsPanelProps) {
     return () => {
       supabase.removeChannel(metricsChannel);
     };
-  }, []);
+  }, [sessionId]);
 
   const generateTipsFromMetrics = (metrics: QualityMetrics) => {
     console.log('TipsPanel: Generating tips from metrics:', metrics);
