@@ -20,8 +20,14 @@ export function FeatureEditor({ value: featureContent, onChange: setFeatureConte
   useEffect(() => {
     const channel = supabase
       .channel('loading-state')
-      .on('broadcast', { event: 'waiting-for-feature' }, () => setWaitingForFeature(true))
-      .on('broadcast', { event: 'feature-received' }, () => setWaitingForFeature(false))
+      .on('broadcast', { event: 'waiting-for-feature' }, () => {
+        console.log('FeatureEditor: Received waiting-for-feature signal');
+        setWaitingForFeature(true);
+      })
+      .on('broadcast', { event: 'feature-received' }, () => {
+        console.log('FeatureEditor: Received feature-received signal');
+        setWaitingForFeature(false);
+      })
       .subscribe();
     return () => {
       supabase.removeChannel(channel);
