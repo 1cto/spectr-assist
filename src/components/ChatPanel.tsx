@@ -1,15 +1,17 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Bot, User } from "lucide-react";
+import { Send, Bot, User, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Message {
   id: string;
   content: string;
   sender: "user" | "assistant";
   timestamp: Date;
+  isTyping?: boolean;
 }
 
 interface ChatPanelProps {
@@ -27,8 +29,11 @@ export function ChatPanel({ featureContent, onFeatureChange }: ChatPanelProps) {
     },
   ]);
   const [input, setInput] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+  const [waitingForResponse, setWaitingForResponse] = useState(false);
   const sessionId = useRef(`session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout>();
   const { toast } = useToast();
 
   const scrollToBottom = () => {
@@ -38,6 +43,52 @@ export function ChatPanel({ featureContent, onFeatureChange }: ChatPanelProps) {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Listen for metrics received event to start typing simulation
+  useEffect(() => {
+    const channel = supabase
+      .channel('chat-typing')
+      .on('broadcast', { event: 'start-typing' }, () => {
+        setIsTyping(true);
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  // Simulate typing effect
+  const simulateTyping = (finalMessage: string, callback: () => void) => {
+    setIsTyping(true);
+    
+    // Add typing indicator message
+    const typingMessage: Message = {
+      id: `typing-${Date.now()}`,
+      content: "",
+      sender: "assistant",
+      timestamp: new Date(),
+      isTyping: true,
+    };
+    
+    setMessages(prev => [...prev, typingMessage]);
+    
+    // Simulate typing delay (2-3 seconds)
+    typingTimeoutRef.current = setTimeout(() => {
+      // Remove typing indicator and add real message
+      setMessages(prev => {
+        const withoutTyping = prev.filter(msg => !msg.isTyping);
+        return [...withoutTyping, {
+          id: Date.now().toString(),
+          content: finalMessage,
+          sender: "assistant" as const,
+          timestamp: new Date(),
+        }];
+      });
+      setIsTyping(false);
+      callback();
+    }, 2500);
+  };
 
   const sendToWebhook = async (chatInput: string): Promise<any> => {
     try {
@@ -80,7 +131,7 @@ export function ChatPanel({ featureContent, onFeatureChange }: ChatPanelProps) {
   };
 
   const handleSend = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() || waitingForResponse) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -91,6 +142,13 @@ export function ChatPanel({ featureContent, onFeatureChange }: ChatPanelProps) {
 
     setMessages(prev => [...prev, userMessage]);
     setInput("");
+    setWaitingForResponse(true);
+
+    // Signal that we're waiting for feature update
+    supabase.channel('loading-state').send({
+      type: 'broadcast',
+      event: 'waiting-for-feature',
+    });
 
     try {
       // Send to webhook and wait for response
@@ -104,16 +162,46 @@ export function ChatPanel({ featureContent, onFeatureChange }: ChatPanelProps) {
       // Update feature content if provided
       if (webhookResponse && typeof webhookResponse === 'object' && webhookResponse.feature) {
         onFeatureChange(webhookResponse.feature);
+        // Signal feature received
+        supabase.channel('loading-state').send({
+          type: 'broadcast',
+          event: 'feature-received',
+        });
       }
       
-      // Add AI response with actual webhook response
-      const aiResponse: Message = {
-        id: (Date.now() + 1000).toString(),
-        content: chatContent,
-        sender: "assistant",
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, aiResponse]);
+      // Store the final response to show after typing simulation
+      const finalResponse = chatContent;
+      
+      // Wait for metrics to be received, then start typing simulation
+      const metricsChannel = supabase
+        .channel('metrics-received-chat')
+        .on('broadcast', { event: 'metrics-update' }, () => {
+          // Signal metrics received
+          supabase.channel('loading-state').send({
+            type: 'broadcast',
+            event: 'metrics-received',
+          });
+          
+          // Start typing simulation
+          simulateTyping(finalResponse, () => {
+            setWaitingForResponse(false);
+          });
+          
+          // Clean up this temporary channel
+          supabase.removeChannel(metricsChannel);
+        })
+        .subscribe();
+      
+      // Fallback: if no metrics received within 10 seconds, show response anyway
+      setTimeout(() => {
+        if (waitingForResponse && !isTyping) {
+          simulateTyping(finalResponse, () => {
+            setWaitingForResponse(false);
+          });
+          supabase.removeChannel(metricsChannel);
+        }
+      }, 10000);
+      
     } catch (error) {
       // Add error message if webhook fails
       const errorResponse: Message = {
@@ -123,6 +211,7 @@ export function ChatPanel({ featureContent, onFeatureChange }: ChatPanelProps) {
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, errorResponse]);
+      setWaitingForResponse(false);
     }
   };
 
@@ -132,6 +221,15 @@ export function ChatPanel({ featureContent, onFeatureChange }: ChatPanelProps) {
       handleSend();
     }
   };
+
+  // Clean up timeouts on unmount
+  useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <div className="flex flex-col h-full bg-chat border-r border-panel-border">
@@ -159,10 +257,19 @@ export function ChatPanel({ featureContent, onFeatureChange }: ChatPanelProps) {
                     : "bg-card border border-border"
                 }`}
               >
-                <p className="text-sm">{message.content}</p>
-                <span className="text-xs opacity-70 mt-1 block">
-                  {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </span>
+                {message.isTyping ? (
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span className="text-sm text-muted-foreground">Typing...</span>
+                  </div>
+                ) : (
+                  <>
+                    <p className="text-sm">{message.content}</p>
+                    <span className="text-xs opacity-70 mt-1 block">
+                      {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </>
+                )}
               </div>
               {message.sender === "user" && (
                 <div className="flex-shrink-0 w-8 h-8 bg-secondary rounded-full flex items-center justify-center">
@@ -184,8 +291,17 @@ export function ChatPanel({ featureContent, onFeatureChange }: ChatPanelProps) {
             placeholder="Ask about requirements, scenarios, or acceptance criteria..."
             className="flex-1"
           />
-          <Button onClick={handleSend} size="icon" className="shrink-0">
-            <Send className="w-4 h-4" />
+          <Button 
+            onClick={handleSend} 
+            size="icon" 
+            className="shrink-0"
+            disabled={waitingForResponse || isTyping}
+          >
+            {waitingForResponse || isTyping ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Send className="w-4 h-4" />
+            )}
           </Button>
         </div>
       </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Clock, TrendingUp, AlertCircle, CheckCircle } from "lucide-react";
+import { Clock, TrendingUp, AlertCircle, CheckCircle, Loader2, FileText, BarChart3 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -28,6 +28,11 @@ interface EstimationPanelProps {
   featureContent: string;
 }
 
+interface LoadingState {
+  waitingForFeature: boolean;
+  waitingForMetrics: boolean;
+}
+
 export function EstimationPanel({ featureContent }: EstimationPanelProps) {
   const [estimation, setEstimation] = useState<EstimationData>({
     complexity: "Medium",
@@ -45,6 +50,11 @@ export function EstimationPanel({ featureContent }: EstimationPanelProps) {
     "specifications": 2,
     "specifications justification": "Clear but basic specifications",
     "overall": 6
+  });
+
+  const [loadingState, setLoadingState] = useState<LoadingState>({
+    waitingForFeature: false,
+    waitingForMetrics: false,
   });
 
   // Convert numeric score to text label
@@ -121,9 +131,22 @@ export function EstimationPanel({ featureContent }: EstimationPanelProps) {
     analyzeFeature();
   }, [featureContent]);
 
-  // Listen for quality metrics updates from external tools
+  // Listen for loading state updates and quality metrics updates
   useEffect(() => {
-    const channel = supabase
+    const loadingChannel = supabase
+      .channel('loading-state')
+      .on('broadcast', { event: 'waiting-for-feature' }, () => {
+        setLoadingState(prev => ({ ...prev, waitingForFeature: true }));
+      })
+      .on('broadcast', { event: 'feature-received' }, () => {
+        setLoadingState(prev => ({ ...prev, waitingForFeature: false, waitingForMetrics: true }));
+      })
+      .on('broadcast', { event: 'metrics-received' }, () => {
+        setLoadingState(prev => ({ ...prev, waitingForMetrics: false }));
+      })
+      .subscribe();
+
+    const metricsChannel = supabase
       .channel('quality-metrics')
       .on('broadcast', { event: 'metrics-update' }, (payload) => {
         console.log('Received quality metrics:', payload);
@@ -143,11 +166,15 @@ export function EstimationPanel({ featureContent }: EstimationPanelProps) {
             }));
           }
         }
+        
+        // Signal that metrics have been received
+        setLoadingState(prev => ({ ...prev, waitingForMetrics: false }));
       })
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(loadingChannel);
+      supabase.removeChannel(metricsChannel);
     };
   }, []);
 
@@ -174,58 +201,11 @@ export function EstimationPanel({ featureContent }: EstimationPanelProps) {
       <Card className="shadow-card">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-lg">
-            <TrendingUp className="w-5 h-5 text-primary" />
-            Feature Estimation
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <label className="text-sm font-medium text-muted-foreground">Complexity</label>
-              <Badge variant="outline" className={getComplexityColor(estimation.complexity)}>
-                {estimation.complexity}
-              </Badge>
-            </div>
-            <div className="space-y-1">
-              <label className="text-sm font-medium text-muted-foreground">Story Points</label>
-              <div className="text-2xl font-bold text-primary">{estimation.effort}</div>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <label className="text-sm font-medium text-muted-foreground">Confidence</label>
-              <span className="text-sm font-medium">{Math.round(estimation.confidence)}%</span>
-            </div>
-            <Progress value={estimation.confidence} className="h-2" />
-          </div>
-
-          <div className="grid grid-cols-1 gap-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">Duration</span>
-              </div>
-              <span className="font-medium">{estimation.duration}</span>
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">Risk Level</span>
-              </div>
-              <Badge variant="outline" className={getRiskColor(estimation.riskLevel)}>
-                {estimation.riskLevel}
-              </Badge>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card className="shadow-card">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <CheckCircle className="w-5 h-5 text-primary" />
+            {loadingState.waitingForMetrics ? (
+              <Loader2 className="w-5 h-5 text-primary animate-spin" />
+            ) : (
+              <BarChart3 className="w-5 h-5 text-primary" />
+            )}
             Quality Metrics
           </CardTitle>
         </CardHeader>
@@ -283,6 +263,61 @@ export function EstimationPanel({ featureContent }: EstimationPanelProps) {
                 </div>
               </div>
             )}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="shadow-card">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            {loadingState.waitingForFeature ? (
+              <Loader2 className="w-5 h-5 text-primary animate-spin" />
+            ) : (
+              <FileText className="w-5 h-5 text-primary" />
+            )}
+            Feature Estimation
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-muted-foreground">Complexity</label>
+              <Badge variant="outline" className={getComplexityColor(estimation.complexity)}>
+                {estimation.complexity}
+              </Badge>
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-muted-foreground">Story Points</label>
+              <div className="text-2xl font-bold text-primary">{estimation.effort}</div>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <label className="text-sm font-medium text-muted-foreground">Confidence</label>
+              <span className="text-sm font-medium">{Math.round(estimation.confidence)}%</span>
+            </div>
+            <Progress value={estimation.confidence} className="h-2" />
+          </div>
+
+          <div className="grid grid-cols-1 gap-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">Duration</span>
+              </div>
+              <span className="font-medium">{estimation.duration}</span>
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">Risk Level</span>
+              </div>
+              <Badge variant="outline" className={getRiskColor(estimation.riskLevel)}>
+                {estimation.riskLevel}
+              </Badge>
+            </div>
           </div>
         </CardContent>
       </Card>

@@ -79,6 +79,17 @@ serve(async (req) => {
         ...metrics
       }
     });
+    
+    // Also trigger the metrics-received event for chat coordination
+    const chatChannel = supabase.channel('metrics-received-chat');
+    await chatChannel.send({
+      type: 'broadcast',
+      event: 'metrics-update',
+      payload: {
+        timestamp: new Date().toISOString(),
+        ...metrics
+      }
+    });
 
     console.log('Metrics broadcasted successfully');
 
