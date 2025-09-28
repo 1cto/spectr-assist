@@ -55,7 +55,7 @@ const Index = () => {
         if (payload.payload?.content || payload.payload?.text) {
           setFeatureContent(payload.payload.content || payload.payload.text);
           // Notify Feature File that feature has been received to stop spinner
-          supabase.channel('loading-state-feature').send({ type: 'broadcast', event: 'feature-received' });
+          loadingChannelRef.current?.send({ type: 'broadcast', event: 'feature-received' });
         }
       })
       .subscribe();
