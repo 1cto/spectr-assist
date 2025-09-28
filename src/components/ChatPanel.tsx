@@ -32,6 +32,10 @@ export function ChatPanel({ featureContent, onFeatureChange }: ChatPanelProps) {
   const [isTyping, setIsTyping] = useState(false);
   const [waitingForResponse, setWaitingForResponse] = useState(false);
   const waitingRef = useRef(false);
+  const finalResponseRef = useRef<string | null>(null);
+  const fallbackTimerRef = useRef<NodeJS.Timeout>();
+  const loadingChannelRef = useRef<any>(null);
+  const metricsChannelRef = useRef<any>(null);
   const sessionId = useRef(`session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout>();
@@ -45,7 +49,45 @@ export function ChatPanel({ featureContent, onFeatureChange }: ChatPanelProps) {
     scrollToBottom();
   }, [messages]);
 
-  // Removed redundant 'chat-typing' listener to prevent stuck typing state
+  // Setup realtime channels for loading-state and metrics to coordinate spinners and typing
+  useEffect(() => {
+    // Loading-state channel (used for spinners and sync)
+    const loadingCh = supabase
+      .channel('loading-state')
+      .on('broadcast', { event: 'metrics-received' }, () => {
+        console.log('ChatPanel: metrics-received via loading-state');
+        if (waitingRef.current && finalResponseRef.current) {
+          simulateTyping(finalResponseRef.current, () => {
+            setWaitingForResponse(false);
+          });
+          waitingRef.current = false;
+          if (fallbackTimerRef.current) clearTimeout(fallbackTimerRef.current);
+        }
+      })
+      .subscribe();
+    loadingChannelRef.current = loadingCh;
+
+    // Metrics channel (direct)
+    const metricsCh = supabase
+      .channel('quality-metrics-chat')
+      .on('broadcast', { event: 'metrics-update' }, () => {
+        console.log('ChatPanel: metrics-update received, starting typing');
+        if (waitingRef.current && finalResponseRef.current) {
+          simulateTyping(finalResponseRef.current, () => {
+            setWaitingForResponse(false);
+          });
+          waitingRef.current = false;
+          if (fallbackTimerRef.current) clearTimeout(fallbackTimerRef.current);
+        }
+      })
+      .subscribe();
+    metricsChannelRef.current = metricsCh;
+
+    return () => {
+      if (loadingCh) supabase.removeChannel(loadingCh);
+      if (metricsCh) supabase.removeChannel(metricsCh);
+    };
+  }, []);
 
   // Simulate typing effect
   const simulateTyping = (finalMessage: string, callback: () => void) => {
@@ -138,7 +180,7 @@ export function ChatPanel({ featureContent, onFeatureChange }: ChatPanelProps) {
     console.log('Starting new message flow - signaling waiting-for-feature');
     
     // Signal that we're waiting for feature update
-    supabase.channel('loading-state').send({
+    loadingChannelRef.current?.send({
       type: 'broadcast',
       event: 'waiting-for-feature',
     });
@@ -156,7 +198,7 @@ export function ChatPanel({ featureContent, onFeatureChange }: ChatPanelProps) {
       if (webhookResponse && typeof webhookResponse === 'object' && webhookResponse.feature) {
         onFeatureChange(webhookResponse.feature);
         // Signal feature received
-        supabase.channel('loading-state').send({
+        loadingChannelRef.current?.send({
           type: 'broadcast',
           event: 'feature-received',
         });
@@ -166,35 +208,17 @@ export function ChatPanel({ featureContent, onFeatureChange }: ChatPanelProps) {
       const finalResponse = chatContent;
       
       // Wait for metrics to be received, then start typing simulation
-      const metricsChannel = supabase
-        .channel('quality-metrics-chat')
-        .on('broadcast', { event: 'metrics-update' }, () => {
-          console.log('Metrics received in chat, starting typing simulation');
-          
-          // Signal metrics received
-          supabase.channel('loading-state').send({
-            type: 'broadcast',
-            event: 'metrics-received',
-          });
-          
-          // Start typing simulation
-          simulateTyping(finalResponse, () => {
-            setWaitingForResponse(false);
-          });
-          
-          // Clean up this temporary channel
-          supabase.removeChannel(metricsChannel);
-        })
-        .subscribe();
+      // Store final response and wait for metrics via subscribed channels
+      finalResponseRef.current = finalResponse;
       
       // Fallback: if no metrics received within 10 seconds, show response anyway
-      const fallbackTimer = setTimeout(() => {
+      fallbackTimerRef.current = setTimeout(() => {
         console.log('Fallback timeout triggered, showing response anyway');
-        if (waitingRef.current) {
-          simulateTyping(finalResponse, () => {
+        if (waitingRef.current && finalResponseRef.current) {
+          simulateTyping(finalResponseRef.current, () => {
             setWaitingForResponse(false);
           });
-          supabase.removeChannel(metricsChannel);
+          waitingRef.current = false;
         }
       }, 10000);
       
@@ -211,11 +235,11 @@ export function ChatPanel({ featureContent, onFeatureChange }: ChatPanelProps) {
       waitingRef.current = false;
       
       // Signal that we're no longer waiting for any loading states
-      supabase.channel('loading-state').send({
+      loadingChannelRef.current?.send({
         type: 'broadcast',
         event: 'feature-received',
       });
-      supabase.channel('loading-state').send({
+      loadingChannelRef.current?.send({
         type: 'broadcast',
         event: 'metrics-received',
       });
@@ -234,6 +258,9 @@ export function ChatPanel({ featureContent, onFeatureChange }: ChatPanelProps) {
     return () => {
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
+      }
+      if (fallbackTimerRef.current) {
+        clearTimeout(fallbackTimerRef.current);
       }
     };
   }, []);
