@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { ChatPanel } from "@/components/ChatPanel";
 import { FeatureEditor } from "@/components/FeatureEditor";
+import { EstimationPanel } from "@/components/EstimationPanel";
 import { TipsPanel } from "@/components/TipsPanel";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -107,10 +108,18 @@ const Index = () => {
           <FeatureEditor value={featureContent} onChange={setFeatureContent} />
         </div>
 
-        {/* Right Panel - Tips */}
+        {/* Right Panel - Estimation & Tips */}
         <div className="w-80 flex-shrink-0 bg-panel border-l border-panel-border overflow-hidden">
-          <div className="h-full p-4 overflow-auto">
-            <TipsPanel />
+          <div className="h-full flex flex-col">
+            {/* Estimation Panel (Upper) */}
+            <div className="p-4 border-b border-panel-border">
+              <EstimationPanel featureContent={featureContent} />
+            </div>
+
+            {/* Tips Panel (Lower) */}
+            <div className="flex-1 p-4 overflow-auto">
+              <TipsPanel />
+            </div>
           </div>
         </div>
       </div>
