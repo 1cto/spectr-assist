@@ -25,13 +25,13 @@ interface LoadingState {
 
 export function EstimationPanel({ featureContent }: EstimationPanelProps) {
   const [qualityMetrics, setQualityMetrics] = useState<QualityMetrics>({
-    "alternative scenarios": 2,
-    "alternative scenarios justification": "Basic scenario coverage",
-    "given-when-then": 2, 
-    "given-when-then justification": "Moderate step structure",
-    "specifications": 2,
-    "specifications justification": "Clear but basic specifications",
-    "overall": 6
+    "alternative scenarios": 0,
+    "alternative scenarios justification": "",
+    "given-when-then": 0, 
+    "given-when-then justification": "",
+    "specifications": 0,
+    "specifications justification": "",
+    "overall": 0
   });
 
   const [loadingState, setLoadingState] = useState<LoadingState>({
