@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import { FileCode, Download, Copy } from "lucide-react";
+import { FileCode, Download, Copy, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import hljs from 'highlight.js/lib/core';
 import gherkin from 'highlight.js/lib/languages/gherkin';
 
@@ -12,8 +13,20 @@ interface FeatureEditorProps {
 }
 
 export function FeatureEditor({ value: featureContent, onChange: setFeatureContent }: FeatureEditorProps) {
-
   const { toast } = useToast();
+  const [waitingForFeature, setWaitingForFeature] = useState(false);
+
+  // Listen to loading-state to swap the Feature File icon with a spinner while waiting
+  useEffect(() => {
+    const channel = supabase
+      .channel('loading-state')
+      .on('broadcast', { event: 'waiting-for-feature' }, () => setWaitingForFeature(true))
+      .on('broadcast', { event: 'feature-received' }, () => setWaitingForFeature(false))
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   useEffect(() => {
     hljs.registerLanguage('gherkin', gherkin);
@@ -116,7 +129,11 @@ export function FeatureEditor({ value: featureContent, onChange: setFeatureConte
     <div className="flex flex-col h-full bg-editor border-x border-panel-border">
       <div className="p-4 border-b border-panel-border bg-gradient-panel flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <FileCode className="w-5 h-5 text-primary" />
+          {waitingForFeature ? (
+            <Loader2 className="w-5 h-5 text-primary animate-spin" />
+          ) : (
+            <FileCode className="w-5 h-5 text-primary" />
+          )}
           <div>
             <h2 className="font-semibold text-foreground">Feature File</h2>
             <p className="text-sm text-muted-foreground">Write your BDD scenarios using Gherkin syntax</p>

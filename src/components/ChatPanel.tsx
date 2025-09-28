@@ -31,6 +31,7 @@ export function ChatPanel({ featureContent, onFeatureChange }: ChatPanelProps) {
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [waitingForResponse, setWaitingForResponse] = useState(false);
+  const waitingRef = useRef(false);
   const sessionId = useRef(`session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout>();
@@ -44,19 +45,7 @@ export function ChatPanel({ featureContent, onFeatureChange }: ChatPanelProps) {
     scrollToBottom();
   }, [messages]);
 
-  // Listen for metrics received event to start typing simulation
-  useEffect(() => {
-    const channel = supabase
-      .channel('chat-typing')
-      .on('broadcast', { event: 'start-typing' }, () => {
-        setIsTyping(true);
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
+  // Removed redundant 'chat-typing' listener to prevent stuck typing state
 
   // Simulate typing effect
   const simulateTyping = (finalMessage: string, callback: () => void) => {
@@ -86,6 +75,7 @@ export function ChatPanel({ featureContent, onFeatureChange }: ChatPanelProps) {
         }];
       });
       setIsTyping(false);
+      waitingRef.current = false;
       callback();
     }, 2500);
   };
@@ -143,6 +133,7 @@ export function ChatPanel({ featureContent, onFeatureChange }: ChatPanelProps) {
     setMessages(prev => [...prev, userMessage]);
     setInput("");
     setWaitingForResponse(true);
+    waitingRef.current = true;
 
     console.log('Starting new message flow - signaling waiting-for-feature');
     
@@ -199,7 +190,7 @@ export function ChatPanel({ featureContent, onFeatureChange }: ChatPanelProps) {
       // Fallback: if no metrics received within 10 seconds, show response anyway
       const fallbackTimer = setTimeout(() => {
         console.log('Fallback timeout triggered, showing response anyway');
-        if (waitingForResponse) {
+        if (waitingRef.current) {
           simulateTyping(finalResponse, () => {
             setWaitingForResponse(false);
           });
@@ -217,6 +208,7 @@ export function ChatPanel({ featureContent, onFeatureChange }: ChatPanelProps) {
       };
       setMessages(prev => [...prev, errorResponse]);
       setWaitingForResponse(false);
+      waitingRef.current = false;
       
       // Signal that we're no longer waiting for any loading states
       supabase.channel('loading-state').send({

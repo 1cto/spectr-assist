@@ -50,6 +50,8 @@ const Index = () => {
         console.log('Received feature update:', payload);
         if (payload.payload?.content || payload.payload?.text) {
           setFeatureContent(payload.payload.content || payload.payload.text);
+          // Notify UI that feature has been received so panels can switch spinners
+          supabase.channel('loading-state').send({ type: 'broadcast', event: 'feature-received' });
         }
       })
       .subscribe();
