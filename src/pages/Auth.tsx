@@ -60,11 +60,17 @@ export default function Auth() {
           description: error.message,
         });
       } else if (data?.url) {
-        // Break out of the iframe to avoid Google refusing to load in an embedded context
-        if (window.top) {
-          window.top.location.href = data.url;
-        } else {
-          window.location.href = data.url;
+        // Open Google auth in a new tab to avoid iframe and cross-origin top navigation issues
+        const win = window.open(data.url, '_blank', 'noopener,noreferrer');
+        if (!win) {
+          // Fallback if popup is blocked: programmatically click an anchor
+          const a = document.createElement('a');
+          a.href = data.url;
+          a.target = '_blank';
+          a.rel = 'noopener noreferrer';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
         }
       }
     } catch (err) {
