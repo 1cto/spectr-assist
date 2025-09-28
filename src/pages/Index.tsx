@@ -53,7 +53,7 @@ const Index = () => {
     Then I should see an error message "Passwords do not match"
     And the registration should not proceed`);
   const [qualityMetrics, setQualityMetrics] = useState<QualityMetrics>({});
-  const chatPanelRef = useRef<ChatPanelHandle>(null);
+  const [chatPanelRef, setChatPanelRef] = useState<ChatPanelHandle | null>(null);
   const loadingChannelRef = useRef<any>(null);
 
   useEffect(() => {
@@ -101,8 +101,8 @@ const Index = () => {
   }, []);
 
   const handleSendMessage = (message: string) => {
-    if (chatPanelRef.current) {
-      chatPanelRef.current.addMessage('user', message);
+    if (chatPanelRef) {
+      chatPanelRef.addMessage('user', message);
     }
   };
 
@@ -129,7 +129,7 @@ const Index = () => {
         <ChatPanel 
           featureContent={featureContent} 
           onFeatureChange={setFeatureContent}
-          ref={chatPanelRef}
+          ref={setChatPanelRef}
         />
         </div>
 
