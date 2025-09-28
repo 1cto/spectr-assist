@@ -180,7 +180,8 @@ export function ChatPanel({ featureContent, onFeatureChange }: ChatPanelProps) {
     console.log('Starting new message flow - signaling waiting-for-feature');
     
     // Signal that we're waiting for feature update
-    loadingChannelRef.current?.send({
+    // Signal to Feature File to start spinner
+    supabase.channel('loading-state-feature').send({
       type: 'broadcast',
       event: 'waiting-for-feature',
     });

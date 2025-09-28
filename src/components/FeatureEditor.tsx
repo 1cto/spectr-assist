@@ -18,8 +18,9 @@ export function FeatureEditor({ value: featureContent, onChange: setFeatureConte
 
   // Listen to loading-state to swap the Feature File icon with a spinner while waiting
   useEffect(() => {
+    console.log('FeatureEditor: Setting up loading-state channel listener');
     const channel = supabase
-      .channel('loading-state')
+      .channel('loading-state-feature')
       .on('broadcast', { event: 'waiting-for-feature' }, () => {
         console.log('FeatureEditor: Received waiting-for-feature signal');
         setWaitingForFeature(true);
