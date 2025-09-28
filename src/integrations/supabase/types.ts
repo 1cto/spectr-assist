@@ -124,16 +124,19 @@ export type Database = {
           id: number
           message: Json
           session_id: string
+          user_id: string | null
         }
         Insert: {
           id?: number
           message: Json
           session_id: string
+          user_id?: string | null
         }
         Update: {
           id?: number
           message?: Json
           session_id?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -146,6 +149,7 @@ export type Database = {
           feature_before: string | null
           id: number
           session_id: string | null
+          user_id: string | null
           user_message: string | null
         }
         Insert: {
@@ -156,6 +160,7 @@ export type Database = {
           feature_before?: string | null
           id?: number
           session_id?: string | null
+          user_id?: string | null
           user_message?: string | null
         }
         Update: {
@@ -166,6 +171,7 @@ export type Database = {
           feature_before?: string | null
           id?: number
           session_id?: string | null
+          user_id?: string | null
           user_message?: string | null
         }
         Relationships: []
