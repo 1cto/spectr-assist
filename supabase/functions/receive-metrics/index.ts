@@ -2,6 +2,16 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
+interface QualityMetrics {
+  "alternative scenarios"?: number;
+  "alternative scenarios justification"?: string;
+  "given-when-then"?: number;
+  "given-when-then justification"?: string;
+  "specifications"?: number;
+  "specifications justification"?: string;
+  "overall"?: number;
+}
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -31,9 +41,31 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
     // Parse the incoming metrics
-    const metrics = await req.json();
+    const metrics: QualityMetrics = await req.json();
     
-    console.log('Received metrics:', metrics);
+    console.log('Received quality metrics:', metrics);
+
+    // Validate the metrics structure
+    if (typeof metrics !== 'object' || metrics === null) {
+      throw new Error('Invalid metrics format: expected object');
+    }
+
+    // Validate numeric values are within expected range (0-3)
+    const numericFields = ['alternative scenarios', 'given-when-then', 'specifications'] as const;
+    for (const field of numericFields) {
+      if (metrics[field] !== undefined) {
+        const value = metrics[field];
+        if (typeof value !== 'number' || value < 0 || value > 3) {
+          console.warn(`Invalid value for ${field}: expected number between 0-3, got ${value}`);
+        }
+      }
+    }
+
+    // Log the individual metrics for debugging
+    console.log('Alternative Scenarios:', metrics["alternative scenarios"], '-', metrics["alternative scenarios justification"]);
+    console.log('Given-When-Then:', metrics["given-when-then"], '-', metrics["given-when-then justification"]);
+    console.log('Specifications:', metrics["specifications"], '-', metrics["specifications justification"]);
+    console.log('Overall Score:', metrics["overall"]);
 
     // Broadcast the metrics to all connected clients via Supabase Realtime
     const channel = supabase.channel('quality-metrics');
