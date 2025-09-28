@@ -27,8 +27,8 @@ const Index = () => {
       .channel(`feature-updates-${sessionId.current}`)
       .on('broadcast', { event: 'feature-update' }, (payload) => {
         console.log('Received feature update:', payload);
-        if (payload.payload?.content || payload.payload?.text) {
-          setFeatureContent(payload.payload.content || payload.payload.text);
+        if (payload?.content || payload?.text) {
+          setFeatureContent(payload.content || payload.text);
           // Notify Feature File that feature has been received to stop spinner and start QM spinner
           loadingChannelRef.current?.send({ type: 'broadcast', event: 'feature-received' });
           loadingChannelRef.current?.send({ type: 'broadcast', event: 'waiting-for-metrics' });
