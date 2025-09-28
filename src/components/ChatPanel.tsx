@@ -144,6 +144,8 @@ export function ChatPanel({ featureContent, onFeatureChange }: ChatPanelProps) {
     setInput("");
     setWaitingForResponse(true);
 
+    console.log('Starting new message flow - signaling waiting-for-feature');
+    
     // Signal that we're waiting for feature update
     supabase.channel('loading-state').send({
       type: 'broadcast',
@@ -216,7 +218,11 @@ export function ChatPanel({ featureContent, onFeatureChange }: ChatPanelProps) {
       setMessages(prev => [...prev, errorResponse]);
       setWaitingForResponse(false);
       
-      // Signal that we're no longer waiting
+      // Signal that we're no longer waiting for any loading states
+      supabase.channel('loading-state').send({
+        type: 'broadcast',
+        event: 'feature-received',
+      });
       supabase.channel('loading-state').send({
         type: 'broadcast',
         event: 'metrics-received',
@@ -306,11 +312,7 @@ export function ChatPanel({ featureContent, onFeatureChange }: ChatPanelProps) {
             className="shrink-0"
             disabled={waitingForResponse || isTyping}
           >
-            {waitingForResponse || isTyping ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Send className="w-4 h-4" />
-            )}
+            <Send className="w-4 h-4" />
           </Button>
         </div>
       </div>

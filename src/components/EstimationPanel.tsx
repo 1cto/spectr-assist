@@ -136,12 +136,15 @@ export function EstimationPanel({ featureContent }: EstimationPanelProps) {
     const loadingChannel = supabase
       .channel('loading-state')
       .on('broadcast', { event: 'waiting-for-feature' }, () => {
+        console.log('EstimationPanel: Received waiting-for-feature signal');
         setLoadingState(prev => ({ ...prev, waitingForFeature: true }));
       })
       .on('broadcast', { event: 'feature-received' }, () => {
+        console.log('EstimationPanel: Received feature-received signal');
         setLoadingState(prev => ({ ...prev, waitingForFeature: false, waitingForMetrics: true }));
       })
       .on('broadcast', { event: 'metrics-received' }, () => {
+        console.log('EstimationPanel: Received metrics-received signal');
         setLoadingState(prev => ({ ...prev, waitingForMetrics: false }));
       })
       .subscribe();
