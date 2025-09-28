@@ -36,7 +36,7 @@ export function TipsPanel({ onSendMessage }: TipsPanelProps) {
   // Listen for quality metrics updates
   useEffect(() => {
     const metricsChannel = supabase
-      .channel('quality-metrics-tips')
+      .channel('quality-metrics')
       .on('broadcast', { event: 'metrics-update' }, (payload) => {
         console.log('TipsPanel: Received quality metrics:', payload);
         
@@ -53,10 +53,12 @@ export function TipsPanel({ onSendMessage }: TipsPanelProps) {
   }, []);
 
   const generateTipsFromMetrics = (metrics: QualityMetrics) => {
+    console.log('TipsPanel: Generating tips from metrics:', metrics);
     const tips: Tip[] = [];
 
     // Alternative Scenarios
     if (metrics["alternative scenarios"] !== undefined && metrics["alternative scenarios"] <= 2) {
+      console.log('TipsPanel: Adding alternative scenarios tip, score:', metrics["alternative scenarios"]);
       tips.push({
         id: "alt-scenarios",
         type: getMetricTipType(metrics["alternative scenarios"]),
@@ -91,6 +93,7 @@ export function TipsPanel({ onSendMessage }: TipsPanelProps) {
       });
     }
 
+    console.log('TipsPanel: Generated tips:', tips);
     setMetricsTips(tips);
   };
 
