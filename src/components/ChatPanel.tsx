@@ -54,7 +54,7 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
   useEffect(() => {
     // Loading-state channel (used for spinners and sync only)
     const loadingCh = supabase
-      .channel('loading-state', { config: { broadcast: { self: true }}})
+      .channel(`loading-state-${sessionId.current}`, { config: { broadcast: { self: true }}})
       .on('broadcast', { event: 'metrics-received' }, () => {
         console.log('ChatPanel: metrics-received via loading-state (coordination only)');
         // Only used for coordination, no response handling here
@@ -161,7 +161,7 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
     // Signal that we're waiting for feature update
     // Signal to Feature File to start spinner (use persistent channel and a temp fail-safe)
     loadingChannelRef.current?.send({ type: 'broadcast', event: 'waiting-for-feature' });
-    const tempLoadingCh = supabase.channel('loading-state', { config: { broadcast: { self: true }}});
+    const tempLoadingCh = supabase.channel(`loading-state-${sessionId.current}`, { config: { broadcast: { self: true }}});
     tempLoadingCh.subscribe((status) => {
       if (status === 'SUBSCRIBED') {
         tempLoadingCh.send({ type: 'broadcast', event: 'waiting-for-feature' });
@@ -244,7 +244,7 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
       
       // Signal that we're waiting for feature update
       loadingChannelRef.current?.send({ type: 'broadcast', event: 'waiting-for-feature' });
-      const tempLoadingCh = supabase.channel('loading-state', { config: { broadcast: { self: true }}});
+      const tempLoadingCh = supabase.channel(`loading-state-${sessionId.current}`, { config: { broadcast: { self: true }}});
       tempLoadingCh.subscribe((status) => {
         if (status === 'SUBSCRIBED') {
           tempLoadingCh.send({ type: 'broadcast', event: 'waiting-for-feature' });

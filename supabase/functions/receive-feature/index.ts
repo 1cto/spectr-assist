@@ -35,15 +35,22 @@ serve(async (req) => {
     
     console.log('Received feature:', featureData);
 
-    // Broadcast the feature to all connected clients via Supabase Realtime
-    const channel = supabase.channel('feature-updates');
+    // Extract sessionId for targeted broadcasting
+    const sessionId = featureData.sessionId;
+    if (!sessionId) {
+      throw new Error('sessionId is required for feature updates');
+    }
+
+    // Broadcast the feature to session-specific channel via Supabase Realtime
+    const channel = supabase.channel(`feature-updates-${sessionId}`);
     
-    // Send the feature to all subscribers
+    // Send the feature to session-specific subscribers
     await channel.send({
       type: 'broadcast',
       event: 'feature-update',
       payload: {
         timestamp: new Date().toISOString(),
+        sessionId,
         ...featureData
       }
     });

@@ -11,6 +11,7 @@ const Index = () => {
   const [featureContent, setFeatureContent] = useState("");
   const loadingChannelRef = useRef<any>(null);
   const chatPanelRef = useRef<ChatPanelRef>(null);
+  const sessionId = useRef(`session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
 
   const handleSendMessage = (message: string) => {
     if (chatPanelRef.current) {
@@ -19,11 +20,11 @@ const Index = () => {
   };
 
   useEffect(() => {
-    const loadingCh = supabase.channel('loading-state', { config: { broadcast: { self: true }}}).subscribe();
+    const loadingCh = supabase.channel(`loading-state-${sessionId.current}`, { config: { broadcast: { self: true }}}).subscribe();
     loadingChannelRef.current = loadingCh;
 
     const featureCh = supabase
-      .channel('feature-updates')
+      .channel(`feature-updates-${sessionId.current}`)
       .on('broadcast', { event: 'feature-update' }, (payload) => {
         console.log('Received feature update:', payload);
         if (payload.payload?.content || payload.payload?.text) {
@@ -33,7 +34,7 @@ const Index = () => {
           loadingChannelRef.current?.send({ type: 'broadcast', event: 'waiting-for-metrics' });
 
           // Fail-safe: also broadcast via a temporary channel to ensure delivery
-          const tempLoadingCh = supabase.channel('loading-state', { config: { broadcast: { self: true }}});
+          const tempLoadingCh = supabase.channel(`loading-state-${sessionId.current}`, { config: { broadcast: { self: true }}});
           tempLoadingCh.subscribe((status) => {
             if (status === 'SUBSCRIBED') {
               tempLoadingCh.send({ type: 'broadcast', event: 'feature-received' });
@@ -92,7 +93,7 @@ const Index = () => {
             <div className="h-full flex flex-col">
               {/* Estimation Panel (Upper) */}
               <div className="p-4 border-b border-panel-border">
-                <EstimationPanel featureContent={featureContent} />
+                <EstimationPanel featureContent={featureContent} sessionId={sessionId.current} />
               </div>
 
               {/* Tips Panel (Lower) */}

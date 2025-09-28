@@ -41,9 +41,17 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
     // Parse the incoming metrics
-    const metrics: QualityMetrics = await req.json();
+    const data = await req.json();
+    const metrics: QualityMetrics = data.metrics || data;
+    const sessionId = data.sessionId;
     
     console.log('Received quality metrics:', metrics);
+    console.log('Session ID:', sessionId);
+
+    // Validate sessionId is provided
+    if (!sessionId) {
+      throw new Error('sessionId is required for metrics updates');
+    }
 
     // Validate the metrics structure
     if (typeof metrics !== 'object' || metrics === null) {
@@ -67,26 +75,28 @@ serve(async (req) => {
     console.log('Specifications:', metrics["specifications"], '-', metrics["specifications justification"]);
     console.log('Overall Score:', metrics["overall"]);
 
-    // Broadcast the metrics to all connected clients via Supabase Realtime
-    const channel = supabase.channel('quality-metrics');
+    // Broadcast the metrics to session-specific clients via Supabase Realtime
+    const channel = supabase.channel(`quality-metrics-${sessionId}`);
     
-    // Send the metrics to all subscribers
+    // Send the metrics to session-specific subscribers
     await channel.send({
       type: 'broadcast',
       event: 'metrics-update',
       payload: {
         timestamp: new Date().toISOString(),
+        sessionId,
         ...metrics
       }
     });
     
     // Also trigger the metrics-received event for chat coordination
-    const chatChannel = supabase.channel('quality-metrics-chat');
+    const chatChannel = supabase.channel(`quality-metrics-chat-${sessionId}`);
     await chatChannel.send({
       type: 'broadcast',
       event: 'metrics-update',
       payload: {
         timestamp: new Date().toISOString(),
+        sessionId,
         ...metrics
       }
     });

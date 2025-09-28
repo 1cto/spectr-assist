@@ -16,6 +16,7 @@ interface QualityMetrics {
 
 interface EstimationPanelProps {
   featureContent: string;
+  sessionId: string;
 }
 
 interface LoadingState {
@@ -23,7 +24,7 @@ interface LoadingState {
   waitingForMetrics: boolean;
 }
 
-export function EstimationPanel({ featureContent }: EstimationPanelProps) {
+export function EstimationPanel({ featureContent, sessionId }: EstimationPanelProps) {
   const [qualityMetrics, setQualityMetrics] = useState<QualityMetrics>({
     "alternative scenarios": 0,
     "alternative scenarios justification": "",
@@ -64,7 +65,7 @@ export function EstimationPanel({ featureContent }: EstimationPanelProps) {
   // Listen for loading state updates and quality metrics updates
   useEffect(() => {
     const loadingChannel = supabase
-      .channel('loading-state', { config: { broadcast: { self: true }}})
+      .channel(`loading-state-${sessionId}`, { config: { broadcast: { self: true }}})
       .on('broadcast', { event: 'waiting-for-feature' }, () => {
         console.log('EstimationPanel: Received waiting-for-feature signal');
         setLoadingState(prev => ({ ...prev, waitingForFeature: true }));
@@ -84,7 +85,7 @@ export function EstimationPanel({ featureContent }: EstimationPanelProps) {
       .subscribe();
 
     const metricsChannel = supabase
-      .channel('quality-metrics')
+      .channel(`quality-metrics-${sessionId}`)
       .on('broadcast', { event: 'metrics-update' }, (payload) => {
         console.log('Received quality metrics:', payload);
         
@@ -106,7 +107,7 @@ export function EstimationPanel({ featureContent }: EstimationPanelProps) {
       supabase.removeChannel(loadingChannel);
       supabase.removeChannel(metricsChannel);
     };
-  }, []);
+  }, [sessionId]);
 
   return (
     <Card className="shadow-card">
