@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ChatPanel } from "@/components/ChatPanel";
 import { FeatureEditor } from "@/components/FeatureEditor";
 import { EstimationPanel } from "@/components/EstimationPanel";
@@ -42,22 +42,27 @@ const Index = () => {
     And I click the "Register" button
     Then I should see an error message "Passwords do not match"
     And the registration should not proceed`);
+  const loadingChannelRef = useRef<any>(null);
 
   useEffect(() => {
-    const channel = supabase
+    const loadingCh = supabase.channel('loading-state').subscribe();
+    loadingChannelRef.current = loadingCh;
+
+    const featureCh = supabase
       .channel('feature-updates')
       .on('broadcast', { event: 'feature-update' }, (payload) => {
         console.log('Received feature update:', payload);
         if (payload.payload?.content || payload.payload?.text) {
           setFeatureContent(payload.payload.content || payload.payload.text);
           // Notify UI that feature has been received so panels can switch spinners
-          supabase.channel('loading-state').send({ type: 'broadcast', event: 'feature-received' });
+          loadingChannelRef.current?.send({ type: 'broadcast', event: 'feature-received' });
         }
       })
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      if (featureCh) supabase.removeChannel(featureCh);
+      if (loadingCh) supabase.removeChannel(loadingCh);
     };
   }, []);
 

@@ -171,7 +171,7 @@ export function EstimationPanel({ featureContent }: EstimationPanelProps) {
         }
         
         // Signal that metrics have been received
-        supabase.channel('loading-state').send({ type: 'broadcast', event: 'metrics-received' });
+        loadingChannel.send({ type: 'broadcast', event: 'metrics-received' });
         setLoadingState(prev => ({ ...prev, waitingForMetrics: false }));
       })
       .subscribe();
