@@ -36,10 +36,7 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
   const [isTyping, setIsTyping] = useState(false);
   const [waitingForResponse, setWaitingForResponse] = useState(false);
   const waitingRef = useRef(false);
-  const finalResponseRef = useRef<string | null>(null);
-  const fallbackTimerRef = useRef<NodeJS.Timeout>();
   const loadingChannelRef = useRef<any>(null);
-  const metricsChannelRef = useRef<any>(null);
   const sessionId = useRef(`session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout>();
@@ -65,25 +62,9 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
       .subscribe();
     loadingChannelRef.current = loadingCh;
 
-    // Metrics channel (direct)
-    const metricsCh = supabase
-      .channel('quality-metrics-chat')
-      .on('broadcast', { event: 'metrics-update' }, () => {
-        console.log('ChatPanel: metrics-update received, starting typing');
-        if (waitingRef.current && finalResponseRef.current) {
-          simulateTyping(finalResponseRef.current, () => {
-            setWaitingForResponse(false);
-          });
-          waitingRef.current = false;
-          if (fallbackTimerRef.current) clearTimeout(fallbackTimerRef.current);
-        }
-      })
-      .subscribe();
-    metricsChannelRef.current = metricsCh;
-
+    // No metrics channel is needed for rendering chat responses now
     return () => {
       if (loadingCh) supabase.removeChannel(loadingCh);
-      if (metricsCh) supabase.removeChannel(metricsCh);
     };
   }, []);
 
@@ -207,23 +188,11 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
         });
       }
       
-      // Store the final response to show after typing simulation
-      const finalResponse = chatContent;
-      
-      // Wait for metrics to be received, then start typing simulation
-      // Store final response and wait for metrics via subscribed channels
-      finalResponseRef.current = finalResponse;
-      
-      // Fallback: if no metrics received within 10 seconds, show response anyway
-      fallbackTimerRef.current = setTimeout(() => {
-        console.log('Fallback timeout triggered, showing response anyway');
-        if (waitingRef.current && finalResponseRef.current) {
-          simulateTyping(finalResponseRef.current, () => {
-            setWaitingForResponse(false);
-          });
-          waitingRef.current = false;
-        }
-      }, 10000);
+      // Immediately render assistant response (no waiting for metrics)
+      simulateTyping(chatContent, () => {
+        setWaitingForResponse(false);
+      });
+      waitingRef.current = false;
       
     } catch (error) {
       // Add error message if webhook fails
@@ -300,18 +269,11 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
           });
         }
         
-        // Store the final response to show after typing simulation
-        finalResponseRef.current = chatContent;
-        
-        // Fallback: if no metrics received within 10 seconds, show response anyway
-        fallbackTimerRef.current = setTimeout(() => {
-          if (waitingRef.current && finalResponseRef.current) {
-            simulateTyping(finalResponseRef.current, () => {
-              setWaitingForResponse(false);
-            });
-            waitingRef.current = false;
-          }
-        }, 10000);
+        // Immediately render assistant response (no waiting for metrics)
+        simulateTyping(chatContent, () => {
+          setWaitingForResponse(false);
+        });
+        waitingRef.current = false;
         
       }).catch((error) => {
         // Add error message if webhook fails
@@ -343,9 +305,6 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
     return () => {
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
-      }
-      if (fallbackTimerRef.current) {
-        clearTimeout(fallbackTimerRef.current);
       }
     };
   }, []);
