@@ -18,7 +18,9 @@ export function FeatureEditor({ value: featureContent, onChange: setFeatureConte
   const [waitingForFeature, setWaitingForFeature] = useState(false);
   const [progressVisible, setProgressVisible] = useState(false);
   const [progressValue, setProgressValue] = useState(0);
+  const [metricsReceived, setMetricsReceived] = useState(false);
   const progressTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const metricsReceivedRef = useRef(false);
 
   // Listen to loading-state to swap the Feature File icon with a spinner while waiting
   useEffect(() => {
@@ -30,9 +32,18 @@ export function FeatureEditor({ value: featureContent, onChange: setFeatureConte
         setWaitingForFeature(true);
         setProgressVisible(true);
         setProgressValue(12);
+        setMetricsReceived(false);
+        metricsReceivedRef.current = false;
         if (progressTimerRef.current) clearInterval(progressTimerRef.current);
         progressTimerRef.current = setInterval(() => {
-          setProgressValue((v) => Math.min(v + 3 + Math.random() * 5, 90));
+          setProgressValue((v) => {
+            const newValue = v + 3 + Math.random() * 5;
+            // Restart if approaching 95% but metrics not received
+            if (newValue >= 95 && !metricsReceivedRef.current) {
+              return 25 + Math.random() * 10; // Restart between 25-35%
+            }
+            return Math.min(newValue, 90);
+          });
         }, 400);
       })
       .on('broadcast', { event: 'feature-received' }, () => {
@@ -48,6 +59,8 @@ export function FeatureEditor({ value: featureContent, onChange: setFeatureConte
       })
       .on('broadcast', { event: 'metrics-received' }, () => {
         console.log('FeatureEditor: Received metrics-received signal');
+        setMetricsReceived(true);
+        metricsReceivedRef.current = true;
         if (progressTimerRef.current) clearInterval(progressTimerRef.current);
         setProgressValue(100);
         setTimeout(() => {
