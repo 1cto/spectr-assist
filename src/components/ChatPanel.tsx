@@ -180,10 +180,14 @@ export function ChatPanel({ featureContent, onFeatureChange }: ChatPanelProps) {
     console.log('Starting new message flow - signaling waiting-for-feature');
     
     // Signal that we're waiting for feature update
-    // Signal to Feature File to start spinner
-    loadingChannelRef.current?.send({
-      type: 'broadcast',
-      event: 'waiting-for-feature',
+    // Signal to Feature File to start spinner (use persistent channel and a temp fail-safe)
+    loadingChannelRef.current?.send({ type: 'broadcast', event: 'waiting-for-feature' });
+    const tempLoadingCh = supabase.channel('loading-state', { config: { broadcast: { self: true }}});
+    tempLoadingCh.subscribe((status) => {
+      if (status === 'SUBSCRIBED') {
+        tempLoadingCh.send({ type: 'broadcast', event: 'waiting-for-feature' });
+        setTimeout(() => supabase.removeChannel(tempLoadingCh), 500);
+      }
     });
 
     try {

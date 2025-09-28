@@ -57,6 +57,16 @@ const Index = () => {
           // Notify Feature File that feature has been received to stop spinner and start QM spinner
           loadingChannelRef.current?.send({ type: 'broadcast', event: 'feature-received' });
           loadingChannelRef.current?.send({ type: 'broadcast', event: 'waiting-for-metrics' });
+
+          // Fail-safe: also broadcast via a temporary channel to ensure delivery
+          const tempLoadingCh = supabase.channel('loading-state', { config: { broadcast: { self: true }}});
+          tempLoadingCh.subscribe((status) => {
+            if (status === 'SUBSCRIBED') {
+              tempLoadingCh.send({ type: 'broadcast', event: 'feature-received' });
+              tempLoadingCh.send({ type: 'broadcast', event: 'waiting-for-metrics' });
+              setTimeout(() => supabase.removeChannel(tempLoadingCh), 500);
+            }
+          });
         }
       })
       .subscribe();
