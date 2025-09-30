@@ -79,7 +79,7 @@ const Index = () => {
         {/* Main Content */}
         <div className="flex-1 flex overflow-hidden">
           {/* Left Panel - Chat */}
-          <div className="w-80 flex-shrink-0">
+          <div className="w-80 flex-shrink-0 border-r" style={{ borderColor: 'rgba(0, 0, 0, 0.08)' }}>
           <ChatPanel 
             ref={chatPanelRef}
             featureContent={featureContent} 
@@ -94,7 +94,7 @@ const Index = () => {
           </div>
 
           {/* Right Panel - Estimation & Tips */}
-          <div className="w-80 flex-shrink-0 bg-panel overflow-hidden">
+          <div className="w-80 flex-shrink-0 overflow-hidden" style={{ backgroundColor: '#F4F2EC' }}>
             <div className="h-full flex flex-col">
               {/* Estimation Panel (Upper) */}
               <div className="p-4">

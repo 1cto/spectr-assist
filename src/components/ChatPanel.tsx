@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from "react";
 import { Send, Bot, User, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -315,7 +315,7 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
   }, []);
 
   return (
-    <div className="flex flex-col h-full bg-chat">
+    <div className="flex flex-col h-full" style={{ backgroundColor: 'white' }}>
       <div className="p-4 bg-gradient-panel">
         <h2 className="font-semibold text-foreground">Requirements Chat</h2>
         <p className="text-sm text-muted-foreground">Discuss and refine your requirements</p>
@@ -337,8 +337,9 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
                 className={`max-w-[80%] p-3 rounded-lg ${
                   message.sender === "user"
                     ? "bg-primary text-primary-foreground"
-                    : "bg-card"
+                    : ""
                 }`}
+                style={message.sender === "assistant" ? { backgroundColor: '#F4F2EC' } : undefined}
               >
                 {message.isTyping ? (
                   <div className="flex items-center gap-2">
@@ -366,18 +367,20 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
       </ScrollArea>
 
       <div className="p-4 bg-gradient-panel">
-        <div className="flex gap-2">
-          <Input
+        <div className="flex gap-2 items-end">
+          <Textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyPress={handleKeyPress}
+            onKeyDown={handleKeyPress}
             placeholder="Ask about requirements, scenarios, or acceptance criteria..."
-            className="flex-1"
+            className="flex-1 min-h-[72px] resize-none"
+            style={{ backgroundColor: '#F4F2EC' }}
+            rows={3}
           />
           <Button 
             onClick={handleSend} 
             size="icon" 
-            className="shrink-0"
+            className="shrink-0 h-10 w-10"
             disabled={waitingForResponse || isTyping}
           >
             <Send className="w-4 h-4" />
