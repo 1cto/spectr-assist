@@ -366,21 +366,20 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
         </div>
       </ScrollArea>
 
-      <div className="p-4" style={{ backgroundColor: 'white' }}>
-        <div className="flex gap-2 items-end">
+      <div className="p-4" style={{ backgroundColor: '#F4F2EC' }}>
+        <div className="relative shadow-lg rounded-md">
           <Textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyPress}
             placeholder="Ask about requirements, scenarios, or acceptance criteria..."
-            className="flex-1 min-h-[72px] resize-none"
-            style={{ backgroundColor: '#F4F2EC' }}
+            className="flex-1 min-h-[72px] resize-none pr-12 bg-white"
             rows={3}
           />
           <Button 
             onClick={handleSend} 
             size="icon" 
-            className="shrink-0 h-10 w-10"
+            className="absolute right-2 bottom-2 h-10 w-10"
             disabled={waitingForResponse || isTyping}
           >
             <Send className="w-4 h-4" />

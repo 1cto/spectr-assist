@@ -153,7 +153,7 @@ export function TipsPanel({ onSendMessage, sessionId }: TipsPanelProps) {
 
   return (
     <div className="space-y-4">
-      <Card className="shadow-card">
+      <Card className="border border-black/8 shadow-none" style={{ backgroundColor: '#F4F2EC' }}>
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-lg">
             <Star className="w-5 h-5 text-primary" />
@@ -211,7 +211,7 @@ export function TipsPanel({ onSendMessage, sessionId }: TipsPanelProps) {
         </CardContent>
       </Card>
 
-      <Card className="shadow-card">
+      <Card className="border border-black/8 shadow-none" style={{ backgroundColor: '#F4F2EC' }}>
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-lg">
             <BookOpen className="w-5 h-5 text-primary" />
