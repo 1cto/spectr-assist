@@ -111,7 +111,7 @@ export function EstimationPanel({ featureContent, sessionId }: EstimationPanelPr
   }, [sessionId]);
 
   return (
-    <Card className="shadow-card">
+    <Card className="border shadow-none" style={{ borderColor: 'rgba(0, 0, 0, 0.08)', backgroundColor: '#F4F2EC' }}>
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
           <BarChart3 className="w-5 h-5 text-primary" />

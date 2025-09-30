@@ -321,8 +321,8 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
         <p className="text-sm text-muted-foreground">Discuss and refine your requirements</p>
       </div>
 
-      <ScrollArea className="flex-1 p-4">
-        <div className="space-y-4">
+      <ScrollArea className="flex-1" style={{ backgroundColor: '#F4F2EC' }}>
+        <div className="p-4 space-y-4">
           {messages.map((message) => (
             <div
               key={message.id}
@@ -336,10 +336,10 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
               <div
                 className={`max-w-[80%] p-3 rounded-lg ${
                   message.sender === "user"
-                    ? "bg-primary text-primary-foreground"
+                    ? "text-black"
                     : ""
                 }`}
-                style={message.sender === "assistant" ? { backgroundColor: '#F4F2EC' } : undefined}
+                style={message.sender === "user" ? { backgroundColor: '#E9E7E1' } : { backgroundColor: '#F4F2EC' }}
               >
                 {message.isTyping ? (
                   <div className="flex items-center gap-2">
@@ -366,7 +366,7 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
         </div>
       </ScrollArea>
 
-      <div className="p-4 bg-gradient-panel">
+      <div className="p-4" style={{ backgroundColor: 'white' }}>
         <div className="flex gap-2 items-end">
           <Textarea
             value={input}
