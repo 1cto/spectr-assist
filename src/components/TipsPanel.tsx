@@ -34,7 +34,7 @@ interface TipsPanelProps {
 export function TipsPanel({ onSendMessage, sessionId }: TipsPanelProps) {
   const [qualityMetrics, setQualityMetrics] = useState<QualityMetrics>({});
   const [metricsTips, setMetricsTips] = useState<Tip[]>([]);
-  const [isGherkinOpen, setIsGherkinOpen] = useState(false);
+  const [isGherkinOpen, setIsGherkinOpen] = useState(true);
 
   // Listen for quality metrics updates
   useEffect(() => {
@@ -157,7 +157,7 @@ export function TipsPanel({ onSendMessage, sessionId }: TipsPanelProps) {
     <div className="space-y-4">
       <div className="border-none shadow-none" style={{ backgroundColor: '#F4F2EC' }}>
         <div className="pb-3">
-          <h3 className="flex items-center gap-2 text-lg font-semibold">
+          <h3 className="flex items-center gap-2 font-semibold" style={{ fontSize: '15pt' }}>
             <Star className="w-5 h-5 text-primary" />
             Improvement Tips
           </h3>
@@ -216,12 +216,12 @@ export function TipsPanel({ onSendMessage, sessionId }: TipsPanelProps) {
       <Collapsible open={isGherkinOpen} onOpenChange={setIsGherkinOpen}>
         <div className="border-none shadow-none" style={{ backgroundColor: '#F4F2EC' }}>
           <CollapsibleTrigger className="w-full pb-3">
-            <h3 className="flex items-center justify-between gap-2 text-lg font-semibold">
+            <h3 className="flex items-center justify-between gap-2 font-semibold" style={{ fontSize: '15pt' }}>
               <div className="flex items-center gap-2">
                 <BookOpen className="w-5 h-5 text-primary" />
                 Gherkin Guide
               </div>
-              <ChevronDown className={`w-5 h-5 transition-transform ${isGherkinOpen ? 'rotate-180' : ''}`} />
+              <ChevronDown className={`w-5 h-5 transition-transform ${!isGherkinOpen ? 'rotate-180' : ''}`} />
             </h3>
           </CollapsibleTrigger>
           <CollapsibleContent>
