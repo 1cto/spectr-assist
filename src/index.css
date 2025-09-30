@@ -9,7 +9,7 @@ All colors MUST be HSL.
 @layer base {
   :root {
     /* Professional BA tool color scheme */
-    --background: 210 20% 98%;
+    --background: 40 25% 94%;
     --foreground: 215 25% 15%;
 
     --card: 0 0% 100%;
@@ -18,7 +18,7 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 215 25% 15%;
 
-    --primary: 217 91% 45%;
+    --primary: 179 100% 26%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 210 40% 94%;
@@ -27,7 +27,7 @@ All colors MUST be HSL.
     --muted: 212 15% 95%;
     --muted-foreground: 215 15% 45%;
 
-    --accent: 217 91% 60%;
+    --accent: 179 100% 35%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 51%;
@@ -35,7 +35,7 @@ All colors MUST be HSL.
 
     --border: 212 20% 88%;
     --input: 212 20% 92%;
-    --ring: 217 91% 45%;
+    --ring: 179 100% 26%;
 
     /* Panel-specific colors */
     --panel-bg: 210 15% 97%;
@@ -44,7 +44,7 @@ All colors MUST be HSL.
     --chat-bg: 210 20% 96%;
     
     /* Feature file syntax colors */
-    --keyword: 217 91% 45%;
+    --keyword: 179 100% 26%;
     --scenario: 142 76% 36%;
     --given: 262 83% 58%;
     --when: 32 95% 44%;
@@ -56,8 +56,8 @@ All colors MUST be HSL.
     --estimate-high: 0 72% 51%;
 
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(217 91% 45%), hsl(217 91% 60%));
-    --gradient-panel: linear-gradient(180deg, hsl(210 15% 97%), hsl(210 15% 95%));
+    --gradient-primary: linear-gradient(135deg, hsl(179 100% 26%), hsl(179 100% 35%));
+    --gradient-panel: linear-gradient(180deg, hsl(40 20% 95%), hsl(40 20% 93%));
     
     /* Shadows */
     --shadow-panel: 0 2px 8px -2px hsl(215 25% 15% / 0.08);
@@ -92,7 +92,7 @@ All colors MUST be HSL.
     --popover: 215 25% 12%;
     --popover-foreground: 210 40% 95%;
 
-    --primary: 217 91% 60%;
+    --primary: 179 100% 35%;
     --primary-foreground: 215 28% 8%;
 
     --secondary: 215 25% 15%;
@@ -101,7 +101,7 @@ All colors MUST be HSL.
     --muted: 215 25% 15%;
     --muted-foreground: 215 15% 65%;
 
-    --accent: 217 91% 55%;
+    --accent: 179 100% 40%;
     --accent-foreground: 215 28% 8%;
 
     --destructive: 0 72% 60%;
@@ -109,7 +109,7 @@ All colors MUST be HSL.
 
     --border: 215 25% 20%;
     --input: 215 25% 18%;
-    --ring: 217 91% 60%;
+    --ring: 179 100% 35%;
 
     /* Dark mode panel colors */
     --panel-bg: 215 25% 10%;
@@ -118,7 +118,7 @@ All colors MUST be HSL.
     --chat-bg: 215 25% 9%;
     
     /* Dark mode gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(217 91% 55%), hsl(217 91% 65%));
+    --gradient-primary: linear-gradient(135deg, hsl(179 100% 35%), hsl(179 100% 45%));
     --gradient-panel: linear-gradient(180deg, hsl(215 25% 10%), hsl(215 25% 8%));
     
     /* Dark mode shadows */
