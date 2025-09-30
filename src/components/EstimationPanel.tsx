@@ -111,69 +111,67 @@ export function EstimationPanel({ featureContent, sessionId }: EstimationPanelPr
   }, [sessionId]);
 
   return (
-    <Card className="border shadow-none" style={{ borderColor: 'rgba(0, 0, 0, 0.08)', backgroundColor: '#F4F2EC' }}>
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-lg">
+    <div className="border-none shadow-none" style={{ backgroundColor: '#F4F2EC' }}>
+      <div className="pb-3">
+        <h3 className="flex items-center gap-2 text-lg font-semibold">
           <BarChart3 className="w-5 h-5 text-primary" />
           Quality Metrics
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Alternative Scenarios</span>
-              <span className={`font-medium ${getScoreColor(qualityMetrics["alternative scenarios"])}`}>
-                {getScoreLabel(qualityMetrics["alternative scenarios"])} ({qualityMetrics["alternative scenarios"] || 0}/3)
-              </span>
-            </div>
-            {qualityMetrics["alternative scenarios justification"] && (
-              <p className="text-xs text-muted-foreground ml-2">
-                {qualityMetrics["alternative scenarios justification"]}
-              </p>
-            )}
+        </h3>
+      </div>
+      <div className="space-y-0">
+        <div className="space-y-2 py-4 border-b border-black/8">
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-muted-foreground">Alternative Scenarios</span>
+            <span className={`font-medium ${getScoreColor(qualityMetrics["alternative scenarios"])}`}>
+              {getScoreLabel(qualityMetrics["alternative scenarios"])} ({qualityMetrics["alternative scenarios"] || 0}/3)
+            </span>
           </div>
-          
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Given-When-Then</span>
-              <span className={`font-medium ${getScoreColor(qualityMetrics["given-when-then"])}`}>
-                {getScoreLabel(qualityMetrics["given-when-then"])} ({qualityMetrics["given-when-then"] || 0}/3)
-              </span>
-            </div>
-            {qualityMetrics["given-when-then justification"] && (
-              <p className="text-xs text-muted-foreground ml-2">
-                {qualityMetrics["given-when-then justification"]}
-              </p>
-            )}
-          </div>
-          
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Specifications</span>
-              <span className={`font-medium ${getScoreColor(qualityMetrics["specifications"])}`}>
-                {getScoreLabel(qualityMetrics["specifications"])} ({qualityMetrics["specifications"] || 0}/3)
-              </span>
-            </div>
-            {qualityMetrics["specifications justification"] && (
-              <p className="text-xs text-muted-foreground ml-2">
-                {qualityMetrics["specifications justification"]}
-              </p>
-            )}
-          </div>
-
-          {qualityMetrics["overall"] !== undefined && (
-            <div className="pt-2">
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-muted-foreground">Overall Score</span>
-                <span className="font-bold text-primary">
-                  {qualityMetrics["overall"]}/9
-                </span>
-              </div>
-            </div>
+          {qualityMetrics["alternative scenarios justification"] && (
+            <p className="text-xs text-muted-foreground ml-2">
+              {qualityMetrics["alternative scenarios justification"]}
+            </p>
           )}
         </div>
-      </CardContent>
-    </Card>
+        
+        <div className="space-y-2 py-4 border-b border-black/8">
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-muted-foreground">Given-When-Then</span>
+            <span className={`font-medium ${getScoreColor(qualityMetrics["given-when-then"])}`}>
+              {getScoreLabel(qualityMetrics["given-when-then"])} ({qualityMetrics["given-when-then"] || 0}/3)
+            </span>
+          </div>
+          {qualityMetrics["given-when-then justification"] && (
+            <p className="text-xs text-muted-foreground ml-2">
+              {qualityMetrics["given-when-then justification"]}
+            </p>
+          )}
+        </div>
+        
+        <div className="space-y-2 py-4 border-b border-black/8">
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-muted-foreground">Specifications</span>
+            <span className={`font-medium ${getScoreColor(qualityMetrics["specifications"])}`}>
+              {getScoreLabel(qualityMetrics["specifications"])} ({qualityMetrics["specifications"] || 0}/3)
+            </span>
+          </div>
+          {qualityMetrics["specifications justification"] && (
+            <p className="text-xs text-muted-foreground ml-2">
+              {qualityMetrics["specifications justification"]}
+            </p>
+          )}
+        </div>
+
+        {qualityMetrics["overall"] !== undefined && (
+          <div className="pt-4">
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-medium text-muted-foreground">Overall Score</span>
+              <span className="font-bold text-primary">
+                {qualityMetrics["overall"]}/9
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
