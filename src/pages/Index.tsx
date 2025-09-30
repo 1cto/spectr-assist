@@ -54,8 +54,7 @@ const Index = () => {
   }, []);
 
   return (
-    <AuthGuard>
-      <div className="h-screen bg-background flex flex-col">
+    <div className="h-screen bg-background flex flex-col">
         {/* Header */}
         <header className="bg-gradient-panel px-6 py-4">
           <div className="flex items-center justify-between">
@@ -66,12 +65,9 @@ const Index = () => {
                 <p className="text-sm text-muted-foreground">Collaborative feature file creation and analysis</p>
               </div>
             </div>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <div className="w-2 h-2 bg-estimate-low rounded-full"></div>
-                <span>Ready</span>
-              </div>
-              <UserMenu />
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="w-2 h-2 bg-estimate-low rounded-full"></div>
+              <span>Ready</span>
             </div>
           </div>
         </header>
@@ -109,7 +105,6 @@ const Index = () => {
           </div>
         </div>
       </div>
-    </AuthGuard>
   );
 };
 
