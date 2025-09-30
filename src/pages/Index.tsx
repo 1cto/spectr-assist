@@ -5,13 +5,13 @@ import { EstimationPanel } from "@/components/EstimationPanel";
 import { TipsPanel } from "@/components/TipsPanel";
 import { AuthGuard } from "@/components/AuthGuard";
 import { UserMenu } from "@/components/UserMenu";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MessageSquare, FileCode, BarChart3 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo.svg";
 
 const Index = () => {
   const [featureContent, setFeatureContent] = useState("");
-  const [activeTab, setActiveTab] = useState("editor");
   const loadingChannelRef = useRef<any>(null);
   const chatPanelRef = useRef<ChatPanelRef>(null);
   const sessionId = useRef(`session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
@@ -20,8 +20,6 @@ const Index = () => {
     if (chatPanelRef.current) {
       chatPanelRef.current.sendMessage(message);
     }
-    // Switch to chat tab on mobile after sending a message from tips
-    setActiveTab("chat");
   };
 
   useEffect(() => {
@@ -96,9 +94,12 @@ const Index = () => {
           {/* Right Panel - Estimation & Tips */}
           <div className="w-80 flex-shrink-0 overflow-hidden" style={{ backgroundColor: '#F4F2EC' }}>
             <div className="h-full flex flex-col">
+              {/* Estimation Panel (Upper) */}
               <div className="p-4">
                 <EstimationPanel featureContent={featureContent} sessionId={sessionId.current} />
               </div>
+
+              {/* Tips Panel (Lower) */}
               <div className="flex-1 p-4 overflow-auto">
                 <TipsPanel onSendMessage={handleSendMessage} sessionId={sessionId.current} />
               </div>
@@ -108,69 +109,42 @@ const Index = () => {
 
         {/* Mobile Layout - Tabs */}
         <div className="flex-1 flex flex-col md:hidden overflow-hidden">
-          <div className="flex border-b">
-            <button
-              onClick={() => setActiveTab("chat")}
-              className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium transition-colors ${
-                activeTab === "chat" 
-                  ? "border-b-2 border-primary text-primary" 
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <MessageSquare className="w-4 h-4" />
-              <span className="hidden sm:inline">Chat</span>
-            </button>
-            <button
-              onClick={() => setActiveTab("editor")}
-              className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium transition-colors ${
-                activeTab === "editor" 
-                  ? "border-b-2 border-primary text-primary" 
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <FileCode className="w-4 h-4" />
-              <span className="hidden sm:inline">Editor</span>
-            </button>
-            <button
-              onClick={() => setActiveTab("analysis")}
-              className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium transition-colors ${
-                activeTab === "analysis" 
-                  ? "border-b-2 border-primary text-primary" 
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <BarChart3 className="w-4 h-4" />
-              <span className="hidden sm:inline">Analysis</span>
-            </button>
-          </div>
-
-          <div className="flex-1 overflow-hidden">
-            {activeTab === "chat" && (
-              <div className="h-full">
-                <ChatPanel 
-                  ref={chatPanelRef}
-                  featureContent={featureContent} 
-                  onFeatureChange={setFeatureContent}
-                  sessionId={sessionId.current}
-                />
-              </div>
-            )}
+          <Tabs defaultValue="editor" className="flex-1 flex flex-col">
+            <TabsList className="w-full rounded-none border-b grid grid-cols-3">
+              <TabsTrigger value="chat" className="gap-2">
+                <MessageSquare className="w-4 h-4" />
+                <span className="hidden sm:inline">Chat</span>
+              </TabsTrigger>
+              <TabsTrigger value="editor" className="gap-2">
+                <FileCode className="w-4 h-4" />
+                <span className="hidden sm:inline">Editor</span>
+              </TabsTrigger>
+              <TabsTrigger value="analysis" className="gap-2">
+                <BarChart3 className="w-4 h-4" />
+                <span className="hidden sm:inline">Analysis</span>
+              </TabsTrigger>
+            </TabsList>
             
-            {activeTab === "editor" && (
-              <div className="h-full p-4">
-                <FeatureEditor value={featureContent} onChange={setFeatureContent} sessionId={sessionId.current} />
-              </div>
-            )}
+            <TabsContent value="chat" className="flex-1 m-0 overflow-hidden">
+              <ChatPanel 
+                ref={chatPanelRef}
+                featureContent={featureContent} 
+                onFeatureChange={setFeatureContent}
+                sessionId={sessionId.current}
+              />
+            </TabsContent>
             
-            {activeTab === "analysis" && (
-              <div className="h-full overflow-auto" style={{ backgroundColor: '#F4F2EC' }}>
-                <div className="p-4 space-y-4">
-                  <EstimationPanel featureContent={featureContent} sessionId={sessionId.current} />
-                  <TipsPanel onSendMessage={handleSendMessage} sessionId={sessionId.current} />
-                </div>
+            <TabsContent value="editor" className="flex-1 m-0 overflow-hidden p-4">
+              <FeatureEditor value={featureContent} onChange={setFeatureContent} sessionId={sessionId.current} />
+            </TabsContent>
+            
+            <TabsContent value="analysis" className="flex-1 m-0 overflow-auto" style={{ backgroundColor: '#F4F2EC' }}>
+              <div className="p-4 space-y-4">
+                <EstimationPanel featureContent={featureContent} sessionId={sessionId.current} />
+                <TipsPanel onSendMessage={handleSendMessage} sessionId={sessionId.current} />
               </div>
-            )}
-          </div>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
   );
