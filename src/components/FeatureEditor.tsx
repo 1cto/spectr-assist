@@ -174,8 +174,8 @@ export function FeatureEditor({ value: featureContent, onChange: setFeatureConte
   };
 
   return (
-    <div className="flex flex-col h-full bg-editor border-x border-panel-border">
-      <div className="p-4 border-b border-panel-border bg-gradient-panel flex items-center justify-between">
+    <div className="flex flex-col h-full bg-white rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.08)]">
+      <div className="p-4 bg-gradient-panel flex items-center justify-between rounded-t-2xl">
         <div className="flex items-center gap-2">
           {waitingForFeature ? (
             <FileCode className="w-5 h-5 text-primary" />
@@ -220,7 +220,7 @@ export function FeatureEditor({ value: featureContent, onChange: setFeatureConte
         </div>
       </div>
 
-      <div className="p-4 border-t border-panel-border bg-gradient-panel">
+      <div className="p-4 bg-gradient-panel rounded-b-2xl">
         <div className="flex items-center gap-4 text-sm text-muted-foreground">
           <div className="flex items-center gap-4">
             <span>Lines: {featureContent.split('\n').length}</span>

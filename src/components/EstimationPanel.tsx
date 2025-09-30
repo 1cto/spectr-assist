@@ -163,7 +163,7 @@ export function EstimationPanel({ featureContent, sessionId }: EstimationPanelPr
           </div>
 
           {qualityMetrics["overall"] !== undefined && (
-            <div className="pt-2 border-t">
+            <div className="pt-2">
               <div className="flex justify-between items-center">
                 <span className="text-sm font-medium text-muted-foreground">Overall Score</span>
                 <span className="font-bold text-primary">

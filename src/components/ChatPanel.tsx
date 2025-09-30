@@ -315,8 +315,8 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
   }, []);
 
   return (
-    <div className="flex flex-col h-full bg-chat border-r border-panel-border">
-      <div className="p-4 border-b border-panel-border bg-gradient-panel">
+    <div className="flex flex-col h-full bg-chat">
+      <div className="p-4 bg-gradient-panel">
         <h2 className="font-semibold text-foreground">Requirements Chat</h2>
         <p className="text-sm text-muted-foreground">Discuss and refine your requirements</p>
       </div>
@@ -337,7 +337,7 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
                 className={`max-w-[80%] p-3 rounded-lg ${
                   message.sender === "user"
                     ? "bg-primary text-primary-foreground"
-                    : "bg-card border border-border"
+                    : "bg-card"
                 }`}
               >
                 {message.isTyping ? (
@@ -365,7 +365,7 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
         </div>
       </ScrollArea>
 
-      <div className="p-4 border-t border-panel-border bg-gradient-panel">
+      <div className="p-4 bg-gradient-panel">
         <div className="flex gap-2">
           <Input
             value={input}
