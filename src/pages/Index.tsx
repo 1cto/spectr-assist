@@ -6,13 +6,17 @@ import { TipsPanel } from "@/components/TipsPanel";
 import { AuthGuard } from "@/components/AuthGuard";
 import { UserMenu } from "@/components/UserMenu";
 import { supabase } from "@/integrations/supabase/client";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { MessageSquare, FileText, BarChart3 } from "lucide-react";
 import logo from "@/assets/logo.svg";
 
 const Index = () => {
   const [featureContent, setFeatureContent] = useState("");
+  const [activeTab, setActiveTab] = useState<"chat" | "document" | "quality">("document");
   const loadingChannelRef = useRef<any>(null);
   const chatPanelRef = useRef<ChatPanelRef>(null);
   const sessionId = useRef(`session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
+  const isMobile = useIsMobile();
 
   const handleSendMessage = (message: string) => {
     if (chatPanelRef.current) {
@@ -56,54 +60,132 @@ const Index = () => {
   return (
     <div className="h-screen bg-background flex flex-col">
         {/* Header */}
-        <header className="bg-gradient-panel px-6 py-4">
+        <header className="bg-gradient-panel px-4 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <img src={logo} alt="BA Requirements Studio" className="h-12" />
+            <div className="flex items-center gap-2 sm:gap-4">
+              <img src={logo} alt="BA Requirements Studio" className="h-8 sm:h-12" />
               <div>
-                <h1 className="text-2xl font-bold text-foreground">BA Requirements Studio</h1>
-                <p className="text-sm text-muted-foreground">Collaborative feature file creation and analysis</p>
+                <h1 className="text-lg sm:text-2xl font-bold text-foreground">BA Requirements Studio</h1>
+                <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">Collaborative feature file creation and analysis</p>
               </div>
             </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
               <div className="w-2 h-2 bg-estimate-low rounded-full"></div>
-              <span>Ready</span>
+              <span className="hidden sm:inline">Ready</span>
             </div>
           </div>
         </header>
 
         {/* Main Content */}
-        <div className="flex-1 flex overflow-hidden">
-          {/* Left Panel - Chat */}
-          <div className="w-[368px] flex-shrink-0 border-r" style={{ borderColor: 'rgba(0, 0, 0, 0.08)' }}>
-          <ChatPanel 
-            ref={chatPanelRef}
-            featureContent={featureContent} 
-            onFeatureChange={setFeatureContent}
-            sessionId={sessionId.current}
-          />
-          </div>
-
-          {/* Center Panel - Feature Editor */}
-          <div className="flex-1 min-w-0 p-6">
-            <FeatureEditor value={featureContent} onChange={setFeatureContent} sessionId={sessionId.current} />
-          </div>
-
-          {/* Right Panel - Estimation & Tips */}
-          <div className="w-80 flex-shrink-0 overflow-hidden" style={{ backgroundColor: '#F4F2EC' }}>
-            <div className="h-full flex flex-col">
-              {/* Estimation Panel (Upper) */}
-              <div className="p-4">
-                <EstimationPanel featureContent={featureContent} sessionId={sessionId.current} />
+        <div className="flex-1 flex overflow-hidden pb-16 lg:pb-0">
+          {/* Mobile: Single Panel View */}
+          {isMobile ? (
+            <div className="flex-1 overflow-hidden">
+              {activeTab === "chat" && (
+                <div className="h-full border-r" style={{ borderColor: 'rgba(0, 0, 0, 0.08)' }}>
+                  <ChatPanel 
+                    ref={chatPanelRef}
+                    featureContent={featureContent} 
+                    onFeatureChange={setFeatureContent}
+                    sessionId={sessionId.current}
+                  />
+                </div>
+              )}
+              
+              {activeTab === "document" && (
+                <div className="h-full p-4">
+                  <FeatureEditor value={featureContent} onChange={setFeatureContent} sessionId={sessionId.current} />
+                </div>
+              )}
+              
+              {activeTab === "quality" && (
+                <div className="h-full overflow-hidden" style={{ backgroundColor: '#F4F2EC' }}>
+                  <div className="h-full flex flex-col">
+                    <div className="p-4">
+                      <EstimationPanel featureContent={featureContent} sessionId={sessionId.current} />
+                    </div>
+                    <div className="flex-1 p-4 overflow-auto">
+                      <TipsPanel onSendMessage={handleSendMessage} sessionId={sessionId.current} />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            /* Desktop: Three Column Layout with Max Widths */
+            <div className="flex-1 flex overflow-hidden justify-center">
+              {/* Left Panel - Chat (max 400px) */}
+              <div className="w-full lg:max-w-[400px] flex-shrink-0 border-r" style={{ borderColor: 'rgba(0, 0, 0, 0.08)' }}>
+                <ChatPanel 
+                  ref={chatPanelRef}
+                  featureContent={featureContent} 
+                  onFeatureChange={setFeatureContent}
+                  sessionId={sessionId.current}
+                />
               </div>
 
-              {/* Tips Panel (Lower) */}
-              <div className="flex-1 p-4 overflow-auto">
-                <TipsPanel onSendMessage={handleSendMessage} sessionId={sessionId.current} />
+              {/* Center Panel - Feature Editor (max 800px) */}
+              <div className="flex-1 lg:max-w-[800px] min-w-0 p-6">
+                <FeatureEditor value={featureContent} onChange={setFeatureContent} sessionId={sessionId.current} />
+              </div>
+
+              {/* Right Panel - Estimation & Tips (max 400px) */}
+              <div className="w-full lg:max-w-[400px] flex-shrink-0 overflow-hidden" style={{ backgroundColor: '#F4F2EC' }}>
+                <div className="h-full flex flex-col">
+                  <div className="p-4">
+                    <EstimationPanel featureContent={featureContent} sessionId={sessionId.current} />
+                  </div>
+                  <div className="flex-1 p-4 overflow-auto">
+                    <TipsPanel onSendMessage={handleSendMessage} sessionId={sessionId.current} />
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
+
+        {/* Mobile Bottom Tab Bar */}
+        {isMobile && (
+          <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50">
+            <nav className="flex">
+              <button
+                onClick={() => setActiveTab("chat")}
+                className={`flex-1 flex flex-col items-center justify-center py-3 px-2 transition-colors ${
+                  activeTab === "chat" 
+                    ? "text-primary bg-accent" 
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <MessageSquare className="h-5 w-5 mb-1" />
+                <span className="text-xs font-medium">Chat</span>
+              </button>
+              
+              <button
+                onClick={() => setActiveTab("document")}
+                className={`flex-1 flex flex-col items-center justify-center py-3 px-2 transition-colors ${
+                  activeTab === "document" 
+                    ? "text-primary bg-accent" 
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <FileText className="h-5 w-5 mb-1" />
+                <span className="text-xs font-medium">Document</span>
+              </button>
+              
+              <button
+                onClick={() => setActiveTab("quality")}
+                className={`flex-1 flex flex-col items-center justify-center py-3 px-2 transition-colors ${
+                  activeTab === "quality" 
+                    ? "text-primary bg-accent" 
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <BarChart3 className="h-5 w-5 mb-1" />
+                <span className="text-xs font-medium">Quality</span>
+              </button>
+            </nav>
+          </div>
+        )}
       </div>
   );
 };
