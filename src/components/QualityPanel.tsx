@@ -213,9 +213,16 @@ export function QualityPanel({ featureContent, sessionId, onSendMessage }: Quali
         {/* Quality Metrics Section */}
         <AccordionItem value="metrics" className="border-b border-black/8">
           <AccordionTrigger className="hover:no-underline py-3">
-            <div className="flex items-center gap-2">
-              <BarChart3 className="w-5 h-5 text-primary" />
-              <span className="font-semibold text-lg">Quality Metrics</span>
+            <div className="flex items-center justify-between w-full pr-4">
+              <div className="flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-primary" />
+                <span className="font-semibold text-lg">Quality Metrics</span>
+              </div>
+              {qualityMetrics["overall"] !== undefined && (
+                <Badge className="bg-primary text-primary-foreground">
+                  {qualityMetrics["overall"]}/9
+                </Badge>
+              )}
             </div>
           </AccordionTrigger>
           <AccordionContent>
