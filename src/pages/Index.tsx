@@ -15,6 +15,7 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState<"chat" | "document" | "quality">("document");
   const [hasDocumentUpdate, setHasDocumentUpdate] = useState(false);
   const [overallScore, setOverallScore] = useState<number | null>(null);
+  const [documentProgress, setDocumentProgress] = useState<{ visible: boolean; value: number }>({ visible: false, value: 0 });
   const loadingChannelRef = useRef<any>(null);
   const chatPanelRef = useRef<ChatPanelRef>(null);
   const sessionId = useRef(`session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
@@ -25,6 +26,10 @@ const Index = () => {
     if (chatPanelRef.current) {
       chatPanelRef.current.sendMessage(message);
     }
+  };
+
+  const handleProgressChange = (visible: boolean, value: number) => {
+    setDocumentProgress({ visible, value });
   };
 
   // Track document updates for mobile badge
@@ -123,7 +128,12 @@ const Index = () => {
               
               {activeTab === "document" && (
                 <div className="h-full p-4">
-                  <FeatureEditor value={featureContent} onChange={setFeatureContent} sessionId={sessionId.current} />
+                  <FeatureEditor 
+                    value={featureContent} 
+                    onChange={setFeatureContent} 
+                    sessionId={sessionId.current}
+                    onProgressChange={handleProgressChange}
+                  />
                 </div>
               )}
               
@@ -150,7 +160,12 @@ const Index = () => {
 
               {/* Center Panel - Feature Editor (40% width, max 800px) */}
               <div className="w-[40%] max-w-[800px] min-w-0 p-6">
-                <FeatureEditor value={featureContent} onChange={setFeatureContent} sessionId={sessionId.current} />
+                <FeatureEditor 
+                  value={featureContent} 
+                  onChange={setFeatureContent} 
+                  sessionId={sessionId.current}
+                  onProgressChange={handleProgressChange}
+                />
               </div>
 
               {/* Right Panel - Quality (30% width, max 400px) */}
@@ -189,13 +204,25 @@ const Index = () => {
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                <div className="relative">
-                  <FileText className="h-5 w-5 mb-1" />
-                  {hasDocumentUpdate && (
-                    <Badge className="absolute -top-1 -right-2 h-2 w-2 p-0 bg-primary" />
+                <div className="relative w-full flex flex-col items-center">
+                  <div className="relative">
+                    <FileText className="h-5 w-5 mb-1" />
+                    {hasDocumentUpdate && (
+                      <Badge className="absolute -top-1 -right-2 h-2 w-2 p-0 bg-primary" />
+                    )}
+                  </div>
+                  <span className="text-xs font-medium mb-1">Document</span>
+                  {documentProgress.visible && (
+                    <div className="w-full px-2">
+                      <div className="h-1 bg-secondary rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-primary transition-all duration-300"
+                          style={{ width: `${documentProgress.value}%` }}
+                        />
+                      </div>
+                    </div>
                   )}
                 </div>
-                <span className="text-xs font-medium">Document</span>
               </button>
               
               <button

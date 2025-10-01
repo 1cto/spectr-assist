@@ -11,11 +11,13 @@ interface FeatureEditorProps {
   value: string;
   onChange: (value: string) => void;
   sessionId: string;
+  onProgressChange?: (visible: boolean, value: number) => void;
 }
 export function FeatureEditor({
   value: featureContent,
   onChange: setFeatureContent,
-  sessionId
+  sessionId,
+  onProgressChange
 }: FeatureEditorProps) {
   const {
     toast
@@ -24,6 +26,11 @@ export function FeatureEditor({
   const [progressVisible, setProgressVisible] = useState(false);
   const [progressValue, setProgressValue] = useState(0);
   const [metricsReceived, setMetricsReceived] = useState(false);
+
+  // Notify parent of progress changes
+  useEffect(() => {
+    onProgressChange?.(progressVisible, progressValue);
+  }, [progressVisible, progressValue, onProgressChange]);
   const progressTimerRef = useRef<NodeJS.Timeout | null>(null);
   const metricsReceivedRef = useRef(false);
 
