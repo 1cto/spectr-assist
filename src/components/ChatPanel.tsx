@@ -27,20 +27,13 @@ export interface ChatPanelRef {
 
 export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureContent, onFeatureChange, sessionId }, ref) => {
   const { user } = useAuth();
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      content: "Hello! I'm here to help you create better feature files. What requirement would you like to work on?",
-      sender: "assistant",
-      timestamp: new Date(),
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [waitingForResponse, setWaitingForResponse] = useState(false);
   const waitingRef = useRef(false);
   const loadingChannelRef = useRef<any>(null);
-  // Using sessionId from props
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout>();
   const { toast } = useToast();
@@ -52,6 +45,75 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Load chat history from database
+  useEffect(() => {
+    const loadChatHistory = async () => {
+      if (!user?.id) {
+        // If no user, show default welcome message
+        setMessages([{
+          id: "1",
+          content: "Hello! I'm here to help you create better feature files. What requirement would you like to work on?",
+          sender: "assistant",
+          timestamp: new Date(),
+        }]);
+        setIsLoadingHistory(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('n8n_chat_histories')
+          .select('*')
+          .eq('session_id', sessionId)
+          .eq('user_id', user.id)
+          .order('id', { ascending: true });
+
+        if (error) {
+          console.error('Error loading chat history:', error);
+          // Show default message on error
+          setMessages([{
+            id: "1",
+            content: "Hello! I'm here to help you create better feature files. What requirement would you like to work on?",
+            sender: "assistant",
+            timestamp: new Date(),
+          }]);
+        } else if (data && data.length > 0) {
+          // Convert database messages to Message format
+          const loadedMessages: Message[] = data.map(record => {
+            const msg = record.message as any;
+            return {
+              id: record.id.toString(),
+              content: msg.content || msg.text || '',
+              sender: msg.role === 'user' ? 'user' : 'assistant',
+              timestamp: new Date(msg.timestamp || record.id),
+            };
+          });
+          setMessages(loadedMessages);
+        } else {
+          // No history, show welcome message
+          setMessages([{
+            id: "1",
+            content: "Hello! I'm here to help you create better feature files. What requirement would you like to work on?",
+            sender: "assistant",
+            timestamp: new Date(),
+          }]);
+        }
+      } catch (err) {
+        console.error('Unexpected error loading chat history:', err);
+        setMessages([{
+          id: "1",
+          content: "Hello! I'm here to help you create better feature files. What requirement would you like to work on?",
+          sender: "assistant",
+          timestamp: new Date(),
+        }]);
+      } finally {
+        setIsLoadingHistory(false);
+      }
+    };
+
+    loadChatHistory();
+  }, [user?.id, sessionId]);
 
   // Setup realtime channels for loading-state and metrics to coordinate spinners and typing
   useEffect(() => {
@@ -146,6 +208,27 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
     }
   };
 
+  // Save message to database
+  const saveMessageToDb = async (message: Message) => {
+    if (!user?.id) return;
+
+    try {
+      await supabase
+        .from('n8n_chat_histories')
+        .insert({
+          session_id: sessionId,
+          user_id: user.id,
+          message: {
+            role: message.sender,
+            content: message.content,
+            timestamp: message.timestamp.toISOString(),
+          }
+        });
+    } catch (error) {
+      console.error('Error saving message to database:', error);
+    }
+  };
+
   const handleSend = async () => {
     if (!input.trim() || waitingForResponse) return;
 
@@ -160,6 +243,9 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
     setInput("");
     setWaitingForResponse(true);
     waitingRef.current = true;
+
+    // Save user message to database
+    await saveMessageToDb(userMessage);
 
     console.log('Starting new message flow - signaling waiting-for-feature');
     
@@ -194,8 +280,16 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
       }
       
       // Immediately render assistant response (no waiting for metrics)
-      simulateTyping(chatContent, () => {
+      simulateTyping(chatContent, async () => {
         setWaitingForResponse(false);
+        // Save assistant message to database after typing animation
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          content: chatContent,
+          sender: "assistant",
+          timestamp: new Date(),
+        };
+        await saveMessageToDb(assistantMessage);
       });
       waitingRef.current = false;
       
@@ -275,8 +369,16 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
         }
         
         // Immediately render assistant response (no waiting for metrics)
-        simulateTyping(chatContent, () => {
+        simulateTyping(chatContent, async () => {
           setWaitingForResponse(false);
+          // Save assistant message to database after typing animation
+          const assistantMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            content: chatContent,
+            sender: "assistant",
+            timestamp: new Date(),
+          };
+          await saveMessageToDb(assistantMessage);
         });
         waitingRef.current = false;
         
@@ -323,7 +425,13 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
 
       <ScrollArea className="flex-1" style={{ backgroundColor: '#F4F2EC' }}>
         <div className="p-4 space-y-4">
-          {messages.map((message) => (
+          {isLoadingHistory ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+              <span className="ml-2 text-sm text-muted-foreground">Loading chat history...</span>
+            </div>
+          ) : (
+            messages.map((message) => (
             <div
               key={message.id}
               className={`flex gap-3 ${message.sender === "user" ? "justify-end" : "justify-start"}`}
@@ -361,7 +469,8 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
                 </div>
               )}
             </div>
-          ))}
+            ))
+          )}
           <div ref={messagesEndRef} />
         </div>
       </ScrollArea>
