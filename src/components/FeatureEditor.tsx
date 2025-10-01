@@ -184,16 +184,17 @@ export function FeatureEditor({ value: featureContent, onChange: setFeatureConte
           )}
           <div>
             <h2 className="font-semibold text-foreground">Feature File</h2>
+            <p className="text-sm text-muted-foreground">Write your BDD scenarios using Gherkin syntax</p>
           </div>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={handleCopy}>
             <Copy className="w-4 h-4 mr-2" />
-            <span style={{ fontSize: '12px' }}>Copy</span>
+            Copy
           </Button>
           <Button variant="outline" size="sm" onClick={handleDownload}>
             <Download className="w-4 h-4 mr-2" />
-            <span style={{ fontSize: '12px' }}>Download</span>
+            Download
           </Button>
         </div>
       </div>
@@ -206,7 +207,7 @@ export function FeatureEditor({ value: featureContent, onChange: setFeatureConte
             onChange={(e) => setFeatureContent(e.target.value)}
             onScroll={handleScrollSync}
             className="w-full h-full resize-none border-0 rounded-none focus:ring-0 font-mono text-sm leading-relaxed p-6 bg-transparent text-transparent caret-foreground selection:bg-primary/20 overflow-auto"
-            placeholder="Write your BDD scenarios using Gherkin syntax&#10;&#10;Feature:&#10;  Background:&#10;  Scenario:"
+            placeholder="Feature:&#10;  Background:&#10;  Scenario:"
           />
           <div className="absolute inset-0 pointer-events-none p-6 font-mono text-sm whitespace-pre-wrap overflow-auto no-scrollbar" ref={overlayRef}>
             <div 
