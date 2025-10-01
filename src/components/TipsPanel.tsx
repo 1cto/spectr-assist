@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { Lightbulb, Star, AlertTriangle, BookOpen, Target } from "lucide-react";
+import { Lightbulb, Star, AlertTriangle, BookOpen, Target, ChevronDown } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Tip {
@@ -33,6 +34,7 @@ interface TipsPanelProps {
 export function TipsPanel({ onSendMessage, sessionId }: TipsPanelProps) {
   const [qualityMetrics, setQualityMetrics] = useState<QualityMetrics>({});
   const [metricsTips, setMetricsTips] = useState<Tip[]>([]);
+  const [isGherkinOpen, setIsGherkinOpen] = useState(true);
 
   // Listen for quality metrics updates
   useEffect(() => {
@@ -153,14 +155,14 @@ export function TipsPanel({ onSendMessage, sessionId }: TipsPanelProps) {
 
   return (
     <div className="space-y-4">
-      <Card className="shadow-card">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-lg">
+      <div className="border-none shadow-none" style={{ backgroundColor: '#F4F2EC' }}>
+        <div className="pb-3">
+          <h3 className="flex items-center gap-2 font-semibold" style={{ fontSize: '15pt' }}>
             <Star className="w-5 h-5 text-primary" />
             Improvement Tips
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+          </h3>
+        </div>
+        <div>
           <div className="space-y-4">
             {metricsTips.length > 0 ? (
               metricsTips.map((tip) => (
@@ -208,45 +210,50 @@ export function TipsPanel({ onSendMessage, sessionId }: TipsPanelProps) {
               </div>
             )}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      <Card className="shadow-card">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <BookOpen className="w-5 h-5 text-primary" />
-            Gherkin Guide
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3 text-sm">
-            <div className="space-y-1">
-              <div className="font-medium text-syntax-keyword">Feature:</div>
-              <div className="text-muted-foreground text-xs ml-2">High-level description of a software feature</div>
+      <Collapsible open={isGherkinOpen} onOpenChange={setIsGherkinOpen}>
+        <div className="border-none shadow-none" style={{ backgroundColor: '#F4F2EC' }}>
+          <CollapsibleTrigger className="w-full pb-3">
+            <h3 className="flex items-center justify-between gap-2 font-semibold" style={{ fontSize: '15pt' }}>
+              <div className="flex items-center gap-2">
+                <BookOpen className="w-5 h-5 text-primary" />
+                Gherkin Guide
+              </div>
+              <ChevronDown className={`w-5 h-5 transition-transform ${!isGherkinOpen ? 'rotate-180' : ''}`} />
+            </h3>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <div className="space-y-3 text-sm">
+              <div className="space-y-1">
+                <div className="font-medium text-syntax-keyword">Feature:</div>
+                <div className="text-muted-foreground text-xs ml-2">High-level description of a software feature</div>
+              </div>
+              
+              <div className="space-y-1">
+                <div className="font-medium text-syntax-scenario">Scenario:</div>
+                <div className="text-muted-foreground text-xs ml-2">Concrete example illustrating a business rule</div>
+              </div>
+              
+              <div className="space-y-1">
+                <div className="font-medium text-syntax-given">Given:</div>
+                <div className="text-muted-foreground text-xs ml-2">Initial context or state</div>
+              </div>
+              
+              <div className="space-y-1">
+                <div className="font-medium text-syntax-when">When:</div>
+                <div className="text-muted-foreground text-xs ml-2">Event or action</div>
+              </div>
+              
+              <div className="space-y-1">
+                <div className="font-medium text-syntax-then">Then:</div>
+                <div className="text-muted-foreground text-xs ml-2">Expected outcome</div>
+              </div>
             </div>
-            
-            <div className="space-y-1">
-              <div className="font-medium text-syntax-scenario">Scenario:</div>
-              <div className="text-muted-foreground text-xs ml-2">Concrete example illustrating a business rule</div>
-            </div>
-            
-            <div className="space-y-1">
-              <div className="font-medium text-syntax-given">Given:</div>
-              <div className="text-muted-foreground text-xs ml-2">Initial context or state</div>
-            </div>
-            
-            <div className="space-y-1">
-              <div className="font-medium text-syntax-when">When:</div>
-              <div className="text-muted-foreground text-xs ml-2">Event or action</div>
-            </div>
-            
-            <div className="space-y-1">
-              <div className="font-medium text-syntax-then">Then:</div>
-              <div className="text-muted-foreground text-xs ml-2">Expected outcome</div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CollapsibleContent>
+        </div>
+      </Collapsible>
     </div>
   );
 }
