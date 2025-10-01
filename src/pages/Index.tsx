@@ -8,21 +8,40 @@ import { UserMenu } from "@/components/UserMenu";
 import { supabase } from "@/integrations/supabase/client";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { MessageSquare, FileText, BarChart3 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import logo from "@/assets/logo.svg";
 
 const Index = () => {
   const [featureContent, setFeatureContent] = useState("");
   const [activeTab, setActiveTab] = useState<"chat" | "document" | "quality">("document");
+  const [hasDocumentUpdate, setHasDocumentUpdate] = useState(false);
+  const [overallScore, setOverallScore] = useState<number | null>(null);
   const loadingChannelRef = useRef<any>(null);
   const chatPanelRef = useRef<ChatPanelRef>(null);
   const sessionId = useRef(`session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
   const isMobile = useIsMobile();
+  const previousFeatureContent = useRef(featureContent);
 
   const handleSendMessage = (message: string) => {
     if (chatPanelRef.current) {
       chatPanelRef.current.sendMessage(message);
     }
   };
+
+  // Track document updates for mobile badge
+  useEffect(() => {
+    if (isMobile && featureContent !== previousFeatureContent.current && activeTab !== "document" && featureContent !== "") {
+      setHasDocumentUpdate(true);
+    }
+    previousFeatureContent.current = featureContent;
+  }, [featureContent, activeTab, isMobile]);
+
+  // Clear badge when switching to document tab
+  useEffect(() => {
+    if (activeTab === "document") {
+      setHasDocumentUpdate(false);
+    }
+  }, [activeTab]);
 
   useEffect(() => {
     const loadingCh = supabase.channel(`loading-state-${sessionId.current}`, { config: { broadcast: { self: true }}}).subscribe();
@@ -51,9 +70,20 @@ const Index = () => {
       })
       .subscribe();
 
+    // Listen for quality metrics to get overall score
+    const metricsChannel = supabase
+      .channel(`quality-metrics-${sessionId.current}`)
+      .on('broadcast', { event: 'metrics-update' }, (payload) => {
+        if (payload.payload?.overall !== undefined) {
+          setOverallScore(payload.payload.overall);
+        }
+      })
+      .subscribe();
+
     return () => {
       if (featureCh) supabase.removeChannel(featureCh);
       if (loadingCh) supabase.removeChannel(loadingCh);
+      if (metricsChannel) supabase.removeChannel(metricsChannel);
     };
   }, []);
 
@@ -112,10 +142,10 @@ const Index = () => {
               )}
             </div>
           ) : (
-            /* Desktop: Three Column Layout with Max Widths */
+            /* Desktop: Three Column Layout - 30%, 40%, 30% */
             <div className="flex-1 flex overflow-hidden justify-center">
-              {/* Left Panel - Chat (max 400px) */}
-              <div className="w-full lg:max-w-[400px] flex-shrink-0 border-r" style={{ borderColor: 'rgba(0, 0, 0, 0.08)' }}>
+              {/* Left Panel - Chat (30% width, max 400px) */}
+              <div className="w-[30%] max-w-[400px] flex-shrink-0 border-r" style={{ borderColor: 'rgba(0, 0, 0, 0.08)' }}>
                 <ChatPanel 
                   ref={chatPanelRef}
                   featureContent={featureContent} 
@@ -124,13 +154,13 @@ const Index = () => {
                 />
               </div>
 
-              {/* Center Panel - Feature Editor (max 800px) */}
-              <div className="flex-1 lg:max-w-[800px] min-w-0 p-6">
+              {/* Center Panel - Feature Editor (40% width, max 800px) */}
+              <div className="w-[40%] max-w-[800px] min-w-0 p-6">
                 <FeatureEditor value={featureContent} onChange={setFeatureContent} sessionId={sessionId.current} />
               </div>
 
-              {/* Right Panel - Estimation & Tips (max 400px) */}
-              <div className="w-full lg:max-w-[400px] flex-shrink-0 overflow-hidden" style={{ backgroundColor: '#F4F2EC' }}>
+              {/* Right Panel - Estimation & Tips (30% width, max 400px) */}
+              <div className="w-[30%] max-w-[400px] flex-shrink-0 overflow-hidden" style={{ backgroundColor: '#F4F2EC' }}>
                 <div className="h-full flex flex-col">
                   <div className="p-4">
                     <EstimationPanel featureContent={featureContent} sessionId={sessionId.current} />
@@ -162,25 +192,37 @@ const Index = () => {
               
               <button
                 onClick={() => setActiveTab("document")}
-                className={`flex-1 flex flex-col items-center justify-center py-3 px-2 transition-colors ${
+                className={`flex-1 flex flex-col items-center justify-center py-3 px-2 transition-colors relative ${
                   activeTab === "document" 
                     ? "text-primary bg-accent" 
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                <FileText className="h-5 w-5 mb-1" />
+                <div className="relative">
+                  <FileText className="h-5 w-5 mb-1" />
+                  {hasDocumentUpdate && (
+                    <Badge className="absolute -top-1 -right-2 h-2 w-2 p-0 bg-primary" />
+                  )}
+                </div>
                 <span className="text-xs font-medium">Document</span>
               </button>
               
               <button
                 onClick={() => setActiveTab("quality")}
-                className={`flex-1 flex flex-col items-center justify-center py-3 px-2 transition-colors ${
+                className={`flex-1 flex flex-col items-center justify-center py-3 px-2 transition-colors relative ${
                   activeTab === "quality" 
                     ? "text-primary bg-accent" 
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                <BarChart3 className="h-5 w-5 mb-1" />
+                <div className="relative">
+                  <BarChart3 className="h-5 w-5 mb-1" />
+                  {overallScore !== null && (
+                    <Badge className="absolute -top-1 -right-3 h-5 min-w-5 px-1 text-xs bg-primary">
+                      {overallScore}
+                    </Badge>
+                  )}
+                </div>
                 <span className="text-xs font-medium">Quality</span>
               </button>
             </nav>
