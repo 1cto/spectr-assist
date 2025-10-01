@@ -178,30 +178,30 @@ const Index = () => {
                 <TipsPanel onSendMessage={handleSendMessage} sessionId={sessionId.current} />
               </div>
             </TabsContent>
-          </Tabs>
 
-          {/* Bottom Navigation - Fixed */}
-          <TabsList className="fixed bottom-0 left-0 right-0 w-full rounded-none border-t grid grid-cols-3 h-16 bg-background z-50">
-            <TabsTrigger value="chat" className="gap-2 flex-col h-full py-2">
-              <MessageSquare className="w-5 h-5" />
-              <span className="text-xs">Chat</span>
-            </TabsTrigger>
-            <TabsTrigger value="editor" className="gap-2 flex-col h-full py-2">
-              <FileCode className="w-5 h-5" />
-              <span className="text-xs">Editor</span>
-            </TabsTrigger>
-            <TabsTrigger value="quality" className="gap-2 flex-col h-full py-2">
-              <BarChart3 className="w-5 h-5" />
-              <span className="text-xs flex items-center gap-1">
-                Quality
-                {qualityMetrics["overall"] !== undefined && (
-                  <span className={`font-bold ${getScoreColor(qualityMetrics["overall"])}`}>
-                    {qualityMetrics["overall"]}/9
-                  </span>
-                )}
-              </span>
-            </TabsTrigger>
-          </TabsList>
+            {/* Bottom Navigation - Fixed */}
+            <TabsList className="fixed bottom-0 left-0 right-0 w-full rounded-none border-t grid grid-cols-3 h-16 bg-background z-50">
+              <TabsTrigger value="chat" className="gap-2 flex-col h-full py-2">
+                <MessageSquare className="w-5 h-5" />
+                <span className="text-xs">Chat</span>
+              </TabsTrigger>
+              <TabsTrigger value="editor" className="gap-2 flex-col h-full py-2">
+                <FileCode className="w-5 h-5" />
+                <span className="text-xs">Editor</span>
+              </TabsTrigger>
+              <TabsTrigger value="quality" className="gap-2 flex-col h-full py-2">
+                <BarChart3 className="w-5 h-5" />
+                <span className="text-xs flex items-center gap-1">
+                  Quality
+                  {qualityMetrics["overall"] !== undefined && (
+                    <span className={`font-bold ${getScoreColor(qualityMetrics["overall"])}`}>
+                      {qualityMetrics["overall"]}/9
+                    </span>
+                  )}
+                </span>
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
       </div>
   );
