@@ -10,8 +10,17 @@ import { MessageSquare, FileCode, BarChart3 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo.svg";
 
+interface QualityMetrics {
+  "alternative scenarios"?: number;
+  "given-when-then"?: number;
+  "specifications"?: number;
+  "overall"?: number;
+  [key: string]: any;
+}
+
 const Index = () => {
   const [featureContent, setFeatureContent] = useState("");
+  const [qualityMetrics, setQualityMetrics] = useState<QualityMetrics>({});
   const loadingChannelRef = useRef<any>(null);
   const chatPanelRef = useRef<ChatPanelRef>(null);
   const sessionId = useRef(`session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
@@ -49,16 +58,46 @@ const Index = () => {
       })
       .subscribe();
 
+    const metricsChannel = supabase
+      .channel(`quality-metrics-${sessionId.current}`)
+      .on('broadcast', { event: 'metrics-update' }, (payload) => {
+        if (payload.payload) {
+          const { timestamp, sessionId: sid, ...metrics } = payload.payload as any;
+          setQualityMetrics(prev => ({
+            ...prev,
+            ...metrics
+          }));
+        }
+      })
+      .subscribe();
+
     return () => {
       if (featureCh) supabase.removeChannel(featureCh);
       if (loadingCh) supabase.removeChannel(loadingCh);
+      if (metricsChannel) supabase.removeChannel(metricsChannel);
     };
   }, []);
 
+  const getScoreColor = (score?: number): string => {
+    switch (score) {
+      case 0:
+      case 1:
+      case 2:
+      case 3: return "text-estimate-high";
+      case 4:
+      case 5:
+      case 6: return "text-estimate-medium";
+      case 7:
+      case 8:
+      case 9: return "text-estimate-low";
+      default: return "text-muted-foreground";
+    }
+  };
+
   return (
     <div className="h-screen bg-background flex flex-col">
-        {/* Header */}
-        <header className="bg-gradient-panel px-4 md:px-6 py-3 md:py-4">
+        {/* Header - Hidden on mobile */}
+        <header className="hidden md:block bg-gradient-panel px-4 md:px-6 py-3 md:py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 md:gap-4">
               <img src={logo} alt="BA Requirements Studio" className="h-8 md:h-12" />
@@ -96,7 +135,12 @@ const Index = () => {
             <div className="h-full flex flex-col">
               {/* Estimation Panel (Upper) */}
               <div className="p-4">
-                <EstimationPanel featureContent={featureContent} sessionId={sessionId.current} />
+                <EstimationPanel 
+                  featureContent={featureContent} 
+                  sessionId={sessionId.current}
+                  qualityMetrics={qualityMetrics}
+                  onQualityMetricsChange={setQualityMetrics}
+                />
               </div>
 
               {/* Tips Panel (Lower) */}
@@ -108,23 +152,8 @@ const Index = () => {
         </div>
 
         {/* Mobile Layout - Tabs */}
-        <div className="flex-1 flex flex-col md:hidden overflow-hidden">
+        <div className="flex-1 flex flex-col md:hidden overflow-hidden pb-16">
           <Tabs defaultValue="editor" className="flex-1 flex flex-col">
-            <TabsList className="w-full rounded-none border-b grid grid-cols-3">
-              <TabsTrigger value="chat" className="gap-2">
-                <MessageSquare className="w-4 h-4" />
-                <span className="hidden sm:inline">Chat</span>
-              </TabsTrigger>
-              <TabsTrigger value="editor" className="gap-2">
-                <FileCode className="w-4 h-4" />
-                <span className="hidden sm:inline">Editor</span>
-              </TabsTrigger>
-              <TabsTrigger value="analysis" className="gap-2">
-                <BarChart3 className="w-4 h-4" />
-                <span className="hidden sm:inline">Analysis</span>
-              </TabsTrigger>
-            </TabsList>
-            
             <TabsContent value="chat" className="flex-1 m-0 overflow-hidden">
               <ChatPanel 
                 ref={chatPanelRef}
@@ -138,13 +167,41 @@ const Index = () => {
               <FeatureEditor value={featureContent} onChange={setFeatureContent} sessionId={sessionId.current} />
             </TabsContent>
             
-            <TabsContent value="analysis" className="flex-1 m-0 overflow-auto" style={{ backgroundColor: '#F4F2EC' }}>
+            <TabsContent value="quality" className="flex-1 m-0 overflow-auto" style={{ backgroundColor: '#F4F2EC' }}>
               <div className="p-4 space-y-4">
-                <EstimationPanel featureContent={featureContent} sessionId={sessionId.current} />
+                <EstimationPanel 
+                  featureContent={featureContent} 
+                  sessionId={sessionId.current}
+                  qualityMetrics={qualityMetrics}
+                  onQualityMetricsChange={setQualityMetrics}
+                />
                 <TipsPanel onSendMessage={handleSendMessage} sessionId={sessionId.current} />
               </div>
             </TabsContent>
           </Tabs>
+
+          {/* Bottom Navigation - Fixed */}
+          <TabsList className="fixed bottom-0 left-0 right-0 w-full rounded-none border-t grid grid-cols-3 h-16 bg-background z-50">
+            <TabsTrigger value="chat" className="gap-2 flex-col h-full py-2">
+              <MessageSquare className="w-5 h-5" />
+              <span className="text-xs">Chat</span>
+            </TabsTrigger>
+            <TabsTrigger value="editor" className="gap-2 flex-col h-full py-2">
+              <FileCode className="w-5 h-5" />
+              <span className="text-xs">Editor</span>
+            </TabsTrigger>
+            <TabsTrigger value="quality" className="gap-2 flex-col h-full py-2">
+              <BarChart3 className="w-5 h-5" />
+              <span className="text-xs flex items-center gap-1">
+                Quality
+                {qualityMetrics["overall"] !== undefined && (
+                  <span className={`font-bold ${getScoreColor(qualityMetrics["overall"])}`}>
+                    {qualityMetrics["overall"]}/9
+                  </span>
+                )}
+              </span>
+            </TabsTrigger>
+          </TabsList>
         </div>
       </div>
   );

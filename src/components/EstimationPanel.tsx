@@ -17,6 +17,8 @@ interface QualityMetrics {
 interface EstimationPanelProps {
   featureContent: string;
   sessionId: string;
+  qualityMetrics?: QualityMetrics;
+  onQualityMetricsChange?: (metrics: QualityMetrics) => void;
 }
 
 interface LoadingState {
@@ -24,8 +26,13 @@ interface LoadingState {
   waitingForMetrics: boolean;
 }
 
-export function EstimationPanel({ featureContent, sessionId }: EstimationPanelProps) {
-  const [qualityMetrics, setQualityMetrics] = useState<QualityMetrics>({
+export function EstimationPanel({ 
+  featureContent, 
+  sessionId, 
+  qualityMetrics: externalMetrics,
+  onQualityMetricsChange 
+}: EstimationPanelProps) {
+  const [internalMetrics, setInternalMetrics] = useState<QualityMetrics>({
     "alternative scenarios": 0,
     "alternative scenarios justification": "",
     "given-when-then": 0, 
@@ -34,6 +41,9 @@ export function EstimationPanel({ featureContent, sessionId }: EstimationPanelPr
     "specifications justification": "",
     "overall": 0
   });
+
+  const qualityMetrics = externalMetrics || internalMetrics;
+  const setQualityMetrics = onQualityMetricsChange || setInternalMetrics;
 
   const [loadingState, setLoadingState] = useState<LoadingState>({
     waitingForFeature: false,
