@@ -233,15 +233,10 @@ const Index = () => {
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                <div className="relative">
-                  <BarChart3 className="h-5 w-5 mb-1" />
-                  {overallScore !== null && (
-                    <Badge className="absolute -top-1 -right-3 h-5 min-w-5 px-1 text-xs bg-primary">
-                      {overallScore}
-                    </Badge>
-                  )}
-                </div>
-                <span className="text-xs font-medium">Quality</span>
+                <BarChart3 className="h-5 w-5 mb-1" />
+                <span className="text-xs font-medium">
+                  Quality {overallScore !== null && `${overallScore}`}
+                </span>
               </button>
             </nav>
           </div>
