@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { ChatPanel, ChatPanelRef } from "@/components/ChatPanel";
 import { FeatureEditor } from "@/components/FeatureEditor";
-import { EstimationPanel } from "@/components/EstimationPanel";
-import { TipsPanel } from "@/components/TipsPanel";
+import { QualityPanel } from "@/components/QualityPanel";
 import { AuthGuard } from "@/components/AuthGuard";
 import { UserMenu } from "@/components/UserMenu";
 import { supabase } from "@/integrations/supabase/client";
@@ -129,16 +128,11 @@ const Index = () => {
               )}
               
               {activeTab === "quality" && (
-                <div className="h-full overflow-hidden" style={{ backgroundColor: '#F4F2EC' }}>
-                  <div className="h-full flex flex-col">
-                    <div className="p-4">
-                      <EstimationPanel featureContent={featureContent} sessionId={sessionId.current} />
-                    </div>
-                    <div className="flex-1 p-4 overflow-auto">
-                      <TipsPanel onSendMessage={handleSendMessage} sessionId={sessionId.current} />
-                    </div>
-                  </div>
-                </div>
+                <QualityPanel 
+                  featureContent={featureContent} 
+                  sessionId={sessionId.current}
+                  onSendMessage={handleSendMessage}
+                />
               )}
             </div>
           ) : (
@@ -159,16 +153,13 @@ const Index = () => {
                 <FeatureEditor value={featureContent} onChange={setFeatureContent} sessionId={sessionId.current} />
               </div>
 
-              {/* Right Panel - Estimation & Tips (30% width, max 400px) */}
-              <div className="w-[30%] max-w-[400px] flex-shrink-0 overflow-hidden" style={{ backgroundColor: '#F4F2EC' }}>
-                <div className="h-full flex flex-col">
-                  <div className="p-4">
-                    <EstimationPanel featureContent={featureContent} sessionId={sessionId.current} />
-                  </div>
-                  <div className="flex-1 p-4 overflow-auto">
-                    <TipsPanel onSendMessage={handleSendMessage} sessionId={sessionId.current} />
-                  </div>
-                </div>
+              {/* Right Panel - Quality (30% width, max 400px) */}
+              <div className="w-[30%] max-w-[400px] flex-shrink-0 overflow-hidden">
+                <QualityPanel 
+                  featureContent={featureContent} 
+                  sessionId={sessionId.current}
+                  onSendMessage={handleSendMessage}
+                />
               </div>
             </div>
           )}
