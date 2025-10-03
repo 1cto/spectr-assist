@@ -25,6 +25,8 @@ export function FeatureEditor({
     toast
   } = useToast();
   const [waitingForFeature, setWaitingForFeature] = useState(false);
+  const [featureProgressVisible, setFeatureProgressVisible] = useState(false);
+  const [featureProgressValue, setFeatureProgressValue] = useState(0);
   const [progressVisible, setProgressVisible] = useState(false);
   const [progressValue, setProgressValue] = useState(0);
   const [metricsReceived, setMetricsReceived] = useState(false);
@@ -50,17 +52,22 @@ export function FeatureEditor({
     }, () => {
       console.log('FeatureEditor: Received waiting-for-feature signal');
       setWaitingForFeature(true);
+      setFeatureProgressVisible(true);
+      setFeatureProgressValue(12);
       setProgressVisible(true);
       setProgressValue(12);
       setMetricsReceived(false);
       metricsReceivedRef.current = false;
       if (progressTimerRef.current) clearInterval(progressTimerRef.current);
       progressTimerRef.current = setInterval(() => {
+        setFeatureProgressValue(v => {
+          const newValue = v + 3 + Math.random() * 5;
+          return Math.min(newValue, 90);
+        });
         setProgressValue(v => {
           const newValue = v + 3 + Math.random() * 5;
-          // Restart if approaching 95% but metrics not received
           if (newValue >= 95 && !metricsReceivedRef.current) {
-            return 25 + Math.random() * 10; // Restart between 25-35%
+            return 25 + Math.random() * 10;
           }
           return Math.min(newValue, 90);
         });
@@ -70,6 +77,12 @@ export function FeatureEditor({
     }, () => {
       console.log('FeatureEditor: Received feature-received signal');
       setWaitingForFeature(false);
+      if (progressTimerRef.current) clearInterval(progressTimerRef.current);
+      setFeatureProgressValue(100);
+      setTimeout(() => {
+        setFeatureProgressVisible(false);
+        setFeatureProgressValue(0);
+      }, 300);
       setProgressVisible(true);
       setProgressValue(v => Math.max(v, 70));
     }).on('broadcast', {
@@ -108,12 +121,18 @@ export function FeatureEditor({
     if (startSignal === undefined || startSignal === null) return;
     // Mirror waiting-for-feature behavior
     setWaitingForFeature(true);
+    setFeatureProgressVisible(true);
+    setFeatureProgressValue(12);
     setProgressVisible(true);
     setProgressValue(12);
     setMetricsReceived(false);
     metricsReceivedRef.current = false;
     if (progressTimerRef.current) clearInterval(progressTimerRef.current);
     progressTimerRef.current = setInterval(() => {
+      setFeatureProgressValue(v => {
+        const newValue = v + 3 + Math.random() * 5;
+        return Math.min(newValue, 90);
+      });
       setProgressValue(v => {
         const newValue = v + 3 + Math.random() * 5;
         if (newValue >= 95 && !metricsReceivedRef.current) {
@@ -215,11 +234,15 @@ export function FeatureEditor({
       <div className="p-4 bg-white flex items-center justify-between rounded-t-2xl border-b" style={{
       borderColor: 'rgba(0, 0, 0, 0.08)'
     }}>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-1">
           {waitingForFeature ? <FileCode className="w-5 h-5 text-primary" /> : <FileCode className="w-5 h-5 text-primary" />}
-          <div>
+          <div className="flex-1">
             <h2 className="font-semibold text-foreground">Feature File</h2>
-            
+            {featureProgressVisible && (
+              <div className="mt-1">
+                <Progress value={featureProgressValue} className="h-1" />
+              </div>
+            )}
           </div>
         </div>
         <div className="flex gap-2">
@@ -249,14 +272,9 @@ export function FeatureEditor({
       borderColor: 'rgba(0, 0, 0, 0.08)'
     }}>
         <div className="flex items-center gap-4 text-sm text-muted-foreground">
-          <div className="flex items-center gap-4">
-            <span>Lines: {featureContent.split('\n').length}</span>
-            <span>Scenarios: {(featureContent.match(/Scenario:/g) || []).length}</span>
-            <span>Steps: {(featureContent.match(/^\s*(Given|When|Then|And|But)/gm) || []).length}</span>
-          </div>
-          {progressVisible && <div className="flex-1">
-              <Progress value={progressValue} className="h-2" />
-            </div>}
+          <span>Lines: {featureContent.split('\n').length}</span>
+          <span>Scenarios: {(featureContent.match(/Scenario:/g) || []).length}</span>
+          <span>Steps: {(featureContent.match(/^\s*(Given|When|Then|And|But)/gm) || []).length}</span>
         </div>
       </div>
     </div>;
