@@ -34,6 +34,7 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
   const [isTyping, setIsTyping] = useState(false);
   const [waitingForResponse, setWaitingForResponse] = useState(false);
   const waitingRef = useRef(false);
+  const pendingResponseRef = useRef<string | null>(null);
   const loadingChannelRef = useRef<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout>();
@@ -123,8 +124,8 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
       .channel(`loading-state-${sessionId}`, { config: { broadcast: { self: true }}})
       .on('broadcast', { event: 'metrics-received' }, () => {
         console.log('ChatPanel: metrics-received, starting typing simulation');
-        // Start typing indicator when metrics are received
-        if (waitingRef.current) {
+        // Start typing indicator when metrics are received (only if waiting and not already typing)
+        if (waitingRef.current && !isTyping && pendingResponseRef.current) {
           setIsTyping(true);
           const typingMessage: Message = {
             id: `typing-${Date.now()}`,
@@ -134,6 +135,36 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
             isTyping: true,
           };
           setMessages(prev => [...prev, typingMessage]);
+          
+          // After typing delay, show the actual response
+          typingTimeoutRef.current = setTimeout(() => {
+            const responseContent = pendingResponseRef.current;
+            if (responseContent) {
+              setMessages(prev => {
+                const withoutTyping = prev.filter(msg => !msg.isTyping);
+                return [...withoutTyping, {
+                  id: Date.now().toString(),
+                  content: responseContent,
+                  sender: "assistant" as const,
+                  timestamp: new Date(),
+                }];
+              });
+              
+              // Save to database
+              const assistantMessage: Message = {
+                id: (Date.now() + 1).toString(),
+                content: responseContent,
+                sender: "assistant",
+                timestamp: new Date(),
+              };
+              saveMessageToDb(assistantMessage);
+            }
+            
+            setIsTyping(false);
+            setWaitingForResponse(false);
+            waitingRef.current = false;
+            pendingResponseRef.current = null;
+          }, 2500);
         }
       })
       .subscribe();
@@ -143,7 +174,7 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
     return () => {
       if (loadingCh) supabase.removeChannel(loadingCh);
     };
-  }, []);
+  }, [isTyping]);
 
   // Simulate typing effect
   const simulateTyping = (finalMessage: string, callback: () => void) => {
@@ -280,44 +311,26 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
       // Send to webhook and wait for response
       const webhookResponse = await sendToWebhook(input);
       
-      // Use output field for chat response
-      const chatContent = (webhookResponse && typeof webhookResponse === 'object' && webhookResponse.output) 
-        ? webhookResponse.output 
-        : (typeof webhookResponse === 'string' ? webhookResponse : "I received your message and processed it successfully.");
-      
-      // Update feature content if provided
-      if (webhookResponse && typeof webhookResponse === 'object' && webhookResponse.feature) {
-        onFeatureChange(webhookResponse.feature);
-        // Signal feature received
-        loadingChannelRef.current?.send({
-          type: 'broadcast',
-          event: 'feature-received',
-          payload: { ts: Date.now(), sessionId },
-        });
-      }
-      
-      // Remove typing indicator and show actual response
-      setMessages(prev => {
-        const withoutTyping = prev.filter(msg => !msg.isTyping);
-        return [...withoutTyping, {
-          id: Date.now().toString(),
-          content: chatContent,
-          sender: "assistant" as const,
-          timestamp: new Date(),
-        }];
-      });
-      setIsTyping(false);
-      setWaitingForResponse(false);
-      waitingRef.current = false;
-      
-      // Save assistant message to database
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        content: chatContent,
-        sender: "assistant",
-        timestamp: new Date(),
-      };
-      await saveMessageToDb(assistantMessage);
+        // Use output field for chat response
+        const chatContent = (webhookResponse && typeof webhookResponse === 'object' && webhookResponse.output) 
+          ? webhookResponse.output 
+          : (typeof webhookResponse === 'string' ? webhookResponse : "I received your message and processed it successfully.");
+        
+        // Store the response to show after metrics-received
+        pendingResponseRef.current = chatContent;
+        
+        // Update feature content if provided
+        if (webhookResponse && typeof webhookResponse === 'object' && webhookResponse.feature) {
+          onFeatureChange(webhookResponse.feature);
+          // Signal feature received
+          loadingChannelRef.current?.send({
+            type: 'broadcast',
+            event: 'feature-received',
+            payload: { ts: Date.now(), sessionId },
+          });
+        }
+        
+        // Don't show response immediately - wait for metrics-received event
       
     } catch (error) {
       // Add error message if webhook fails
@@ -327,9 +340,14 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
         sender: "assistant",
         timestamp: new Date(),
       };
-      setMessages(prev => [...prev, errorResponse]);
+      setMessages(prev => {
+        const withoutTyping = prev.filter(msg => !msg.isTyping);
+        return [...withoutTyping, errorResponse];
+      });
+      setIsTyping(false);
       setWaitingForResponse(false);
       waitingRef.current = false;
+      pendingResponseRef.current = null;
       
       // Signal that we're no longer waiting for any loading states
       loadingChannelRef.current?.send({
@@ -391,6 +409,9 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
           ? webhookResponse.output 
           : (typeof webhookResponse === 'string' ? webhookResponse : "I received your message and processed it successfully.");
         
+        // Store the response to show after metrics-received
+        pendingResponseRef.current = chatContent;
+        
         // Update feature content if provided
         if (webhookResponse && typeof webhookResponse === 'object' && webhookResponse.feature) {
           onFeatureChange(webhookResponse.feature);
@@ -402,28 +423,7 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
           });
         }
         
-        // Remove typing indicator and show actual response
-        setMessages(prev => {
-          const withoutTyping = prev.filter(msg => !msg.isTyping);
-          return [...withoutTyping, {
-            id: Date.now().toString(),
-            content: chatContent,
-            sender: "assistant" as const,
-            timestamp: new Date(),
-          }];
-        });
-        setIsTyping(false);
-        setWaitingForResponse(false);
-        waitingRef.current = false;
-        
-        // Save assistant message to database
-        const assistantMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          content: chatContent,
-          sender: "assistant",
-          timestamp: new Date(),
-        };
-        saveMessageToDb(assistantMessage);
+        // Don't show response immediately - wait for metrics-received event
         
       }).catch((error) => {
         // Add error message if webhook fails
@@ -433,9 +433,14 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
           sender: "assistant",
           timestamp: new Date(),
         };
-        setMessages(prev => [...prev, errorResponse]);
+        setMessages(prev => {
+          const withoutTyping = prev.filter(msg => !msg.isTyping);
+          return [...withoutTyping, errorResponse];
+        });
+        setIsTyping(false);
         setWaitingForResponse(false);
         waitingRef.current = false;
+        pendingResponseRef.current = null;
         
         // Signal that we're no longer waiting for any loading states
         loadingChannelRef.current?.send({
