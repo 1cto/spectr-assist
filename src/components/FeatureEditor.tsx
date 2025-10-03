@@ -98,8 +98,14 @@ export function FeatureEditor({
   }, [sessionId]);
 
   // External trigger to force progress start (fail-safe)
+  const firstStartRef = useRef(true);
   useEffect(() => {
-    if (startSignal === undefined) return;
+    // Ignore initial mount
+    if (firstStartRef.current) {
+      firstStartRef.current = false;
+      return;
+    }
+    if (startSignal === undefined || startSignal === null) return;
     // Mirror waiting-for-feature behavior
     setWaitingForFeature(true);
     setProgressVisible(true);
