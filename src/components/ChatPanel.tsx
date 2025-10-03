@@ -35,6 +35,9 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
   const [waitingForResponse, setWaitingForResponse] = useState(false);
   const waitingRef = useRef(false);
   const pendingResponseRef = useRef<string | null>(null);
+  const metricsEventHandledRef = useRef(false);
+  const metricsTypingStartTimeRef = useRef<number | null>(null);
+  const metricsCheckIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const loadingChannelRef = useRef<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout>();
@@ -124,8 +127,12 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
       .channel(`loading-state-${sessionId}`, { config: { broadcast: { self: true }}})
       .on('broadcast', { event: 'metrics-received' }, () => {
         console.log('ChatPanel: metrics-received, starting typing simulation');
-        // Start typing indicator when metrics are received (only if waiting and not already typing)
-        if (waitingRef.current && !isTyping && pendingResponseRef.current) {
+        // Guard against duplicate events
+        if (!waitingRef.current || metricsEventHandledRef.current) return;
+        metricsEventHandledRef.current = true;
+
+        // Start typing indicator regardless of webhook completion
+        if (!isTyping) {
           setIsTyping(true);
           const typingMessage: Message = {
             id: `typing-${Date.now()}`,
@@ -135,43 +142,57 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
             isTyping: true,
           };
           setMessages(prev => [...prev, typingMessage]);
-          
-          // After typing delay, show the actual response
-          typingTimeoutRef.current = setTimeout(() => {
-            const responseContent = pendingResponseRef.current;
-            if (responseContent) {
-              setMessages(prev => {
-                const withoutTyping = prev.filter(msg => !msg.isTyping);
-                return [...withoutTyping, {
-                  id: Date.now().toString(),
-                  content: responseContent,
-                  sender: "assistant" as const,
-                  timestamp: new Date(),
-                }];
-              });
-              
-              // Save to database
-              const assistantMessage: Message = {
-                id: (Date.now() + 1).toString(),
-                content: responseContent,
-                sender: "assistant",
-                timestamp: new Date(),
-              };
-              saveMessageToDb(assistantMessage);
-            }
-            
-            setIsTyping(false);
-            setWaitingForResponse(false);
-            waitingRef.current = false;
-            pendingResponseRef.current = null;
-          }, 2500);
         }
+
+        // Start polling for webhook response completion
+        metricsTypingStartTimeRef.current = Date.now();
+        if (metricsCheckIntervalRef.current) clearInterval(metricsCheckIntervalRef.current);
+        metricsCheckIntervalRef.current = setInterval(() => {
+          if (pendingResponseRef.current) {
+            const minDuration = 1500; // ms
+            const elapsed = Date.now() - (metricsTypingStartTimeRef.current || Date.now());
+            const remaining = Math.max(0, minDuration - elapsed);
+
+            if (metricsCheckIntervalRef.current) clearInterval(metricsCheckIntervalRef.current);
+            typingTimeoutRef.current = setTimeout(() => {
+              const responseContent = pendingResponseRef.current;
+              // Finalize only once
+              if (responseContent) {
+                setMessages(prev => {
+                  const withoutTyping = prev.filter(msg => !msg.isTyping);
+                  return [...withoutTyping, {
+                    id: Date.now().toString(),
+                    content: responseContent,
+                    sender: "assistant" as const,
+                    timestamp: new Date(),
+                  }];
+                });
+
+                // Save to database (fire and forget)
+                const assistantMessage: Message = {
+                  id: (Date.now() + 1).toString(),
+                  content: responseContent,
+                  sender: "assistant",
+                  timestamp: new Date(),
+                };
+                saveMessageToDb(assistantMessage);
+              }
+
+              setIsTyping(false);
+              setWaitingForResponse(false);
+              waitingRef.current = false;
+              pendingResponseRef.current = null;
+            }, remaining);
+          }
+        }, 200);
       })
       .subscribe();
     loadingChannelRef.current = loadingCh;
 
     // No metrics channel is needed for rendering chat responses now
     return () => {
+      if (metricsCheckIntervalRef.current) clearInterval(metricsCheckIntervalRef.current);
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
       if (loadingCh) supabase.removeChannel(loadingCh);
     };
   }, [isTyping]);
@@ -286,6 +307,11 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
     setInput("");
     setWaitingForResponse(true);
     waitingRef.current = true;
+    // Reset typing and coordination state for new flow
+    if (metricsCheckIntervalRef.current) clearInterval(metricsCheckIntervalRef.current);
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    metricsEventHandledRef.current = false;
+    pendingResponseRef.current = null;
 
     // Save user message to database
     await saveMessageToDb(userMessage);
@@ -384,6 +410,11 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
       setMessages(prev => [...prev, userMessage]);
       setWaitingForResponse(true);
       waitingRef.current = true;
+      // Reset typing and coordination state for new flow
+      if (metricsCheckIntervalRef.current) clearInterval(metricsCheckIntervalRef.current);
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+      metricsEventHandledRef.current = false;
+      pendingResponseRef.current = null;
 
       console.log('Starting new message flow - signaling waiting-for-feature');
       
