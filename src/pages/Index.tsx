@@ -12,7 +12,7 @@ import logo from "@/assets/logo.svg";
 
 const Index = () => {
   const [featureContent, setFeatureContent] = useState("");
-  const [activeTab, setActiveTab] = useState<"chat" | "document" | "quality">("document");
+  const [activeTab, setActiveTab] = useState<"chat" | "document" | "quality">("chat");
   const [hasDocumentUpdate, setHasDocumentUpdate] = useState(false);
   const [overallScore, setOverallScore] = useState<number | null>(null);
   const [documentProgress, setDocumentProgress] = useState<{ visible: boolean; value: number }>({ visible: false, value: 0 });
