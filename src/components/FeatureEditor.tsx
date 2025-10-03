@@ -207,8 +207,8 @@ export function FeatureEditor({
 
       <div className="flex-1 overflow-hidden">
         <div className="relative h-full">
-          <Textarea ref={textareaRef} value={featureContent} onChange={e => setFeatureContent(e.target.value)} onScroll={handleScrollSync} className="w-full h-full resize-none border-0 rounded-none focus:ring-0 font-mono text-sm leading-relaxed p-6 bg-transparent text-transparent caret-foreground selection:bg-primary/20 overflow-auto" placeholder="Write your BDD scenarios using Gherkin syntax&#10;Feature:&#10;Background:&#10;Scenario:" />
-          <div className="absolute inset-0 pointer-events-none p-6 font-mono text-sm whitespace-pre-wrap overflow-auto no-scrollbar" ref={overlayRef}>
+          <Textarea ref={textareaRef} value={featureContent} onChange={e => setFeatureContent(e.target.value)} onScroll={handleScrollSync} className="w-full h-full resize-none border-0 rounded-none focus:ring-0 font-mono text-sm leading-relaxed p-6 bg-transparent text-transparent caret-foreground selection:bg-primary/20 overflow-auto" style={{ hyphens: 'none', wordBreak: 'normal' }} placeholder="Write your BDD scenarios using Gherkin syntax&#10;Feature:&#10;Background:&#10;Scenario:" />
+          <div className="absolute inset-0 pointer-events-none p-6 font-mono text-sm overflow-auto no-scrollbar" style={{ whiteSpace: 'pre-wrap', wordBreak: 'normal', hyphens: 'none', overflowWrap: 'normal' }} ref={overlayRef}>
             <div className="select-none leading-relaxed" dangerouslySetInnerHTML={{
             __html: getHighlightedContent(featureContent)
           }} />

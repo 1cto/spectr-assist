@@ -162,8 +162,8 @@ const Index = () => {
                 />
               </div>
 
-              {/* Center Panel - Feature Editor (40% width, max 800px) */}
-              <div className="w-[40%] max-w-[800px] min-w-0 p-6">
+              {/* Center Panel - Feature Editor (40% width) */}
+              <div className="w-[40%] min-w-0 p-6">
                 <FeatureEditor 
                   value={featureContent} 
                   onChange={setFeatureContent} 
