@@ -159,13 +159,25 @@ const Index = () => {
               </div>
 
               {/* Center Panel - Feature Editor */}
-              <div className="flex-1 min-w-0 p-6">
-                <FeatureEditor 
-                  value={featureContent} 
-                  onChange={setFeatureContent} 
-                  sessionId={sessionId.current}
-                  onProgressChange={handleProgressChange}
-                />
+              <div className="flex-1 min-w-0 p-6 flex flex-col">
+                <div className="flex-1 min-h-0">
+                  <FeatureEditor 
+                    value={featureContent} 
+                    onChange={setFeatureContent} 
+                    sessionId={sessionId.current}
+                    onProgressChange={handleProgressChange}
+                  />
+                </div>
+                {documentProgress.visible && (
+                  <div className="mt-4 px-2">
+                    <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-primary transition-all duration-300"
+                        style={{ width: `${documentProgress.value}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Right Panel - Quality (30% width, max 400px) */}
