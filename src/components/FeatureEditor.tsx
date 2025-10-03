@@ -83,13 +83,20 @@ export function FeatureEditor({
         setFeatureProgressValue(0);
       }, 300);
       setProgressVisible(true);
-      setProgressValue(v => Math.max(v, 70));
+      setProgressValue(12);
+      // Restart interval to keep cycling while waiting for metrics
+      progressTimerRef.current = setInterval(() => {
+        setProgressValue(v => {
+          const newValue = v + 3 + Math.random() * 5;
+          if (newValue >= 100) return 12;
+          return newValue;
+        });
+      }, 400);
     }).on('broadcast', {
       event: 'waiting-for-metrics'
     }, () => {
       console.log('FeatureEditor: Received waiting-for-metrics signal');
       setProgressVisible(true);
-      setProgressValue(v => Math.max(v, 85));
     }).on('broadcast', {
       event: 'metrics-received'
     }, () => {
