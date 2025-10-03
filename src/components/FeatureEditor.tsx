@@ -194,13 +194,13 @@ export function FeatureEditor({
           </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={handleCopy} className="text-xs">
+            <Button variant="outline" size="sm" onClick={handleCopy} className="text-xs flex items-center justify-center">
             <Copy className="w-4 h-4 mr-2" />
-            Copy
-          </Button>
-          <Button variant="outline" size="sm" onClick={handleDownload} className="text-xs">
+            <span className="hidden sm:inline w-4 h-4 mr-2">Copy</span>
+            </Button>
+          <Button variant="outline" size="sm" onClick={handleDownload} className="text-xs flex items-center ">
             <Download className="w-4 h-4 mr-2" />
-            Download
+            <span className="hidden sm:inline w-4 h-4 mr-2">Download</span>
           </Button>
         </div>
       </div>
@@ -225,7 +225,7 @@ export function FeatureEditor({
             <span>Scenarios: {(featureContent.match(/Scenario:/g) || []).length}</span>
             <span>Steps: {(featureContent.match(/^\s*(Given|When|Then|And|But)/gm) || []).length}</span>
           </div>
-          {progressVisible && <div className="flex-1">
+          {progressVisible && <div className="flex-1 hidden sm:block">
               <Progress value={progressValue} className="h-2" />
             </div>}
         </div>
