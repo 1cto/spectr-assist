@@ -188,7 +188,8 @@ export function QualityPanel({ featureContent, sessionId, onSendMessage }: Quali
         progressTimerRef.current = setInterval(() => {
           setMetricsProgressValue(v => {
             const newValue = v + 3 + Math.random() * 5;
-            return Math.min(newValue, 90);
+            if (newValue >= 100) return 0;
+            return newValue;
           });
         }, 400);
       })

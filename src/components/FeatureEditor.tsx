@@ -62,12 +62,13 @@ export function FeatureEditor({
       progressTimerRef.current = setInterval(() => {
         setFeatureProgressValue(v => {
           const newValue = v + 3 + Math.random() * 5;
-          return Math.min(newValue, 90);
+          if (newValue >= 100) return 0;
+          return newValue;
         });
         setProgressValue(v => {
           const newValue = v + 3 + Math.random() * 5;
-          if (newValue >= 95 && !metricsReceivedRef.current) {
-            return 25 + Math.random() * 10;
+          if (newValue >= 100 && !metricsReceivedRef.current) {
+            return 0;
           }
           return Math.min(newValue, 90);
         });
@@ -131,12 +132,13 @@ export function FeatureEditor({
     progressTimerRef.current = setInterval(() => {
       setFeatureProgressValue(v => {
         const newValue = v + 3 + Math.random() * 5;
-        return Math.min(newValue, 90);
+        if (newValue >= 100) return 0;
+        return newValue;
       });
       setProgressValue(v => {
         const newValue = v + 3 + Math.random() * 5;
-        if (newValue >= 95 && !metricsReceivedRef.current) {
-          return 25 + Math.random() * 10;
+        if (newValue >= 100 && !metricsReceivedRef.current) {
+          return 0;
         }
         return Math.min(newValue, 90);
       });
