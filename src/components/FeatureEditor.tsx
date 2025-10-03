@@ -12,12 +12,14 @@ interface FeatureEditorProps {
   onChange: (value: string) => void;
   sessionId: string;
   onProgressChange?: (visible: boolean, value: number) => void;
+  startSignal?: number; // optional external trigger to start progress
 }
 export function FeatureEditor({
   value: featureContent,
   onChange: setFeatureContent,
   sessionId,
-  onProgressChange
+  onProgressChange,
+  startSignal
 }: FeatureEditorProps) {
   const {
     toast
@@ -94,6 +96,27 @@ export function FeatureEditor({
       supabase.removeChannel(channel);
     };
   }, [sessionId]);
+
+  // External trigger to force progress start (fail-safe)
+  useEffect(() => {
+    if (startSignal === undefined) return;
+    // Mirror waiting-for-feature behavior
+    setWaitingForFeature(true);
+    setProgressVisible(true);
+    setProgressValue(12);
+    setMetricsReceived(false);
+    metricsReceivedRef.current = false;
+    if (progressTimerRef.current) clearInterval(progressTimerRef.current);
+    progressTimerRef.current = setInterval(() => {
+      setProgressValue(v => {
+        const newValue = v + 3 + Math.random() * 5;
+        if (newValue >= 95 && !metricsReceivedRef.current) {
+          return 25 + Math.random() * 10;
+        }
+        return Math.min(newValue, 90);
+      });
+    }, 400);
+  }, [startSignal]);
   useEffect(() => {
     hljs.registerLanguage('gherkin', gherkin);
   }, []);

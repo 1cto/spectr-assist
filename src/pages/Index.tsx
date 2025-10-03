@@ -16,6 +16,7 @@ const Index = () => {
   const [hasDocumentUpdate, setHasDocumentUpdate] = useState(false);
   const [overallScore, setOverallScore] = useState<number | null>(null);
   const [documentProgress, setDocumentProgress] = useState<{ visible: boolean; value: number }>({ visible: false, value: 0 });
+  const [startSignal, setStartSignal] = useState(0);
   const loadingChannelRef = useRef<any>(null);
   const chatPanelRef = useRef<ChatPanelRef>(null);
   const sessionId = useRef(`session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
@@ -25,6 +26,7 @@ const Index = () => {
   const startWaiting = useCallback(() => {
     // Kick off mobile progress immediately
     setDocumentProgress({ visible: true, value: 12 });
+    setStartSignal((k) => k + 1);
     // Broadcast waiting-for-feature via parent-held channel
     try {
       loadingChannelRef.current?.send({ type: 'broadcast', event: 'waiting-for-feature', payload: { ts: Date.now(), sessionId: sessionId.current } });
@@ -36,7 +38,7 @@ const Index = () => {
         setTimeout(() => supabase.removeChannel(tempLoadingCh), 500);
       }
     });
-  }, []);
+  }, [setDocumentProgress]);
 
   const handleSendMessage = (message: string) => {
     // Ensure waiting state starts even if ChatPanel channel isn't ready
@@ -156,6 +158,7 @@ const Index = () => {
                   onChange={setFeatureContent} 
                   sessionId={sessionId.current}
                   onProgressChange={handleProgressChange}
+                  startSignal={startSignal}
                 />
               </div>
               
@@ -189,6 +192,7 @@ const Index = () => {
                     onChange={setFeatureContent} 
                     sessionId={sessionId.current}
                     onProgressChange={handleProgressChange}
+                    startSignal={startSignal}
                   />
                 </div>
               </div>
