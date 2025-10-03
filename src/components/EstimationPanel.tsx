@@ -99,7 +99,7 @@ export function EstimationPanel({ featureContent, sessionId }: EstimationPanelPr
         }
         
         // Signal that metrics have been received
-        loadingChannel.send({ type: 'broadcast', event: 'metrics-received' });
+        loadingChannel.send({ type: 'broadcast', event: 'metrics-received', payload: { ts: Date.now(), sessionId } });
         setLoadingState(prev => ({ ...prev, waitingForMetrics: false }));
       })
       .subscribe();

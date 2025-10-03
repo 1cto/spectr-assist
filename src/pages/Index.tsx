@@ -58,15 +58,15 @@ const Index = () => {
         if (payload.payload?.content || payload.payload?.text) {
           setFeatureContent(payload.payload.content || payload.payload.text);
           // Notify Feature File that feature has been received to stop spinner and start QM spinner
-          loadingChannelRef.current?.send({ type: 'broadcast', event: 'feature-received' });
-          loadingChannelRef.current?.send({ type: 'broadcast', event: 'waiting-for-metrics' });
+           loadingChannelRef.current?.send({ type: 'broadcast', event: 'feature-received', payload: { ts: Date.now(), sessionId: sessionId.current } });
+           loadingChannelRef.current?.send({ type: 'broadcast', event: 'waiting-for-metrics', payload: { ts: Date.now(), sessionId: sessionId.current } });
 
           // Fail-safe: also broadcast via a temporary channel to ensure delivery
           const tempLoadingCh = supabase.channel(`loading-state-${sessionId.current}`, { config: { broadcast: { self: true }}});
           tempLoadingCh.subscribe((status) => {
             if (status === 'SUBSCRIBED') {
-              tempLoadingCh.send({ type: 'broadcast', event: 'feature-received' });
-              tempLoadingCh.send({ type: 'broadcast', event: 'waiting-for-metrics' });
+               tempLoadingCh.send({ type: 'broadcast', event: 'feature-received', payload: { ts: Date.now(), sessionId: sessionId.current } });
+               tempLoadingCh.send({ type: 'broadcast', event: 'waiting-for-metrics', payload: { ts: Date.now(), sessionId: sessionId.current } });
               setTimeout(() => supabase.removeChannel(tempLoadingCh), 500);
             }
           });
