@@ -234,12 +234,12 @@ export function FeatureEditor({
       <div className="p-4 bg-white flex items-center justify-between rounded-t-2xl border-b" style={{
       borderColor: 'rgba(0, 0, 0, 0.08)'
     }}>
-        <div className="flex items-center gap-2 flex-1">
+        <div className="flex items-center gap-2">
           {waitingForFeature ? <FileCode className="w-5 h-5 text-primary" /> : <FileCode className="w-5 h-5 text-primary" />}
-          <div className="flex-1">
+          <div>
             <h2 className="font-semibold text-foreground">Feature File</h2>
             {featureProgressVisible && (
-              <div className="mt-1">
+              <div className="mt-1" style={{ width: '90px' }}>
                 <Progress value={featureProgressValue} className="h-1" />
               </div>
             )}

@@ -238,12 +238,12 @@ export function QualityPanel({ featureContent, sessionId, onSendMessage }: Quali
         <AccordionItem value="metrics" className="border-b border-black/8">
           <AccordionTrigger className="hover:no-underline py-3">
             <div className="flex items-center justify-between w-full pr-4">
-              <div className="flex items-center gap-2 flex-1">
+              <div className="flex items-center gap-2">
                 <BarChart3 className="w-5 h-5 text-primary" />
-                <div className="flex-1">
+                <div>
                   <span className="font-semibold text-lg">Quality Metrics</span>
                   {metricsProgressVisible && (
-                    <div className="mt-1 mr-4">
+                    <div className="mt-1" style={{ width: '120px' }}>
                       <Progress value={metricsProgressValue} className="h-1" />
                     </div>
                   )}
