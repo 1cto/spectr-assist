@@ -249,6 +249,17 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
 
     console.log('Starting new message flow - signaling waiting-for-feature');
     
+    // Show typing indicator immediately
+    setIsTyping(true);
+    const typingMessage: Message = {
+      id: `typing-${Date.now()}`,
+      content: "",
+      sender: "assistant",
+      timestamp: new Date(),
+      isTyping: true,
+    };
+    setMessages(prev => [...prev, typingMessage]);
+    
     // Signal that we're waiting for feature update
     // Signal to Feature File to start spinner (use persistent channel and a temp fail-safe)
     loadingChannelRef.current?.send({ type: 'broadcast', event: 'waiting-for-feature', payload: { ts: Date.now(), sessionId } });
@@ -280,19 +291,28 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
         });
       }
       
-      // Immediately render assistant response (no waiting for metrics)
-      simulateTyping(chatContent, async () => {
-        setWaitingForResponse(false);
-        // Save assistant message to database after typing animation
-        const assistantMessage: Message = {
-          id: (Date.now() + 1).toString(),
+      // Remove typing indicator and show actual response
+      setMessages(prev => {
+        const withoutTyping = prev.filter(msg => !msg.isTyping);
+        return [...withoutTyping, {
+          id: Date.now().toString(),
           content: chatContent,
-          sender: "assistant",
+          sender: "assistant" as const,
           timestamp: new Date(),
-        };
-        await saveMessageToDb(assistantMessage);
+        }];
       });
+      setIsTyping(false);
+      setWaitingForResponse(false);
       waitingRef.current = false;
+      
+      // Save assistant message to database
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        content: chatContent,
+        sender: "assistant",
+        timestamp: new Date(),
+      };
+      await saveMessageToDb(assistantMessage);
       
     } catch (error) {
       // Add error message if webhook fails
@@ -344,6 +364,17 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
 
       console.log('Starting new message flow - signaling waiting-for-feature');
       
+      // Show typing indicator immediately
+      setIsTyping(true);
+      const typingMessage: Message = {
+        id: `typing-${Date.now()}`,
+        content: "",
+        sender: "assistant",
+        timestamp: new Date(),
+        isTyping: true,
+      };
+      setMessages(prev => [...prev, typingMessage]);
+      
       // Signal that we're waiting for feature update
       loadingChannelRef.current?.send({ type: 'broadcast', event: 'waiting-for-feature', payload: { ts: Date.now(), sessionId } });
       const tempLoadingCh = supabase.channel(`loading-state-${sessionId}`, { config: { broadcast: { self: true }}});
@@ -372,19 +403,28 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
           });
         }
         
-        // Immediately render assistant response (no waiting for metrics)
-        simulateTyping(chatContent, async () => {
-          setWaitingForResponse(false);
-          // Save assistant message to database after typing animation
-          const assistantMessage: Message = {
-            id: (Date.now() + 1).toString(),
+        // Remove typing indicator and show actual response
+        setMessages(prev => {
+          const withoutTyping = prev.filter(msg => !msg.isTyping);
+          return [...withoutTyping, {
+            id: Date.now().toString(),
             content: chatContent,
-            sender: "assistant",
+            sender: "assistant" as const,
             timestamp: new Date(),
-          };
-          await saveMessageToDb(assistantMessage);
+          }];
         });
+        setIsTyping(false);
+        setWaitingForResponse(false);
         waitingRef.current = false;
+        
+        // Save assistant message to database
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          content: chatContent,
+          sender: "assistant",
+          timestamp: new Date(),
+        };
+        saveMessageToDb(assistantMessage);
         
       }).catch((error) => {
         // Add error message if webhook fails
