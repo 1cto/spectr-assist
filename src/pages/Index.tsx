@@ -78,11 +78,15 @@ const Index = () => {
     const metricsChannel = supabase
       .channel(`quality-metrics-${sessionId.current}`)
       .on('broadcast', { event: 'metrics-update' }, (payload) => {
+        console.log('Index: Received metrics update:', payload);
         if (payload.payload?.overall !== undefined) {
+          console.log('Index: Setting overall score:', payload.payload.overall);
           setOverallScore(payload.payload.overall);
         }
       })
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Index: Metrics channel subscription status:', status);
+      });
 
     return () => {
       if (featureCh) supabase.removeChannel(featureCh);

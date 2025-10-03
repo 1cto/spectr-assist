@@ -187,8 +187,10 @@ export function QualityPanel({ featureContent, sessionId, onSendMessage }: Quali
     const metricsChannel = supabase
       .channel(`quality-metrics-${sessionId}`)
       .on('broadcast', { event: 'metrics-update' }, (payload) => {
+        console.log('QualityPanel: Received metrics update:', payload);
         if (payload.payload) {
           const { timestamp, sessionId: sid, ...metrics } = payload.payload as any;
+          console.log('QualityPanel: Updating metrics:', metrics);
           setQualityMetrics(prev => ({
             ...prev,
             ...metrics
@@ -199,7 +201,9 @@ export function QualityPanel({ featureContent, sessionId, onSendMessage }: Quali
         loadingChannel.send({ type: 'broadcast', event: 'metrics-received' });
         setLoadingState(prev => ({ ...prev, waitingForMetrics: false }));
       })
-      .subscribe();
+      .subscribe((status) => {
+        console.log('QualityPanel: Metrics channel subscription status:', status);
+      });
 
     return () => {
       supabase.removeChannel(loadingChannel);
