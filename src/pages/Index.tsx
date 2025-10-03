@@ -119,23 +119,27 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="h-screen bg-background flex flex-col">
-        {/* Header */}
-        <header className="bg-gradient-panel px-4 sm:px-6 py-3 sm:py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 sm:gap-4">
-              <img src={logo} alt="BA Requirements Studio" className="h-8 sm:h-12" />
-              <div>
-                <h1 className="text-lg sm:text-2xl font-bold text-foreground">BA Requirements Studio</h1>
-                <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">Collaborative feature file creation and analysis</p>
+    <AuthGuard>
+      <div className="h-screen bg-background flex flex-col">
+          {/* Header */}
+          <header className="bg-gradient-panel px-4 sm:px-6 py-3 sm:py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 sm:gap-4">
+                <img src={logo} alt="BA Requirements Studio" className="h-8 sm:h-12" />
+                <div>
+                  <h1 className="text-lg sm:text-2xl font-bold text-foreground">BA Requirements Studio</h1>
+                  <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">Collaborative feature file creation and analysis</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
+                  <div className="w-2 h-2 bg-estimate-low rounded-full"></div>
+                  <span className="hidden sm:inline">Ready</span>
+                </div>
+                <UserMenu />
               </div>
             </div>
-            <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
-              <div className="w-2 h-2 bg-estimate-low rounded-full"></div>
-              <span className="hidden sm:inline">Ready</span>
-            </div>
-          </div>
-        </header>
+          </header>
 
         {/* Main Content */}
         <div className="flex-1 flex overflow-hidden pb-16 lg:pb-0">
@@ -276,6 +280,7 @@ const Index = () => {
           </div>
         )}
       </div>
+    </AuthGuard>
   );
 };
 
