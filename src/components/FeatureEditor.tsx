@@ -62,12 +62,12 @@ export function FeatureEditor({
       progressTimerRef.current = setInterval(() => {
         setFeatureProgressValue(v => {
           const newValue = v + 3 + Math.random() * 5;
-          if (newValue >= 100) return 0;
+          if (newValue >= 100) return 12; // Reset to 12% to continue cycle
           return newValue;
         });
         setProgressValue(v => {
           const newValue = v + 3 + Math.random() * 5;
-          if (newValue >= 100) return 0;
+          if (newValue >= 100) return 12; // Reset to 12% to continue cycle
           return newValue;
         });
       }, 400);
@@ -130,12 +130,12 @@ export function FeatureEditor({
     progressTimerRef.current = setInterval(() => {
       setFeatureProgressValue(v => {
         const newValue = v + 3 + Math.random() * 5;
-        if (newValue >= 100) return 0;
+        if (newValue >= 100) return 12; // Reset to 12% to continue cycle
         return newValue;
       });
       setProgressValue(v => {
         const newValue = v + 3 + Math.random() * 5;
-        if (newValue >= 100) return 0;
+        if (newValue >= 100) return 12; // Reset to 12% to continue cycle
         return newValue;
       });
     }, 400);
