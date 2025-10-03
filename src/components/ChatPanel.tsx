@@ -19,13 +19,14 @@ interface ChatPanelProps {
   featureContent: string;
   onFeatureChange: (content: string) => void;
   sessionId: string;
+  onStartWaiting?: () => void;
 }
 
 export interface ChatPanelRef {
   sendMessage: (message: string) => void;
 }
 
-export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureContent, onFeatureChange, sessionId }, ref) => {
+export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureContent, onFeatureChange, sessionId, onStartWaiting }, ref) => {
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
@@ -248,6 +249,9 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
     await saveMessageToDb(userMessage);
 
     console.log('Starting new message flow - signaling waiting-for-feature');
+
+    // Notify parent (Index) to start waiting state immediately
+    try { onStartWaiting?.(); } catch {}
     
     // Show typing indicator immediately
     setIsTyping(true);
@@ -260,8 +264,7 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
     };
     setMessages(prev => [...prev, typingMessage]);
     
-    // Signal that we're waiting for feature update
-    // Signal to Feature File to start spinner (use persistent channel and a temp fail-safe)
+    // Signal that we're waiting for feature update (local broadcast)
     loadingChannelRef.current?.send({ type: 'broadcast', event: 'waiting-for-feature', payload: { ts: Date.now(), sessionId } });
     const tempLoadingCh = supabase.channel(`loading-state-${sessionId}`, { config: { broadcast: { self: true }}});
     tempLoadingCh.subscribe((status) => {
@@ -364,6 +367,9 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
 
       console.log('Starting new message flow - signaling waiting-for-feature');
       
+      // Notify parent (Index) to start waiting state immediately
+      try { onStartWaiting?.(); } catch {}
+
       // Show typing indicator immediately
       setIsTyping(true);
       const typingMessage: Message = {
@@ -375,7 +381,7 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
       };
       setMessages(prev => [...prev, typingMessage]);
       
-      // Signal that we're waiting for feature update
+      // Signal that we're waiting for feature update (local broadcast)
       loadingChannelRef.current?.send({ type: 'broadcast', event: 'waiting-for-feature', payload: { ts: Date.now(), sessionId } });
       const tempLoadingCh = supabase.channel(`loading-state-${sessionId}`, { config: { broadcast: { self: true }}});
       tempLoadingCh.subscribe((status) => {

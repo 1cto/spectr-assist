@@ -22,7 +22,25 @@ const Index = () => {
   const isMobile = useIsMobile();
   const previousFeatureContent = useRef(featureContent);
 
+  const startWaiting = useCallback(() => {
+    // Kick off mobile progress immediately
+    setDocumentProgress({ visible: true, value: 12 });
+    // Broadcast waiting-for-feature via parent-held channel
+    try {
+      loadingChannelRef.current?.send({ type: 'broadcast', event: 'waiting-for-feature', payload: { ts: Date.now(), sessionId: sessionId.current } });
+    } catch {}
+    const tempLoadingCh = supabase.channel(`loading-state-${sessionId.current}`, { config: { broadcast: { self: true }}});
+    tempLoadingCh.subscribe((status) => {
+      if (status === 'SUBSCRIBED') {
+        tempLoadingCh.send({ type: 'broadcast', event: 'waiting-for-feature', payload: { ts: Date.now(), sessionId: sessionId.current } });
+        setTimeout(() => supabase.removeChannel(tempLoadingCh), 500);
+      }
+    });
+  }, []);
+
   const handleSendMessage = (message: string) => {
+    // Ensure waiting state starts even if ChatPanel channel isn't ready
+    startWaiting();
     if (chatPanelRef.current) {
       chatPanelRef.current.sendMessage(message);
     }
@@ -128,6 +146,7 @@ const Index = () => {
                   featureContent={featureContent} 
                   onFeatureChange={setFeatureContent}
                   sessionId={sessionId.current}
+                  onStartWaiting={startWaiting}
                 />
               </div>
               
@@ -158,6 +177,7 @@ const Index = () => {
                   featureContent={featureContent} 
                   onFeatureChange={setFeatureContent}
                   sessionId={sessionId.current}
+                  onStartWaiting={startWaiting}
                 />
               </div>
 
