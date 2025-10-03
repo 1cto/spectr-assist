@@ -251,11 +251,11 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
     
     // Signal that we're waiting for feature update
     // Signal to Feature File to start spinner (use persistent channel and a temp fail-safe)
-    loadingChannelRef.current?.send({ type: 'broadcast', event: 'waiting-for-feature' });
+    loadingChannelRef.current?.send({ type: 'broadcast', event: 'waiting-for-feature', payload: { ts: Date.now(), sessionId } });
     const tempLoadingCh = supabase.channel(`loading-state-${sessionId}`, { config: { broadcast: { self: true }}});
     tempLoadingCh.subscribe((status) => {
       if (status === 'SUBSCRIBED') {
-        tempLoadingCh.send({ type: 'broadcast', event: 'waiting-for-feature' });
+        tempLoadingCh.send({ type: 'broadcast', event: 'waiting-for-feature', payload: { ts: Date.now(), sessionId } });
         setTimeout(() => supabase.removeChannel(tempLoadingCh), 500);
       }
     });
@@ -276,6 +276,7 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
         loadingChannelRef.current?.send({
           type: 'broadcast',
           event: 'feature-received',
+          payload: { ts: Date.now(), sessionId },
         });
       }
       
@@ -309,10 +310,12 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
       loadingChannelRef.current?.send({
         type: 'broadcast',
         event: 'feature-received',
+        payload: { ts: Date.now(), sessionId },
       });
       loadingChannelRef.current?.send({
         type: 'broadcast',
         event: 'metrics-received',
+        payload: { ts: Date.now(), sessionId },
       });
     }
   };
@@ -342,11 +345,11 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
       console.log('Starting new message flow - signaling waiting-for-feature');
       
       // Signal that we're waiting for feature update
-      loadingChannelRef.current?.send({ type: 'broadcast', event: 'waiting-for-feature' });
+      loadingChannelRef.current?.send({ type: 'broadcast', event: 'waiting-for-feature', payload: { ts: Date.now(), sessionId } });
       const tempLoadingCh = supabase.channel(`loading-state-${sessionId}`, { config: { broadcast: { self: true }}});
       tempLoadingCh.subscribe((status) => {
         if (status === 'SUBSCRIBED') {
-          tempLoadingCh.send({ type: 'broadcast', event: 'waiting-for-feature' });
+          tempLoadingCh.send({ type: 'broadcast', event: 'waiting-for-feature', payload: { ts: Date.now(), sessionId } });
           setTimeout(() => supabase.removeChannel(tempLoadingCh), 500);
         }
       });
@@ -365,6 +368,7 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
           loadingChannelRef.current?.send({
             type: 'broadcast',
             event: 'feature-received',
+            payload: { ts: Date.now(), sessionId },
           });
         }
         
@@ -398,10 +402,12 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
         loadingChannelRef.current?.send({
           type: 'broadcast',
           event: 'feature-received',
+          payload: { ts: Date.now(), sessionId },
         });
         loadingChannelRef.current?.send({
           type: 'broadcast',
           event: 'metrics-received',
+          payload: { ts: Date.now(), sessionId },
         });
       });
     }

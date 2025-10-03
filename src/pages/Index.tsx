@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { ChatPanel, ChatPanelRef } from "@/components/ChatPanel";
 import { FeatureEditor } from "@/components/FeatureEditor";
 import { QualityPanel } from "@/components/QualityPanel";
@@ -28,9 +28,9 @@ const Index = () => {
     }
   };
 
-  const handleProgressChange = (visible: boolean, value: number) => {
+  const handleProgressChange = useCallback((visible: boolean, value: number) => {
     setDocumentProgress({ visible, value });
-  };
+  }, []);
 
   // Track document updates for mobile badge
   useEffect(() => {
@@ -58,15 +58,15 @@ const Index = () => {
         if (payload.payload?.content || payload.payload?.text) {
           setFeatureContent(payload.payload.content || payload.payload.text);
           // Notify Feature File that feature has been received to stop spinner and start QM spinner
-          loadingChannelRef.current?.send({ type: 'broadcast', event: 'feature-received' });
-          loadingChannelRef.current?.send({ type: 'broadcast', event: 'waiting-for-metrics' });
+           loadingChannelRef.current?.send({ type: 'broadcast', event: 'feature-received', payload: { ts: Date.now(), sessionId: sessionId.current } });
+           loadingChannelRef.current?.send({ type: 'broadcast', event: 'waiting-for-metrics', payload: { ts: Date.now(), sessionId: sessionId.current } });
 
           // Fail-safe: also broadcast via a temporary channel to ensure delivery
           const tempLoadingCh = supabase.channel(`loading-state-${sessionId.current}`, { config: { broadcast: { self: true }}});
           tempLoadingCh.subscribe((status) => {
             if (status === 'SUBSCRIBED') {
-              tempLoadingCh.send({ type: 'broadcast', event: 'feature-received' });
-              tempLoadingCh.send({ type: 'broadcast', event: 'waiting-for-metrics' });
+               tempLoadingCh.send({ type: 'broadcast', event: 'feature-received', payload: { ts: Date.now(), sessionId: sessionId.current } });
+               tempLoadingCh.send({ type: 'broadcast', event: 'waiting-for-metrics', payload: { ts: Date.now(), sessionId: sessionId.current } });
               setTimeout(() => supabase.removeChannel(tempLoadingCh), 500);
             }
           });
@@ -78,11 +78,18 @@ const Index = () => {
     const metricsChannel = supabase
       .channel(`quality-metrics-${sessionId.current}`)
       .on('broadcast', { event: 'metrics-update' }, (payload) => {
+        console.log('Index: Received metrics update:', payload);
         if (payload.payload?.overall !== undefined) {
+          console.log('Index: Setting overall score:', payload.payload.overall);
           setOverallScore(payload.payload.overall);
+          
+          // Broadcast metrics-received to stop the progress bar
+          loadingChannelRef.current?.send({ type: 'broadcast', event: 'metrics-received', payload: { ts: Date.now(), sessionId: sessionId.current } });
         }
       })
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Index: Metrics channel subscription status:', status);
+      });
 
     return () => {
       if (featureCh) supabase.removeChannel(featureCh);
@@ -115,35 +122,31 @@ const Index = () => {
           {/* Mobile: Single Panel View */}
           {isMobile ? (
             <div className="flex-1 overflow-hidden">
-              {activeTab === "chat" && (
-                <div className="h-full border-r" style={{ borderColor: 'rgba(0, 0, 0, 0.08)' }}>
-                  <ChatPanel 
-                    ref={chatPanelRef}
-                    featureContent={featureContent} 
-                    onFeatureChange={setFeatureContent}
-                    sessionId={sessionId.current}
-                  />
-                </div>
-              )}
+              <div className={`h-full border-r ${activeTab === "chat" ? "block" : "hidden"}`} style={{ borderColor: 'rgba(0, 0, 0, 0.08)' }}>
+                <ChatPanel 
+                  ref={chatPanelRef}
+                  featureContent={featureContent} 
+                  onFeatureChange={setFeatureContent}
+                  sessionId={sessionId.current}
+                />
+              </div>
               
-              {activeTab === "document" && (
-                <div className="h-full p-4">
-                  <FeatureEditor 
-                    value={featureContent} 
-                    onChange={setFeatureContent} 
-                    sessionId={sessionId.current}
-                    onProgressChange={handleProgressChange}
-                  />
-                </div>
-              )}
+              <div className={`h-full p-4 ${activeTab === "document" ? "block" : "hidden"}`}>
+                <FeatureEditor 
+                  value={featureContent} 
+                  onChange={setFeatureContent} 
+                  sessionId={sessionId.current}
+                  onProgressChange={handleProgressChange}
+                />
+              </div>
               
-              {activeTab === "quality" && (
+              <div className={`h-full ${activeTab === "quality" ? "block" : "hidden"}`}>
                 <QualityPanel 
                   featureContent={featureContent} 
                   sessionId={sessionId.current}
                   onSendMessage={handleSendMessage}
                 />
-              )}
+              </div>
             </div>
           ) : (
             /* Desktop: Three Column Layout - 30%, 40%, 30% */
@@ -158,18 +161,20 @@ const Index = () => {
                 />
               </div>
 
-              {/* Center Panel - Feature Editor (40% width, max 800px) */}
-              <div className="w-[40%] max-w-[800px] min-w-0 p-6">
-                <FeatureEditor 
-                  value={featureContent} 
-                  onChange={setFeatureContent} 
-                  sessionId={sessionId.current}
-                  onProgressChange={handleProgressChange}
-                />
+              {/* Center Panel - Feature Editor */}
+              <div className="flex-1 min-w-0 p-6 flex flex-col">
+                <div className="flex-1 min-h-0">
+                  <FeatureEditor 
+                    value={featureContent} 
+                    onChange={setFeatureContent} 
+                    sessionId={sessionId.current}
+                    onProgressChange={handleProgressChange}
+                  />
+                </div>
               </div>
 
               {/* Right Panel - Quality (30% width, max 400px) */}
-              <div className="w-[30%] max-w-[400px] flex-shrink-0 overflow-hidden">
+              <div className="w-[30%] max-w-[400px] flex-shrink-0 flex flex-col overflow-hidden">
                 <QualityPanel 
                   featureContent={featureContent} 
                   sessionId={sessionId.current}
@@ -233,10 +238,15 @@ const Index = () => {
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                <BarChart3 className="h-5 w-5 mb-1" />
-                <span className="text-xs font-medium">
-                  Quality {overallScore !== null && `${overallScore}`}
-                </span>
+                <div className="relative">
+                  <BarChart3 className="h-5 w-5 mb-1" />
+                  {overallScore !== null && (
+                    <Badge className="absolute -top-1 -right-3 h-4 px-1 text-[10px] bg-primary">
+                      {overallScore}
+                    </Badge>
+                  )}
+                </div>
+                <span className="text-xs font-medium">Quality</span>
               </button>
             </nav>
           </div>
