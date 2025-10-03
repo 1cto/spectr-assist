@@ -374,6 +374,7 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
       
       // Update feature content if provided
       if (webhookResponse && typeof webhookResponse === 'object' && webhookResponse.feature) {
+        console.log('ChatPanel: Feature update detected, updating content');
         onFeatureChange(webhookResponse.feature);
         // Signal feature received
         loadingChannelRef.current?.send({
@@ -381,10 +382,49 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
           event: 'feature-received',
           payload: { ts: Date.now(), sessionId },
         });
+      } else {
+        console.log('ChatPanel: No feature update, will show response directly after typing delay');
+        // No feature update - show response after a short typing delay
+        setIsTyping(true);
+        const typingMessage: Message = {
+          id: `typing-${Date.now()}`,
+          content: "",
+          sender: "assistant",
+          timestamp: new Date(),
+          isTyping: true,
+        };
+        setMessages(prev => [...prev, typingMessage]);
+        
+        // Show response after typing delay
+        setTimeout(() => {
+          setMessages(prev => {
+            const withoutTyping = prev.filter(msg => !msg.isTyping);
+            return [...withoutTyping, {
+              id: Date.now().toString(),
+              content: chatContent,
+              sender: "assistant" as const,
+              timestamp: new Date(),
+            }];
+          });
+          
+          // Save to database
+          const assistantMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            content: chatContent,
+            sender: "assistant",
+            timestamp: new Date(),
+          };
+          saveMessageToDb(assistantMessage);
+          
+          setIsTyping(false);
+          setWaitingForResponse(false);
+          waitingRef.current = false;
+          pendingResponseRef.current = null;
+          metricsEventHandledRef.current = false;
+        }, 1500);
       }
       
-      console.log('ChatPanel: Waiting for metrics-received event to show response');
-      // Don't show response immediately - wait for metrics-received event
+      console.log('ChatPanel: Waiting for metrics-received event to show response (if feature was updated)');
       
     } catch (error) {
       // Add error message if webhook fails
@@ -463,16 +503,20 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
 
       // Send the message to webhook
       sendToWebhook(message).then((webhookResponse) => {
+        console.log('ChatPanel (ref): Webhook response received:', webhookResponse);
+        
         // Use output field for chat response
         const chatContent = (webhookResponse && typeof webhookResponse === 'object' && webhookResponse.output) 
           ? webhookResponse.output 
           : (typeof webhookResponse === 'string' ? webhookResponse : "I received your message and processed it successfully.");
         
+        console.log('ChatPanel (ref): Storing response:', chatContent.substring(0, 50));
         // Store the response to show after metrics-received
         pendingResponseRef.current = chatContent;
         
         // Update feature content if provided
         if (webhookResponse && typeof webhookResponse === 'object' && webhookResponse.feature) {
+          console.log('ChatPanel (ref): Feature update detected');
           onFeatureChange(webhookResponse.feature);
           // Signal feature received
           loadingChannelRef.current?.send({
@@ -480,6 +524,44 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
             event: 'feature-received',
             payload: { ts: Date.now(), sessionId },
           });
+        } else {
+          console.log('ChatPanel (ref): No feature update, showing response directly');
+          // No feature update - show response after typing delay
+          setIsTyping(true);
+          const typingMessage: Message = {
+            id: `typing-${Date.now()}`,
+            content: "",
+            sender: "assistant",
+            timestamp: new Date(),
+            isTyping: true,
+          };
+          setMessages(prev => [...prev, typingMessage]);
+          
+          setTimeout(() => {
+            setMessages(prev => {
+              const withoutTyping = prev.filter(msg => !msg.isTyping);
+              return [...withoutTyping, {
+                id: Date.now().toString(),
+                content: chatContent,
+                sender: "assistant" as const,
+                timestamp: new Date(),
+              }];
+            });
+            
+            const assistantMessage: Message = {
+              id: (Date.now() + 1).toString(),
+              content: chatContent,
+              sender: "assistant",
+              timestamp: new Date(),
+            };
+            saveMessageToDb(assistantMessage);
+            
+            setIsTyping(false);
+            setWaitingForResponse(false);
+            waitingRef.current = false;
+            pendingResponseRef.current = null;
+            metricsEventHandledRef.current = false;
+          }, 1500);
         }
         
         // Don't show response immediately - wait for metrics-received event
