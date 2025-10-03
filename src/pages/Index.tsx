@@ -12,17 +12,37 @@ import logo from "@/assets/logo.svg";
 
 const Index = () => {
   const [featureContent, setFeatureContent] = useState("");
-  const [activeTab, setActiveTab] = useState<"chat" | "document" | "quality">("document");
+  const [activeTab, setActiveTab] = useState<"chat" | "document" | "quality">("chat");
   const [hasDocumentUpdate, setHasDocumentUpdate] = useState(false);
   const [overallScore, setOverallScore] = useState<number | null>(null);
   const [documentProgress, setDocumentProgress] = useState<{ visible: boolean; value: number }>({ visible: false, value: 0 });
+  const [startSignal, setStartSignal] = useState(0);
   const loadingChannelRef = useRef<any>(null);
   const chatPanelRef = useRef<ChatPanelRef>(null);
   const sessionId = useRef(`session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
   const isMobile = useIsMobile();
   const previousFeatureContent = useRef(featureContent);
 
+  const startWaiting = useCallback(() => {
+    // Kick off mobile progress immediately
+    setDocumentProgress({ visible: true, value: 12 });
+    setStartSignal((k) => k + 1);
+    // Broadcast waiting-for-feature via parent-held channel
+    try {
+      loadingChannelRef.current?.send({ type: 'broadcast', event: 'waiting-for-feature', payload: { ts: Date.now(), sessionId: sessionId.current } });
+    } catch {}
+    const tempLoadingCh = supabase.channel(`loading-state-${sessionId.current}`, { config: { broadcast: { self: true }}});
+    tempLoadingCh.subscribe((status) => {
+      if (status === 'SUBSCRIBED') {
+        tempLoadingCh.send({ type: 'broadcast', event: 'waiting-for-feature', payload: { ts: Date.now(), sessionId: sessionId.current } });
+        setTimeout(() => supabase.removeChannel(tempLoadingCh), 500);
+      }
+    });
+  }, [setDocumentProgress]);
+
   const handleSendMessage = (message: string) => {
+    // Ensure waiting state starts even if ChatPanel channel isn't ready
+    startWaiting();
     if (chatPanelRef.current) {
       chatPanelRef.current.sendMessage(message);
     }
@@ -82,6 +102,9 @@ const Index = () => {
         if (payload.payload?.overall !== undefined) {
           console.log('Index: Setting overall score:', payload.payload.overall);
           setOverallScore(payload.payload.overall);
+          
+          // Broadcast metrics-received to stop the progress bar
+          loadingChannelRef.current?.send({ type: 'broadcast', event: 'metrics-received', payload: { ts: Date.now(), sessionId: sessionId.current } });
         }
       })
       .subscribe((status) => {
@@ -125,6 +148,7 @@ const Index = () => {
                   featureContent={featureContent} 
                   onFeatureChange={setFeatureContent}
                   sessionId={sessionId.current}
+                  onStartWaiting={startWaiting}
                 />
               </div>
               
@@ -134,6 +158,7 @@ const Index = () => {
                   onChange={setFeatureContent} 
                   sessionId={sessionId.current}
                   onProgressChange={handleProgressChange}
+                  startSignal={startSignal}
                 />
               </div>
               
@@ -155,21 +180,25 @@ const Index = () => {
                   featureContent={featureContent} 
                   onFeatureChange={setFeatureContent}
                   sessionId={sessionId.current}
+                  onStartWaiting={startWaiting}
                 />
               </div>
 
               {/* Center Panel - Feature Editor */}
-              <div className="flex-1 min-w-0 p-6">
-                <FeatureEditor 
-                  value={featureContent} 
-                  onChange={setFeatureContent} 
-                  sessionId={sessionId.current}
-                  onProgressChange={handleProgressChange}
-                />
+              <div className="flex-1 min-w-0 p-6 flex flex-col">
+                <div className="flex-1 min-h-0">
+                  <FeatureEditor 
+                    value={featureContent} 
+                    onChange={setFeatureContent} 
+                    sessionId={sessionId.current}
+                    onProgressChange={handleProgressChange}
+                    startSignal={startSignal}
+                  />
+                </div>
               </div>
 
               {/* Right Panel - Quality (30% width, max 400px) */}
-              <div className="w-[30%] max-w-[400px] flex-shrink-0 overflow-hidden">
+              <div className="w-[30%] max-w-[400px] flex-shrink-0 flex flex-col overflow-hidden">
                 <QualityPanel 
                   featureContent={featureContent} 
                   sessionId={sessionId.current}

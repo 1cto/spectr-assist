@@ -12,17 +12,21 @@ interface FeatureEditorProps {
   onChange: (value: string) => void;
   sessionId: string;
   onProgressChange?: (visible: boolean, value: number) => void;
+  startSignal?: number; // optional external trigger to start progress
 }
 export function FeatureEditor({
   value: featureContent,
   onChange: setFeatureContent,
   sessionId,
-  onProgressChange
+  onProgressChange,
+  startSignal
 }: FeatureEditorProps) {
   const {
     toast
   } = useToast();
   const [waitingForFeature, setWaitingForFeature] = useState(false);
+  const [featureProgressVisible, setFeatureProgressVisible] = useState(false);
+  const [featureProgressValue, setFeatureProgressValue] = useState(0);
   const [progressVisible, setProgressVisible] = useState(false);
   const [progressValue, setProgressValue] = useState(0);
   const [metricsReceived, setMetricsReceived] = useState(false);
@@ -48,17 +52,23 @@ export function FeatureEditor({
     }, () => {
       console.log('FeatureEditor: Received waiting-for-feature signal');
       setWaitingForFeature(true);
+      setFeatureProgressVisible(true);
+      setFeatureProgressValue(12);
       setProgressVisible(true);
       setProgressValue(12);
       setMetricsReceived(false);
       metricsReceivedRef.current = false;
       if (progressTimerRef.current) clearInterval(progressTimerRef.current);
       progressTimerRef.current = setInterval(() => {
+        setFeatureProgressValue(v => {
+          const newValue = v + 3 + Math.random() * 5;
+          if (newValue >= 100) return 0;
+          return newValue;
+        });
         setProgressValue(v => {
           const newValue = v + 3 + Math.random() * 5;
-          // Restart if approaching 95% but metrics not received
-          if (newValue >= 95 && !metricsReceivedRef.current) {
-            return 25 + Math.random() * 10; // Restart between 25-35%
+          if (newValue >= 100 && !metricsReceivedRef.current) {
+            return 0;
           }
           return Math.min(newValue, 90);
         });
@@ -68,6 +78,12 @@ export function FeatureEditor({
     }, () => {
       console.log('FeatureEditor: Received feature-received signal');
       setWaitingForFeature(false);
+      if (progressTimerRef.current) clearInterval(progressTimerRef.current);
+      setFeatureProgressValue(100);
+      setTimeout(() => {
+        setFeatureProgressVisible(false);
+        setFeatureProgressValue(0);
+      }, 300);
       setProgressVisible(true);
       setProgressValue(v => Math.max(v, 70));
     }).on('broadcast', {
@@ -94,6 +110,40 @@ export function FeatureEditor({
       supabase.removeChannel(channel);
     };
   }, [sessionId]);
+
+  // External trigger to force progress start (fail-safe)
+  const firstStartRef = useRef(true);
+  useEffect(() => {
+    // Ignore initial mount
+    if (firstStartRef.current) {
+      firstStartRef.current = false;
+      return;
+    }
+    if (startSignal === undefined || startSignal === null) return;
+    // Mirror waiting-for-feature behavior
+    setWaitingForFeature(true);
+    setFeatureProgressVisible(true);
+    setFeatureProgressValue(12);
+    setProgressVisible(true);
+    setProgressValue(12);
+    setMetricsReceived(false);
+    metricsReceivedRef.current = false;
+    if (progressTimerRef.current) clearInterval(progressTimerRef.current);
+    progressTimerRef.current = setInterval(() => {
+      setFeatureProgressValue(v => {
+        const newValue = v + 3 + Math.random() * 5;
+        if (newValue >= 100) return 0;
+        return newValue;
+      });
+      setProgressValue(v => {
+        const newValue = v + 3 + Math.random() * 5;
+        if (newValue >= 100 && !metricsReceivedRef.current) {
+          return 0;
+        }
+        return Math.min(newValue, 90);
+      });
+    }, 400);
+  }, [startSignal]);
   useEffect(() => {
     hljs.registerLanguage('gherkin', gherkin);
   }, []);
@@ -190,7 +240,11 @@ export function FeatureEditor({
           {waitingForFeature ? <FileCode className="w-5 h-5 text-primary" /> : <FileCode className="w-5 h-5 text-primary" />}
           <div>
             <h2 className="font-semibold text-foreground">Feature File</h2>
-            
+            {featureProgressVisible && (
+              <div className="mt-1" style={{ width: '90px' }}>
+                <Progress value={featureProgressValue} className="h-1" />
+              </div>
+            )}
           </div>
         </div>
         <div className="flex gap-2">
@@ -207,7 +261,7 @@ export function FeatureEditor({
 
       <div className="flex-1 overflow-hidden">
         <div className="relative h-full">
-          <Textarea ref={textareaRef} value={featureContent} onChange={e => setFeatureContent(e.target.value)} onScroll={handleScrollSync} className="w-full h-full resize-none border-0 rounded-none focus:ring-0 font-mono text-sm leading-relaxed p-6 bg-transparent text-transparent caret-foreground selection:bg-primary/20 overflow-auto" style={{ hyphens: 'none', wordBreak: 'normal', whiteSpace: 'pre' }} placeholder="Write your BDD scenarios&#10;using Gherkin syntax&#10;&#10;Feature:&#10;&#10;Background:&#10;&#10;Scenario:" />
+          <Textarea ref={textareaRef} value={featureContent} onChange={e => setFeatureContent(e.target.value)} onScroll={handleScrollSync} readOnly className="w-full h-full resize-none border-0 rounded-none focus:ring-0 font-mono text-sm leading-relaxed p-6 bg-transparent text-transparent caret-foreground selection:bg-primary/20 overflow-auto" style={{ hyphens: 'none', wordBreak: 'normal', whiteSpace: 'pre' }} placeholder="Write your BDD scenarios&#10;using Gherkin syntax&#10;&#10;Feature:&#10;&#10;Background:&#10;&#10;Scenario:" />
           <div className="absolute inset-0 pointer-events-none p-6 font-mono text-sm overflow-auto no-scrollbar" style={{ whiteSpace: 'pre', wordBreak: 'normal', hyphens: 'none', overflowWrap: 'normal' }} ref={overlayRef}>
             <div className="select-none leading-relaxed" dangerouslySetInnerHTML={{
             __html: getHighlightedContent(featureContent)

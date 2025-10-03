@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { BarChart3, Lightbulb, BookOpen, Target, AlertTriangle, Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import {
   Accordion,
   AccordionContent,
@@ -51,6 +52,9 @@ export function QualityPanel({ featureContent, sessionId, onSendMessage }: Quali
     waitingForFeature: false,
     waitingForMetrics: false,
   });
+  const [metricsProgressVisible, setMetricsProgressVisible] = useState(false);
+  const [metricsProgressValue, setMetricsProgressValue] = useState(0);
+  const progressTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Convert numeric score to text label
   const getScoreLabel = (score?: number): string => {
@@ -178,9 +182,25 @@ export function QualityPanel({ featureContent, sessionId, onSendMessage }: Quali
       })
       .on('broadcast', { event: 'waiting-for-metrics' }, () => {
         setLoadingState(prev => ({ ...prev, waitingForFeature: false, waitingForMetrics: true }));
+        setMetricsProgressVisible(true);
+        setMetricsProgressValue(12);
+        if (progressTimerRef.current) clearInterval(progressTimerRef.current);
+        progressTimerRef.current = setInterval(() => {
+          setMetricsProgressValue(v => {
+            const newValue = v + 3 + Math.random() * 5;
+            if (newValue >= 100) return 0;
+            return newValue;
+          });
+        }, 400);
       })
       .on('broadcast', { event: 'metrics-received' }, () => {
         setLoadingState(prev => ({ ...prev, waitingForMetrics: false }));
+        if (progressTimerRef.current) clearInterval(progressTimerRef.current);
+        setMetricsProgressValue(100);
+        setTimeout(() => {
+          setMetricsProgressVisible(false);
+          setMetricsProgressValue(0);
+        }, 300);
       })
       .subscribe();
 
@@ -206,6 +226,7 @@ export function QualityPanel({ featureContent, sessionId, onSendMessage }: Quali
       });
 
     return () => {
+      if (progressTimerRef.current) clearInterval(progressTimerRef.current);
       supabase.removeChannel(loadingChannel);
       supabase.removeChannel(metricsChannel);
     };
@@ -220,7 +241,14 @@ export function QualityPanel({ featureContent, sessionId, onSendMessage }: Quali
             <div className="flex items-center justify-between w-full pr-4">
               <div className="flex items-center gap-2">
                 <BarChart3 className="w-5 h-5 text-primary" />
-                <span className="font-semibold text-lg">Quality Metrics</span>
+                <div>
+                  <span className="font-semibold text-lg">Quality Metrics</span>
+                  {metricsProgressVisible && (
+                    <div className="mt-1" style={{ width: '120px' }}>
+                      <Progress value={metricsProgressValue} className="h-1" />
+                    </div>
+                  )}
+                </div>
               </div>
               {qualityMetrics["overall"] !== undefined && (
                 <Badge className="bg-primary text-primary-foreground">
