@@ -162,13 +162,15 @@ const Index = () => {
               </div>
 
               {/* Center Panel - Feature Editor */}
-              <div className="flex-1 min-w-0 p-6">
-                <FeatureEditor 
-                  value={featureContent} 
-                  onChange={setFeatureContent} 
-                  sessionId={sessionId.current}
-                  onProgressChange={handleProgressChange}
-                />
+              <div className="flex-1 min-w-0 p-6 flex flex-col">
+                <div className="flex-1 min-h-0">
+                  <FeatureEditor 
+                    value={featureContent} 
+                    onChange={setFeatureContent} 
+                    sessionId={sessionId.current}
+                    onProgressChange={handleProgressChange}
+                  />
+                </div>
               </div>
 
               {/* Right Panel - Quality (30% width, max 400px) */}
