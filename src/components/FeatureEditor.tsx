@@ -67,10 +67,8 @@ export function FeatureEditor({
         });
         setProgressValue(v => {
           const newValue = v + 3 + Math.random() * 5;
-          if (newValue >= 100 && !metricsReceivedRef.current) {
-            return 0;
-          }
-          return Math.min(newValue, 90);
+          if (newValue >= 100) return 0;
+          return newValue;
         });
       }, 400);
     }).on('broadcast', {
@@ -137,10 +135,8 @@ export function FeatureEditor({
       });
       setProgressValue(v => {
         const newValue = v + 3 + Math.random() * 5;
-        if (newValue >= 100 && !metricsReceivedRef.current) {
-          return 0;
-        }
-        return Math.min(newValue, 90);
+        if (newValue >= 100) return 0;
+        return newValue;
       });
     }, 400);
   }, [startSignal]);
