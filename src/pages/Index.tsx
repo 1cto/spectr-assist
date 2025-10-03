@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { ChatPanel, ChatPanelRef } from "@/components/ChatPanel";
 import { FeatureEditor } from "@/components/FeatureEditor";
 import { QualityPanel } from "@/components/QualityPanel";
@@ -28,9 +28,9 @@ const Index = () => {
     }
   };
 
-  const handleProgressChange = (visible: boolean, value: number) => {
+  const handleProgressChange = useCallback((visible: boolean, value: number) => {
     setDocumentProgress({ visible, value });
-  };
+  }, []);
 
   // Track document updates for mobile badge
   useEffect(() => {
