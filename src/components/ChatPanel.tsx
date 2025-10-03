@@ -122,8 +122,19 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
     const loadingCh = supabase
       .channel(`loading-state-${sessionId}`, { config: { broadcast: { self: true }}})
       .on('broadcast', { event: 'metrics-received' }, () => {
-        console.log('ChatPanel: metrics-received via loading-state (coordination only)');
-        // Only used for coordination, no response handling here
+        console.log('ChatPanel: metrics-received, starting typing simulation');
+        // Start typing indicator when metrics are received
+        if (waitingRef.current) {
+          setIsTyping(true);
+          const typingMessage: Message = {
+            id: `typing-${Date.now()}`,
+            content: "",
+            sender: "assistant",
+            timestamp: new Date(),
+            isTyping: true,
+          };
+          setMessages(prev => [...prev, typingMessage]);
+        }
       })
       .subscribe();
     loadingChannelRef.current = loadingCh;
@@ -253,16 +264,7 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
     // Notify parent (Index) to start waiting state immediately
     try { onStartWaiting?.(); } catch {}
     
-    // Show typing indicator immediately
-    setIsTyping(true);
-    const typingMessage: Message = {
-      id: `typing-${Date.now()}`,
-      content: "",
-      sender: "assistant",
-      timestamp: new Date(),
-      isTyping: true,
-    };
-    setMessages(prev => [...prev, typingMessage]);
+    // Don't show typing indicator yet - wait for metrics-received event
     
     // Signal that we're waiting for feature update (local broadcast)
     loadingChannelRef.current?.send({ type: 'broadcast', event: 'waiting-for-feature', payload: { ts: Date.now(), sessionId } });
@@ -370,16 +372,7 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
       // Notify parent (Index) to start waiting state immediately
       try { onStartWaiting?.(); } catch {}
 
-      // Show typing indicator immediately
-      setIsTyping(true);
-      const typingMessage: Message = {
-        id: `typing-${Date.now()}`,
-        content: "",
-        sender: "assistant",
-        timestamp: new Date(),
-        isTyping: true,
-      };
-      setMessages(prev => [...prev, typingMessage]);
+      // Don't show typing indicator yet - wait for metrics-received event
       
       // Signal that we're waiting for feature update (local broadcast)
       loadingChannelRef.current?.send({ type: 'broadcast', event: 'waiting-for-feature', payload: { ts: Date.now(), sessionId } });
