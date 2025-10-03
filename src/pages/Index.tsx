@@ -172,7 +172,7 @@ const Index = () => {
               </div>
 
               {/* Right Panel - Quality (30% width, max 400px) */}
-              <div className="w-[30%] max-w-[400px] flex-shrink-0 overflow-hidden">
+              <div className="w-[30%] max-w-[400px] flex-shrink-0 flex flex-col overflow-hidden">
                 <QualityPanel 
                   featureContent={featureContent} 
                   sessionId={sessionId.current}
