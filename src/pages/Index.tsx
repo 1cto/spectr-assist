@@ -119,35 +119,31 @@ const Index = () => {
           {/* Mobile: Single Panel View */}
           {isMobile ? (
             <div className="flex-1 overflow-hidden">
-              {activeTab === "chat" && (
-                <div className="h-full border-r" style={{ borderColor: 'rgba(0, 0, 0, 0.08)' }}>
-                  <ChatPanel 
-                    ref={chatPanelRef}
-                    featureContent={featureContent} 
-                    onFeatureChange={setFeatureContent}
-                    sessionId={sessionId.current}
-                  />
-                </div>
-              )}
+              <div className={`h-full border-r ${activeTab === "chat" ? "block" : "hidden"}`} style={{ borderColor: 'rgba(0, 0, 0, 0.08)' }}>
+                <ChatPanel 
+                  ref={chatPanelRef}
+                  featureContent={featureContent} 
+                  onFeatureChange={setFeatureContent}
+                  sessionId={sessionId.current}
+                />
+              </div>
               
-              {activeTab === "document" && (
-                <div className="h-full p-4">
-                  <FeatureEditor 
-                    value={featureContent} 
-                    onChange={setFeatureContent} 
-                    sessionId={sessionId.current}
-                    onProgressChange={handleProgressChange}
-                  />
-                </div>
-              )}
+              <div className={`h-full p-4 ${activeTab === "document" ? "block" : "hidden"}`}>
+                <FeatureEditor 
+                  value={featureContent} 
+                  onChange={setFeatureContent} 
+                  sessionId={sessionId.current}
+                  onProgressChange={handleProgressChange}
+                />
+              </div>
               
-              {activeTab === "quality" && (
+              <div className={`h-full ${activeTab === "quality" ? "block" : "hidden"}`}>
                 <QualityPanel 
                   featureContent={featureContent} 
                   sessionId={sessionId.current}
                   onSendMessage={handleSendMessage}
                 />
-              )}
+              </div>
             </div>
           ) : (
             /* Desktop: Three Column Layout - 30%, 40%, 30% */
