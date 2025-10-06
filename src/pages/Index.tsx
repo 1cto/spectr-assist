@@ -158,7 +158,6 @@ const Index = () => {
               
               <div className={`h-full p-4 ${activeTab === "document" ? "block" : "hidden"}`}>
                 <FeatureEditor 
-                  id="feature-editor-id"
                   value={featureContent} 
                   onChange={setFeatureContent} 
                   sessionId={sessionId.current}
