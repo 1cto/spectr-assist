@@ -353,6 +353,7 @@ export function QualityPanel({ featureContent, sessionId, onSendMessage }: Quali
                             {tip.category}
                           </span>
                           <Button 
+                            id="apply-id"
                             variant="ghost" 
                             size="sm" 
                             className="text-xs h-6 px-2"
