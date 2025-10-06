@@ -166,7 +166,7 @@ export default function Auth() {
             </Alert>
           )}
           
-          <form onSubmit={handleEmailAuth} className="space-y-4">
+          <form id="AuthFormID" onSubmit={handleEmailAuth} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -192,6 +192,7 @@ export default function Auth() {
               />
             </div>
             <Button
+              id="SignUpGoogleID"
               type="submit"
               disabled={isLoading}
               className="w-full"
@@ -220,6 +221,7 @@ export default function Auth() {
           </div>
           
           <Button
+            id="SignInWithGoogleID"
             onClick={signInWithGoogle}
             disabled={isLoading}
             className="w-full"
@@ -249,6 +251,7 @@ export default function Auth() {
 
           <div className="text-center">
             <button
+              id="SignUpID"
               type="button"
               onClick={() => {
                 setIsSignUp(!isSignUp);
