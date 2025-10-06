@@ -256,8 +256,10 @@ export function FeatureEditor({
             Copy
           </Button>
           <Button variant="outline" size="sm" onClick={handleDownload} className="text-xs">
-            <Download className="w-4 h-4 mr-2 hidden " />
+            <Download className="w-4 h-4 mr-2 " />
+            <span className="hiden"
             Download
+              </span>
           </Button>
         </div>
       </div>
