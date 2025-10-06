@@ -192,6 +192,7 @@ export default function Auth() {
               />
             </div>
             <Button
+              id="btn-email-auth"
               type="submit"
               disabled={isLoading}
               className="w-full"
@@ -220,6 +221,7 @@ export default function Auth() {
           </div>
           
           <Button
+            id="btn-google-auth"
             onClick={signInWithGoogle}
             disabled={isLoading}
             className="w-full"
