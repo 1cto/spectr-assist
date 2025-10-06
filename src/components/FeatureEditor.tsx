@@ -251,13 +251,13 @@ export function FeatureEditor({
           </div>
         </div>
         <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={handleCopy} className="text-xs flex items-center justify-center">
+          <Button variant="outline" size="sm" onClick={handleCopy} className="text-xs">
             <Copy className="w-4 h-4 mr-2" />
-            <span className="hidden sm:inline w-4 h-4 mr-2">Copy</span>
-            </Button>
-          <Button variant="outline" size="sm" onClick={handleDownload} className="text-xs flex items-center ">
+            Copy
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleDownload} className="text-xs">
             <Download className="w-4 h-4 mr-2" />
-            <span className="hidden sm:inline w-4 h-4 mr-2">Download</span>
+            Download
           </Button>
         </div>
       </div>
@@ -277,14 +277,9 @@ export function FeatureEditor({
       borderColor: 'rgba(0, 0, 0, 0.08)'
     }}>
         <div className="flex items-center gap-4 text-sm text-muted-foreground">
-          <div className="flex items-center gap-4">
-            <span>Lines: {featureContent.split('\n').length}</span>
-            <span>Scenarios: {(featureContent.match(/Scenario:/g) || []).length}</span>
-            <span>Steps: {(featureContent.match(/^\s*(Given|When|Then|And|But)/gm) || []).length}</span>
-          </div>
-          {progressVisible && <div className="flex-1 hidden sm:block">
-              <Progress value={progressValue} className="h-2" />
-            </div>}
+          <span>Lines: {featureContent.split('\n').length}</span>
+          <span>Scenarios: {(featureContent.match(/Scenario:/g) || []).length}</span>
+          <span>Steps: {(featureContent.match(/^\s*(Given|When|Then|And|But)/gm) || []).length}</span>
         </div>
       </div>
     </div>;
