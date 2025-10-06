@@ -20,9 +20,9 @@ interface QualityMetrics {
   "alternative scenarios justification"?: string;
   "given-when-then"?: number;
   "given-when-then justification"?: string;
-  "specifications"?: number;
+  specifications?: number;
   "specifications justification"?: string;
-  "overall"?: number;
+  overall?: number;
   [key: string]: any;
 }
 
@@ -40,9 +40,9 @@ export function TipsPanel({ onSendMessage, sessionId }: TipsPanelProps) {
   useEffect(() => {
     const metricsChannel = supabase
       .channel(`quality-metrics-${sessionId}`)
-      .on('broadcast', { event: 'metrics-update' }, (payload) => {
-        console.log('TipsPanel: Received quality metrics:', payload);
-        
+      .on("broadcast", { event: "metrics-update" }, (payload) => {
+        console.log("TipsPanel: Received quality metrics:", payload);
+
         if (payload.payload) {
           setQualityMetrics(payload.payload);
           generateTipsFromMetrics(payload.payload);
@@ -56,17 +56,19 @@ export function TipsPanel({ onSendMessage, sessionId }: TipsPanelProps) {
   }, [sessionId]);
 
   const generateTipsFromMetrics = (metrics: QualityMetrics) => {
-    console.log('TipsPanel: Generating tips from metrics:', metrics);
+    console.log("TipsPanel: Generating tips from metrics:", metrics);
     const tips: Tip[] = [];
 
     // Alternative Scenarios
     if (metrics["alternative scenarios"] !== undefined && metrics["alternative scenarios"] <= 2) {
-      console.log('TipsPanel: Adding alternative scenarios tip, score:', metrics["alternative scenarios"]);
+      console.log("TipsPanel: Adding alternative scenarios tip, score:", metrics["alternative scenarios"]);
       tips.push({
         id: "alt-scenarios",
         type: getMetricTipType(metrics["alternative scenarios"]),
         title: "Improve Alternative Scenarios",
-        description: metrics["alternative scenarios justification"] || "Add more alternative scenarios to cover edge cases and different user paths.",
+        description:
+          metrics["alternative scenarios justification"] ||
+          "Add more alternative scenarios to cover edge cases and different user paths.",
         priority: getMetricPriority(metrics["alternative scenarios"]),
         category: "Scenarios",
       });
@@ -78,7 +80,9 @@ export function TipsPanel({ onSendMessage, sessionId }: TipsPanelProps) {
         id: "gwt-structure",
         type: getMetricTipType(metrics["given-when-then"]),
         title: "Enhance Given-When-Then Structure",
-        description: metrics["given-when-then justification"] || "Improve the structure and clarity of your Given-When-Then statements.",
+        description:
+          metrics["given-when-then justification"] ||
+          "Improve the structure and clarity of your Given-When-Then statements.",
         priority: getMetricPriority(metrics["given-when-then"]),
         category: "Structure",
       });
@@ -96,54 +100,76 @@ export function TipsPanel({ onSendMessage, sessionId }: TipsPanelProps) {
       });
     }
 
-    console.log('TipsPanel: Generated tips:', tips);
+    console.log("TipsPanel: Generated tips:", tips);
     setMetricsTips(tips);
   };
 
   const getMetricTipType = (score?: number): "improvement" | "warning" | "best-practice" | "suggestion" => {
     switch (score) {
-      case 0: return "warning";
-      case 1: return "improvement";
-      case 2: return "suggestion";
-      default: return "improvement";
+      case 0:
+        return "warning";
+      case 1:
+        return "improvement";
+      case 2:
+        return "suggestion";
+      default:
+        return "improvement";
     }
   };
 
   const getMetricPriority = (score?: number): "High" | "Medium" | "Low" => {
     switch (score) {
-      case 0: return "High";
-      case 1: return "High";
-      case 2: return "Medium";
-      default: return "Medium";
+      case 0:
+        return "High";
+      case 1:
+        return "High";
+      case 2:
+        return "Medium";
+      default:
+        return "Medium";
     }
   };
 
   const getTipIcon = (type: string) => {
     switch (type) {
-      case "improvement": return <Target className="w-4 h-4" />;
-      case "warning": return <AlertTriangle className="w-4 h-4" />;
-      case "best-practice": return <BookOpen className="w-4 h-4" />;
-      case "suggestion": return <Lightbulb className="w-4 h-4" />;
-      default: return <Lightbulb className="w-4 h-4" />;
+      case "improvement":
+        return <Target className="w-4 h-4" />;
+      case "warning":
+        return <AlertTriangle className="w-4 h-4" />;
+      case "best-practice":
+        return <BookOpen className="w-4 h-4" />;
+      case "suggestion":
+        return <Lightbulb className="w-4 h-4" />;
+      default:
+        return <Lightbulb className="w-4 h-4" />;
     }
   };
 
   const getTipColor = (type: string) => {
     switch (type) {
-      case "improvement": return "text-primary";
-      case "warning": return "text-estimate-high";
-      case "best-practice": return "text-estimate-low";
-      case "suggestion": return "text-estimate-medium";
-      default: return "text-muted-foreground";
+      case "improvement":
+        return "text-primary";
+      case "warning":
+        return "text-estimate-high";
+      case "best-practice":
+        return "text-estimate-low";
+      case "suggestion":
+        return "text-estimate-medium";
+      default:
+        return "text-muted-foreground";
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case "High": return "text-estimate-high";
-      case "Medium": return "text-estimate-medium";
-      case "Low": return "text-estimate-low";
-      default: return "text-muted-foreground";
+      case "High":
+        return "text-estimate-high";
+      case "Medium":
+        return "text-estimate-medium";
+      case "Low":
+        return "text-estimate-low";
+      default:
+        return "text-muted-foreground";
     }
   };
 
@@ -155,9 +181,9 @@ export function TipsPanel({ onSendMessage, sessionId }: TipsPanelProps) {
 
   return (
     <div className="space-y-4">
-      <div className="border-none shadow-none" style={{ backgroundColor: '#F4F2EC' }}>
+      <div className="border-none shadow-none" style={{ backgroundColor: "#F4F2EC" }}>
         <div className="pb-3">
-          <h3 className="flex items-center gap-2 font-semibold" style={{ fontSize: '15pt' }}>
+          <h3 className="flex items-center gap-2 font-semibold" style={{ fontSize: "15pt" }}>
             <Star className="w-5 h-5 text-primary" />
             Improvement Tips
           </h3>
@@ -171,30 +197,21 @@ export function TipsPanel({ onSendMessage, sessionId }: TipsPanelProps) {
                   className="p-3 border border-border rounded-lg hover:border-primary/30 transition-colors"
                 >
                   <div className="flex items-start gap-3">
-                    <div className={`mt-0.5 ${getTipColor(tip.type)}`}>
-                      {getTipIcon(tip.type)}
-                    </div>
+                    <div className={`mt-0.5 ${getTipColor(tip.type)}`}>{getTipIcon(tip.type)}</div>
                     <div className="flex-1 space-y-2">
                       <div className="flex items-start justify-between gap-2">
                         <h4 className="font-medium text-sm leading-tight">{tip.title}</h4>
-                        <Badge 
-                          variant="outline" 
-                          className={`text-xs ${getPriorityColor(tip.priority)} shrink-0`}
-                        >
+                        <Badge variant="outline" className={`text-xs ${getPriorityColor(tip.priority)} shrink-0`}>
                           {tip.priority}
                         </Badge>
                       </div>
-                      <p className="text-xs text-muted-foreground leading-relaxed">
-                        {tip.description}
-                      </p>
+                      <p className="text-xs text-muted-foreground leading-relaxed">{tip.description}</p>
                       <div className="flex items-center justify-between">
-                        <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
-                          {tip.category}
-                        </span>
-                        <Button 
-                          id="apply-id"
-                          variant="ghost" 
-                          size="sm" 
+                        <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">{tip.category}</span>
+                        <Button
+                          id="tips-apply-id"
+                          variant="ghost"
+                          size="sm"
                           className="text-xs h-6 px-2"
                           onClick={() => handleApplyTip(tip)}
                         >
@@ -215,14 +232,14 @@ export function TipsPanel({ onSendMessage, sessionId }: TipsPanelProps) {
       </div>
 
       <Collapsible open={isGherkinOpen} onOpenChange={setIsGherkinOpen}>
-        <div className="border-none shadow-none" style={{ backgroundColor: '#F4F2EC' }}>
+        <div className="border-none shadow-none" style={{ backgroundColor: "#F4F2EC" }}>
           <CollapsibleTrigger className="w-full pb-3">
-            <h3 className="flex items-center justify-between gap-2 font-semibold" style={{ fontSize: '15pt' }}>
+            <h3 className="flex items-center justify-between gap-2 font-semibold" style={{ fontSize: "15pt" }}>
               <div className="flex items-center gap-2">
                 <BookOpen className="w-5 h-5 text-primary" />
                 Gherkin Guide
               </div>
-              <ChevronDown className={`w-5 h-5 transition-transform ${!isGherkinOpen ? 'rotate-180' : ''}`} />
+              <ChevronDown className={`w-5 h-5 transition-transform ${!isGherkinOpen ? "rotate-180" : ""}`} />
             </h3>
           </CollapsibleTrigger>
           <CollapsibleContent>
@@ -231,22 +248,22 @@ export function TipsPanel({ onSendMessage, sessionId }: TipsPanelProps) {
                 <div className="font-medium text-syntax-keyword">Feature:</div>
                 <div className="text-muted-foreground text-xs ml-2">High-level description of a software feature</div>
               </div>
-              
+
               <div className="space-y-1">
                 <div className="font-medium text-syntax-scenario">Scenario:</div>
                 <div className="text-muted-foreground text-xs ml-2">Concrete example illustrating a business rule</div>
               </div>
-              
+
               <div className="space-y-1">
                 <div className="font-medium text-syntax-given">Given:</div>
                 <div className="text-muted-foreground text-xs ml-2">Initial context or state</div>
               </div>
-              
+
               <div className="space-y-1">
                 <div className="font-medium text-syntax-when">When:</div>
                 <div className="text-muted-foreground text-xs ml-2">Event or action</div>
               </div>
-              
+
               <div className="space-y-1">
                 <div className="font-medium text-syntax-then">Then:</div>
                 <div className="text-muted-foreground text-xs ml-2">Expected outcome</div>
