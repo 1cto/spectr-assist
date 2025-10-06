@@ -192,6 +192,7 @@ export function TipsPanel({ onSendMessage, sessionId }: TipsPanelProps) {
                           {tip.category}
                         </span>
                         <Button 
+                          id="apply-id"
                           variant="ghost" 
                           size="sm" 
                           className="text-xs h-6 px-2"
