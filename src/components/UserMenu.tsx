@@ -61,8 +61,8 @@ export function UserMenu() {
           </div>
         </div>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleSignOut}>
-          <LogOut  id = "log-out-id" className="mr-2 h-4 w-4" />
+        <DropdownMenuItem id="sign-out-btn" onClick={handleSignOut}>
+          <LogOut className="mr-2 h-4 w-4" />
           Sign out
         </DropdownMenuItem>
       </DropdownMenuContent>

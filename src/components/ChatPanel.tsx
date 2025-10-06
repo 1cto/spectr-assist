@@ -677,6 +677,7 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
             rows={3}
           />
           <Button 
+            id="send-message-btn"
             onClick={handleSend} 
             size="icon" 
             className="absolute right-2 bottom-2 h-10 w-10"
