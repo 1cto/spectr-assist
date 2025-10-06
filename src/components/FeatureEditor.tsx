@@ -253,11 +253,11 @@ export function FeatureEditor({
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={handleCopy} className="text-xs">
             <Copy className="w-4 h-4 mr-2" />
-            Copy
+            <span className="hidden">Copy </span>
           </Button>
           <Button variant="outline" size="sm" onClick={handleDownload} className="text-xs">
             <Download className="w-4 h-4 mr-2 " />
-            <span className="hiden">
+            <span className="hidden">
             Download
               </span>
           </Button>
