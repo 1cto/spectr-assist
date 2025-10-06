@@ -158,6 +158,7 @@ const Index = () => {
               
               <div className={`h-full p-4 ${activeTab === "document" ? "block" : "hidden"}`}>
                 <FeatureEditor 
+                  id="feature-editor-id"
                   value={featureContent} 
                   onChange={setFeatureContent} 
                   sessionId={sessionId.current}
@@ -218,6 +219,7 @@ const Index = () => {
           <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50">
             <nav className="flex">
               <button
+                id="mob-chat-tab-id"
                 onClick={() => setActiveTab("chat")}
                 className={`flex-1 flex flex-col items-center justify-center py-3 px-2 transition-colors ${
                   activeTab === "chat" 
@@ -230,6 +232,7 @@ const Index = () => {
               </button>
               
               <button
+                id="mob-feature-tab-id"
                 onClick={() => setActiveTab("document")}
                 className={`flex-1 flex flex-col items-center justify-center py-3 px-2 transition-colors relative ${
                   activeTab === "document" 
@@ -259,6 +262,7 @@ const Index = () => {
               </button>
               
               <button
+                id="mob-quality-tab-id"
                 onClick={() => setActiveTab("quality")}
                 className={`flex-1 flex flex-col items-center justify-center py-3 px-2 transition-colors relative ${
                   activeTab === "quality" 
