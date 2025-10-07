@@ -72,8 +72,12 @@ const Index = () => {
   // Load last feature from user's most recent session
   useEffect(() => {
     const loadLastFeature = async () => {
-      if (!user) return;
+      if (!user) {
+        console.log('No user available for loading feature');
+        return;
+      }
 
+      console.log('Loading last feature for user:', user.id);
       const { data, error } = await supabase
         .from('n8n_storymapper_feature_history')
         .select('feature_after')
@@ -82,8 +86,13 @@ const Index = () => {
         .limit(1)
         .maybeSingle();
 
-      if (!error && data?.feature_after) {
+      if (error) {
+        console.error('Error loading last feature:', error);
+      } else if (data?.feature_after) {
+        console.log('Loaded feature, length:', data.feature_after.length);
         setFeatureContent(data.feature_after);
+      } else {
+        console.log('No feature data found');
       }
     };
 
