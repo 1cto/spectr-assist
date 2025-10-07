@@ -70,7 +70,6 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
         const { data, error } = await supabase
           .from('n8n_chat_histories')
           .select('*')
-          .eq('session_id', sessionId)
           .eq('user_id', user.id)
           .order('id', { ascending: true });
 
