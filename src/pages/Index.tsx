@@ -118,16 +118,59 @@ Scenario: [Scenario Name]
     loadLastFeature();
   }, [user]);
 
+  // Save feature to database
+  const saveFeatureToDb = async (featureBefore: string, featureAfter: string, userMessage: string, comment: string) => {
+    if (!user?.id) {
+      console.log('[FeatureSave] No user available, skipping save');
+      return;
+    }
+
+    try {
+      console.log('[FeatureSave] Saving feature to database for user:', user.id);
+      const { error } = await supabase
+        .from('n8n_storymapper_feature_history')
+        .insert({
+          user_id: user.id,
+          session_id: sessionId.current,
+          feature_before: featureBefore,
+          feature_after: featureAfter,
+          user_message: userMessage,
+          comment: comment,
+        });
+
+      if (error) {
+        console.error('[FeatureSave] Error saving feature:', error);
+      } else {
+        console.log('[FeatureSave] Feature saved successfully');
+      }
+    } catch (error) {
+      console.error('[FeatureSave] Unexpected error saving feature:', error);
+    }
+  };
+
   useEffect(() => {
     const loadingCh = supabase.channel(`loading-state-${sessionId.current}`, { config: { broadcast: { self: true }}}).subscribe();
     loadingChannelRef.current = loadingCh;
 
     const featureCh = supabase
       .channel(`feature-updates-${sessionId.current}`)
-      .on('broadcast', { event: 'feature-update' }, (payload) => {
+      .on('broadcast', { event: 'feature-update' }, async (payload) => {
         console.log('Received feature update:', payload);
         if (payload.payload?.content || payload.payload?.text) {
-          setFeatureContent(payload.payload.content || payload.payload.text);
+          const newFeature = payload.payload.content || payload.payload.text;
+          const previousFeature = featureContent;
+          
+          // Update local state
+          setFeatureContent(newFeature);
+          
+          // Save to database
+          await saveFeatureToDb(
+            previousFeature,
+            newFeature,
+            payload.payload.userMessage || '',
+            payload.payload.comment || ''
+          );
+          
           // Notify Feature File that feature has been received to stop spinner and start QM spinner
            loadingChannelRef.current?.send({ type: 'broadcast', event: 'feature-received', payload: { ts: Date.now(), sessionId: sessionId.current } });
            loadingChannelRef.current?.send({ type: 'broadcast', event: 'waiting-for-metrics', payload: { ts: Date.now(), sessionId: sessionId.current } });
