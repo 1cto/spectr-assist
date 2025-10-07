@@ -130,7 +130,7 @@ Scenario: [Scenario Name]
   }, [user]);
 
   // Save feature to database
-  const saveFeatureToDb = async (featureBefore: string, featureAfter: string, userMessage: string, comment: string) => {
+  const saveFeatureToDb = async (featureBefore: string, featureAfter: string, userMessage: string, comment: string, estimation?: any) => {
     // Use ref to get current user, not stale closure value
     const currentUser = userRef.current;
     
@@ -143,6 +143,9 @@ Scenario: [Scenario Name]
       console.log('[FeatureSave] Saving feature to database for user:', currentUser.id);
       console.log('[FeatureSave] Feature before length:', featureBefore.length);
       console.log('[FeatureSave] Feature after length:', featureAfter.length);
+      if (estimation) {
+        console.log('[FeatureSave] Saving estimation data:', estimation);
+      }
       
       const { error } = await supabase
         .from('n8n_storymapper_feature_history')
@@ -153,6 +156,7 @@ Scenario: [Scenario Name]
           feature_after: featureAfter,
           user_message: userMessage,
           comment: comment,
+          estimation: estimation || null,
         });
 
       if (error) {
@@ -162,6 +166,40 @@ Scenario: [Scenario Name]
       }
     } catch (error) {
       console.error('[FeatureSave] Unexpected error saving feature:', error);
+    }
+  };
+
+  // Save estimation to database for the most recent feature entry
+  const saveEstimationToDb = async (metrics: any) => {
+    const currentUser = userRef.current;
+    
+    if (!currentUser?.id) {
+      console.log('[EstimationSave] No user available, skipping save');
+      return;
+    }
+
+    try {
+      console.log('[EstimationSave] Saving estimation for session:', sessionId.current);
+      console.log('[EstimationSave] Metrics:', metrics);
+      
+      // Update the most recent entry for this session with the estimation data
+      const { error } = await supabase
+        .from('n8n_storymapper_feature_history')
+        .update({
+          estimation: metrics
+        })
+        .eq('user_id', currentUser.id)
+        .eq('session_id', sessionId.current)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (error) {
+        console.error('[EstimationSave] Error saving estimation:', error);
+      } else {
+        console.log('[EstimationSave] Estimation saved successfully');
+      }
+    } catch (error) {
+      console.error('[EstimationSave] Unexpected error saving estimation:', error);
     }
   };
 
@@ -212,11 +250,14 @@ Scenario: [Scenario Name]
     // Listen for quality metrics to get overall score
     const metricsChannel = supabase
       .channel(`quality-metrics-${sessionId.current}`)
-      .on('broadcast', { event: 'metrics-update' }, (payload) => {
+      .on('broadcast', { event: 'metrics-update' }, async (payload) => {
         console.log('Index: Received metrics update:', payload);
         if (payload.payload?.overall !== undefined) {
           console.log('Index: Setting overall score:', payload.payload.overall);
           setOverallScore(payload.payload.overall);
+          
+          // Save estimation to database
+          await saveEstimationToDb(payload.payload);
           
           // Broadcast metrics-received to stop the progress bar
           loadingChannelRef.current?.send({ type: 'broadcast', event: 'metrics-received', payload: { ts: Date.now(), sessionId: sessionId.current } });
