@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { MessageSquare, FileText, BarChart3 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/hooks/useAuth";
 import logo from "@/assets/logo.svg";
 
 const Index = () => {
@@ -19,7 +20,10 @@ const Index = () => {
   const [startSignal, setStartSignal] = useState(0);
   const loadingChannelRef = useRef<any>(null);
   const chatPanelRef = useRef<ChatPanelRef>(null);
-  const sessionId = useRef(`session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
+  // Session management: selected session and available sessions for the current user
+  const { user } = useAuth();
+  const [availableSessions, setAvailableSessions] = useState<string[]>([]);
+  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
   const isMobile = useIsMobile();
   const previousFeatureContent = useRef(featureContent);
 
@@ -29,16 +33,19 @@ const Index = () => {
     setStartSignal((k) => k + 1);
     // Broadcast waiting-for-feature via parent-held channel
     try {
-      loadingChannelRef.current?.send({ type: 'broadcast', event: 'waiting-for-feature', payload: { ts: Date.now(), sessionId: sessionId.current } });
+      if (selectedSessionId) {
+        loadingChannelRef.current?.send({ type: 'broadcast', event: 'waiting-for-feature', payload: { ts: Date.now(), sessionId: selectedSessionId } });
+      }
     } catch {}
-    const tempLoadingCh = supabase.channel(`loading-state-${sessionId.current}`, { config: { broadcast: { self: true }}});
+    if (!selectedSessionId) return;
+    const tempLoadingCh = supabase.channel(`loading-state-${selectedSessionId}`, { config: { broadcast: { self: true }}});
     tempLoadingCh.subscribe((status) => {
       if (status === 'SUBSCRIBED') {
-        tempLoadingCh.send({ type: 'broadcast', event: 'waiting-for-feature', payload: { ts: Date.now(), sessionId: sessionId.current } });
+        tempLoadingCh.send({ type: 'broadcast', event: 'waiting-for-feature', payload: { ts: Date.now(), sessionId: selectedSessionId } });
         setTimeout(() => supabase.removeChannel(tempLoadingCh), 500);
       }
     });
-  }, [setDocumentProgress]);
+  }, [setDocumentProgress, selectedSessionId]);
 
   const handleSendMessage = (message: string) => {
     // Ensure waiting state starts even if ChatPanel channel isn't ready
@@ -67,26 +74,58 @@ const Index = () => {
     }
   }, [activeTab]);
 
+  // Load sessions list for the current user and pick the most recent by default
   useEffect(() => {
-    const loadingCh = supabase.channel(`loading-state-${sessionId.current}`, { config: { broadcast: { self: true }}}).subscribe();
+    if (!user?.id) {
+      setAvailableSessions([]);
+      setSelectedSessionId(`session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
+      return;
+    }
+    (async () => {
+      const { data, error } = await supabase
+        .from('n8n_chat_histories')
+        .select('session_id,id')
+        .eq('user_id', user.id)
+        .order('id', { ascending: false });
+      if (error) {
+        console.error('Error loading sessions:', error);
+        setAvailableSessions([]);
+        setSelectedSessionId(`session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
+        return;
+      }
+      const unique: string[] = [];
+      if (data) {
+        for (const row of data) {
+          if (row.session_id && !unique.includes(row.session_id)) unique.push(row.session_id);
+        }
+      }
+      setAvailableSessions(unique);
+      setSelectedSessionId(unique[0] || `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
+    })();
+  }, [user?.id]);
+
+  // Subscribe to per-session channels; resubscribe when selected session changes
+  useEffect(() => {
+    if (!selectedSessionId) return;
+    const loadingCh = supabase.channel(`loading-state-${selectedSessionId}`, { config: { broadcast: { self: true }}}).subscribe();
     loadingChannelRef.current = loadingCh;
 
     const featureCh = supabase
-      .channel(`feature-updates-${sessionId.current}`)
+      .channel(`feature-updates-${selectedSessionId}`)
       .on('broadcast', { event: 'feature-update' }, (payload) => {
         console.log('Received feature update:', payload);
         if (payload.payload?.content || payload.payload?.text) {
           setFeatureContent(payload.payload.content || payload.payload.text);
           // Notify Feature File that feature has been received to stop spinner and start QM spinner
-           loadingChannelRef.current?.send({ type: 'broadcast', event: 'feature-received', payload: { ts: Date.now(), sessionId: sessionId.current } });
-           loadingChannelRef.current?.send({ type: 'broadcast', event: 'waiting-for-metrics', payload: { ts: Date.now(), sessionId: sessionId.current } });
+           loadingChannelRef.current?.send({ type: 'broadcast', event: 'feature-received', payload: { ts: Date.now(), sessionId: selectedSessionId } });
+           loadingChannelRef.current?.send({ type: 'broadcast', event: 'waiting-for-metrics', payload: { ts: Date.now(), sessionId: selectedSessionId } });
 
           // Fail-safe: also broadcast via a temporary channel to ensure delivery
-          const tempLoadingCh = supabase.channel(`loading-state-${sessionId.current}`, { config: { broadcast: { self: true }}});
+          const tempLoadingCh = supabase.channel(`loading-state-${selectedSessionId}`, { config: { broadcast: { self: true }}});
           tempLoadingCh.subscribe((status) => {
             if (status === 'SUBSCRIBED') {
-               tempLoadingCh.send({ type: 'broadcast', event: 'feature-received', payload: { ts: Date.now(), sessionId: sessionId.current } });
-               tempLoadingCh.send({ type: 'broadcast', event: 'waiting-for-metrics', payload: { ts: Date.now(), sessionId: sessionId.current } });
+               tempLoadingCh.send({ type: 'broadcast', event: 'feature-received', payload: { ts: Date.now(), sessionId: selectedSessionId } });
+               tempLoadingCh.send({ type: 'broadcast', event: 'waiting-for-metrics', payload: { ts: Date.now(), sessionId: selectedSessionId } });
               setTimeout(() => supabase.removeChannel(tempLoadingCh), 500);
             }
           });
@@ -96,7 +135,7 @@ const Index = () => {
 
     // Listen for quality metrics to get overall score
     const metricsChannel = supabase
-      .channel(`quality-metrics-${sessionId.current}`)
+      .channel(`quality-metrics-${selectedSessionId}`)
       .on('broadcast', { event: 'metrics-update' }, (payload) => {
         console.log('Index: Received metrics update:', payload);
         if (payload.payload?.overall !== undefined) {
@@ -104,7 +143,7 @@ const Index = () => {
           setOverallScore(payload.payload.overall);
           
           // Broadcast metrics-received to stop the progress bar
-          loadingChannelRef.current?.send({ type: 'broadcast', event: 'metrics-received', payload: { ts: Date.now(), sessionId: sessionId.current } });
+          loadingChannelRef.current?.send({ type: 'broadcast', event: 'metrics-received', payload: { ts: Date.now(), sessionId: selectedSessionId } });
         }
       })
       .subscribe((status) => {
@@ -116,7 +155,7 @@ const Index = () => {
       if (loadingCh) supabase.removeChannel(loadingCh);
       if (metricsChannel) supabase.removeChannel(metricsChannel);
     };
-  }, []);
+  }, [selectedSessionId]);
 
   return (
     <AuthGuard>
@@ -136,6 +175,30 @@ const Index = () => {
                   <div className="w-2 h-2 bg-estimate-low rounded-full"></div>
                   <span className="hidden sm:inline">Ready</span>
                 </div>
+                {/* Session selector */}
+                <div className="flex items-center gap-2">
+                  <label htmlFor="session-select-id" className="text-xs sm:text-sm text-muted-foreground">Session</label>
+                  <select
+                    id="session-select-id"
+                    className="text-xs sm:text-sm border rounded px-2 py-1 bg-background"
+                    value={selectedSessionId ?? ''}
+                    onChange={(e) => setSelectedSessionId(e.target.value)}
+                  >
+                    {(selectedSessionId && !availableSessions.includes(selectedSessionId)) && (
+                      <option value={selectedSessionId}>{selectedSessionId}</option>
+                    )}
+                    {availableSessions.map((sid) => (
+                      <option key={sid} value={sid}>{sid}</option>
+                    ))}
+                  </select>
+                  <button
+                    id="new-session-btn-id"
+                    className="text-xs sm:text-sm px-2 py-1 border rounded"
+                    onClick={() => setSelectedSessionId(`session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`)}
+                  >
+                    New
+                  </button>
+                </div>
                 <UserMenu />
               </div>
             </div>
@@ -151,7 +214,7 @@ const Index = () => {
                   ref={chatPanelRef}
                   featureContent={featureContent} 
                   onFeatureChange={setFeatureContent}
-                  sessionId={sessionId.current}
+                  sessionId={selectedSessionId || ''}
                   onStartWaiting={startWaiting}
                 />
               </div>
@@ -160,7 +223,7 @@ const Index = () => {
                 <FeatureEditor 
                   value={featureContent} 
                   onChange={setFeatureContent} 
-                  sessionId={sessionId.current}
+                  sessionId={selectedSessionId || ''}
                   onProgressChange={handleProgressChange}
                   startSignal={startSignal}
                 />
@@ -169,7 +232,7 @@ const Index = () => {
               <div className={`h-full ${activeTab === "quality" ? "block" : "hidden"}`}>
                 <QualityPanel 
                   featureContent={featureContent} 
-                  sessionId={sessionId.current}
+                  sessionId={selectedSessionId || ''}
                   onSendMessage={handleSendMessage}
                 />
               </div>
@@ -183,7 +246,7 @@ const Index = () => {
                   ref={chatPanelRef}
                   featureContent={featureContent} 
                   onFeatureChange={setFeatureContent}
-                  sessionId={sessionId.current}
+                  sessionId={selectedSessionId || ''}
                   onStartWaiting={startWaiting}
                 />
               </div>
@@ -194,7 +257,7 @@ const Index = () => {
                   <FeatureEditor 
                     value={featureContent} 
                     onChange={setFeatureContent} 
-                    sessionId={sessionId.current}
+                    sessionId={selectedSessionId || ''}
                     onProgressChange={handleProgressChange}
                     startSignal={startSignal}
                   />
@@ -205,7 +268,7 @@ const Index = () => {
               <div className="w-[30%] max-w-[400px] flex-shrink-0 flex flex-col overflow-hidden">
                 <QualityPanel 
                   featureContent={featureContent} 
-                  sessionId={sessionId.current}
+                  sessionId={selectedSessionId || ''}
                   onSendMessage={handleSendMessage}
                 />
               </div>
