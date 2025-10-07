@@ -24,6 +24,17 @@ const Index = () => {
   const sessionId = useRef(`session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
   const isMobile = useIsMobile();
   const previousFeatureContent = useRef(featureContent);
+  const featureContentRef = useRef(featureContent);
+  const userRef = useRef(user);
+
+  // Keep refs in sync with state
+  useEffect(() => {
+    featureContentRef.current = featureContent;
+  }, [featureContent]);
+
+  useEffect(() => {
+    userRef.current = user;
+  }, [user]);
 
   const startWaiting = useCallback(() => {
     // Kick off mobile progress immediately
@@ -120,17 +131,23 @@ Scenario: [Scenario Name]
 
   // Save feature to database
   const saveFeatureToDb = async (featureBefore: string, featureAfter: string, userMessage: string, comment: string) => {
-    if (!user?.id) {
-      console.log('[FeatureSave] No user available, skipping save');
+    // Use ref to get current user, not stale closure value
+    const currentUser = userRef.current;
+    
+    if (!currentUser?.id) {
+      console.log('[FeatureSave] No user available, skipping save. User ref:', currentUser);
       return;
     }
 
     try {
-      console.log('[FeatureSave] Saving feature to database for user:', user.id);
+      console.log('[FeatureSave] Saving feature to database for user:', currentUser.id);
+      console.log('[FeatureSave] Feature before length:', featureBefore.length);
+      console.log('[FeatureSave] Feature after length:', featureAfter.length);
+      
       const { error } = await supabase
         .from('n8n_storymapper_feature_history')
         .insert({
-          user_id: user.id,
+          user_id: currentUser.id,
           session_id: sessionId.current,
           feature_before: featureBefore,
           feature_after: featureAfter,
@@ -141,7 +158,7 @@ Scenario: [Scenario Name]
       if (error) {
         console.error('[FeatureSave] Error saving feature:', error);
       } else {
-        console.log('[FeatureSave] Feature saved successfully');
+        console.log('[FeatureSave] Feature saved successfully to n8n_storymapper_feature_history');
       }
     } catch (error) {
       console.error('[FeatureSave] Unexpected error saving feature:', error);
@@ -158,12 +175,16 @@ Scenario: [Scenario Name]
         console.log('Received feature update:', payload);
         if (payload.payload?.content || payload.payload?.text) {
           const newFeature = payload.payload.content || payload.payload.text;
-          const previousFeature = featureContent;
+          // Use ref to get current feature content, not stale closure value
+          const previousFeature = featureContentRef.current;
+          
+          console.log('[FeatureUpdate] Previous feature length:', previousFeature.length);
+          console.log('[FeatureUpdate] New feature length:', newFeature.length);
           
           // Update local state
           setFeatureContent(newFeature);
           
-          // Save to database
+          // Save to database with current values from refs
           await saveFeatureToDb(
             previousFeature,
             newFeature,
