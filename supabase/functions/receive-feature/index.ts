@@ -44,6 +44,20 @@ serve(async (req) => {
     // Broadcast the feature to session-specific channel via Supabase Realtime
     const channel = supabase.channel(`feature-updates-${sessionId}`);
     
+    // Subscribe and wait for the channel to be ready
+    await new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => reject(new Error('Channel subscription timeout')), 5000);
+      
+      channel.subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          clearTimeout(timeout);
+          resolve(null);
+        }
+      });
+    });
+    
+    console.log('Channel subscribed, sending broadcast...');
+    
     // Send the feature to session-specific subscribers
     await channel.send({
       type: 'broadcast',
