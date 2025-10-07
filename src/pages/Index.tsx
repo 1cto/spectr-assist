@@ -73,26 +73,45 @@ const Index = () => {
   useEffect(() => {
     const loadLastFeature = async () => {
       if (!user) {
-        console.log('No user available for loading feature');
+        console.log('[FeatureLoad] No user available for loading feature');
         return;
       }
 
-      console.log('Loading last feature for user:', user.id);
+      console.log('[FeatureLoad] Loading last feature for user:', user.id);
+      console.log('[FeatureLoad] Current feature content length:', featureContent.length);
+      
       const { data, error } = await supabase
         .from('n8n_storymapper_feature_history')
-        .select('feature_after')
+        .select('feature_after, created_at')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
 
       if (error) {
-        console.error('Error loading last feature:', error);
+        console.error('[FeatureLoad] Error loading last feature:', error);
       } else if (data?.feature_after) {
-        console.log('Loaded feature, length:', data.feature_after.length);
+        console.log('[FeatureLoad] Loaded feature from:', data.created_at);
+        console.log('[FeatureLoad] Feature length:', data.feature_after.length);
+        console.log('[FeatureLoad] Feature preview:', data.feature_after.substring(0, 100));
         setFeatureContent(data.feature_after);
+        console.log('[FeatureLoad] Feature content set successfully');
       } else {
-        console.log('No feature data found');
+        console.log('[FeatureLoad] No feature data found - loading default template');
+        // Set default template for new users
+        const defaultFeature = `Feature: [Feature Name]
+  As a [user role]
+  I want to [goal]
+  So that [benefit]
+
+Background:
+  Given [initial context]
+
+Scenario: [Scenario Name]
+  Given [precondition]
+  When [action]
+  Then [expected result]`;
+        setFeatureContent(defaultFeature);
       }
     };
 
