@@ -5,12 +5,14 @@ import { QualityPanel } from "@/components/QualityPanel";
 import { AuthGuard } from "@/components/AuthGuard";
 import { UserMenu } from "@/components/UserMenu";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { MessageSquare, FileText, BarChart3 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import logo from "@/assets/logo.svg";
 
 const Index = () => {
+  const { user } = useAuth();
   const [featureContent, setFeatureContent] = useState("");
   const [activeTab, setActiveTab] = useState<"chat" | "document" | "quality">("chat");
   const [hasDocumentUpdate, setHasDocumentUpdate] = useState(false);
@@ -66,6 +68,27 @@ const Index = () => {
       setHasDocumentUpdate(false);
     }
   }, [activeTab]);
+
+  // Load last feature from user's most recent session
+  useEffect(() => {
+    const loadLastFeature = async () => {
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('n8n_storymapper_feature_history')
+        .select('feature_after')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (!error && data?.feature_after) {
+        setFeatureContent(data.feature_after);
+      }
+    };
+
+    loadLastFeature();
+  }, [user]);
 
   useEffect(() => {
     const loadingCh = supabase.channel(`loading-state-${sessionId.current}`, { config: { broadcast: { self: true }}}).subscribe();
