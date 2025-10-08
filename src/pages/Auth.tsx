@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
+import Logo from "@/assets/Logo1.svg";
 
 const authSchema = z.object({
   email: z.string().trim().email({ message: "Invalid email address" }),
@@ -150,6 +151,9 @@ export default function Auth() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-secondary/20 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1 text-center">
+          <div className="flex justify-center mb-4">
+            <img src={Logo} alt="StoryBot Logo" className="h-12" />
+          </div>
           <CardTitle className="text-2xl font-bold">
             {isSignUp ? "Create an account" : "Welcome back"}
           </CardTitle>
