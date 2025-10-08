@@ -35,9 +35,10 @@ interface QualityPanelProps {
   featureContent: string;
   sessionId: string;
   onSendMessage?: (message: string) => void;
+  savedEstimation?: any;
 }
 
-export function QualityPanel({ featureContent, sessionId, onSendMessage }: QualityPanelProps) {
+export function QualityPanel({ featureContent, sessionId, onSendMessage, savedEstimation }: QualityPanelProps) {
   const [qualityMetrics, setQualityMetrics] = useState<QualityMetrics>({
     "alternative scenarios": 0,
     "alternative scenarios justification": "",
@@ -169,6 +170,18 @@ export function QualityPanel({ featureContent, sessionId, onSendMessage }: Quali
       onSendMessage(`Fix it ${tip.description}`);
     }
   };
+
+  // Load saved estimation on mount
+  useEffect(() => {
+    if (savedEstimation) {
+      console.log('QualityPanel: Loading saved estimation:', savedEstimation);
+      setQualityMetrics(prev => ({
+        ...prev,
+        ...savedEstimation
+      }));
+      generateTipsFromMetrics(savedEstimation);
+    }
+  }, [savedEstimation]);
 
   // Listen for loading state updates and quality metrics updates
   useEffect(() => {

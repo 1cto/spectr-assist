@@ -18,6 +18,7 @@ const Index = () => {
   const [hasDocumentUpdate, setHasDocumentUpdate] = useState(false);
   const [overallScore, setOverallScore] = useState<number | null>(null);
   const [documentProgress, setDocumentProgress] = useState<{ visible: boolean; value: number }>({ visible: false, value: 0 });
+  const [savedEstimation, setSavedEstimation] = useState<any>(null);
   const [startSignal, setStartSignal] = useState(0);
   const loadingChannelRef = useRef<any>(null);
   const chatPanelRef = useRef<ChatPanelRef>(null);
@@ -93,7 +94,7 @@ const Index = () => {
       
       const { data, error } = await supabase
         .from('n8n_storymapper_feature_history')
-        .select('feature_after, created_at')
+        .select('feature_after, created_at, estimation, session_id')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(1)
@@ -106,10 +107,15 @@ const Index = () => {
         console.log('[FeatureLoad] Feature length:', data.feature_after.length);
         console.log('[FeatureLoad] Feature preview:', data.feature_after.substring(0, 100));
         setFeatureContent(data.feature_after);
+        if (data.estimation) {
+          console.log('[FeatureLoad] Loaded estimation:', data.estimation);
+          setSavedEstimation(data.estimation);
+        }
         console.log('[FeatureLoad] Feature content set successfully');
       } else {
         console.log('[FeatureLoad] No feature data found - leaving editor empty');
         setFeatureContent('');
+        setSavedEstimation(null);
       }
     };
 
@@ -314,6 +320,7 @@ const Index = () => {
                   featureContent={featureContent} 
                   sessionId={sessionId.current}
                   onSendMessage={handleSendMessage}
+                  savedEstimation={savedEstimation}
                 />
               </div>
             </div>
@@ -350,6 +357,7 @@ const Index = () => {
                   featureContent={featureContent} 
                   sessionId={sessionId.current}
                   onSendMessage={handleSendMessage}
+                  savedEstimation={savedEstimation}
                 />
               </div>
             </div>
