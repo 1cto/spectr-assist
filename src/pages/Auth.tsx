@@ -154,12 +154,12 @@ export default function Auth() {
           <CardTitle className="text-2xl font-bold">
             {isSignUp ? "Create an account" : "Welcome back"}
           </CardTitle>
-          <CardDescription className="pb-0">
+          <CardDescription className="pb-0 mb-0">
             {isSignUp 
               ? "Sign up to access the StoryBot" 
               : "Sign in to access the StoryBot"}
           </CardDescription>
-          <div className="flex justify-center pt-0">
+          <div className="flex justify-center -mt-1">
             <img src={Logo} alt="StoryBot Logo" className="h-8" />
           </div>
         </CardHeader>
