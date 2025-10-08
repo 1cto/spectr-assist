@@ -36,8 +36,23 @@ export default function Auth() {
     checkUser();
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' && session) {
+        // Create lead in Bitrix24 for Google sign-in
+        if (session.user.app_metadata.provider === 'google') {
+          try {
+            await supabase.functions.invoke('create-bitrix-lead', {
+              body: { 
+                email: session.user.email,
+                name: session.user.user_metadata?.full_name || session.user.user_metadata?.name
+              }
+            });
+          } catch (bitrixError) {
+            console.error('Failed to create Bitrix24 lead:', bitrixError);
+            // Don't block sign-in if Bitrix24 fails
+          }
+        }
+        
         navigate("/");
         toast({
           title: "Welcome!",
@@ -65,7 +80,7 @@ export default function Auth() {
 
       if (isSignUp) {
         const redirectUrl = `${window.location.origin}/`;
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -74,6 +89,21 @@ export default function Auth() {
         });
 
         if (error) throw error;
+
+        // Create lead in Bitrix24
+        if (data?.user) {
+          try {
+            await supabase.functions.invoke('create-bitrix-lead', {
+              body: { 
+                email: data.user.email,
+                name: data.user.user_metadata?.full_name || data.user.user_metadata?.name
+              }
+            });
+          } catch (bitrixError) {
+            console.error('Failed to create Bitrix24 lead:', bitrixError);
+            // Don't block registration if Bitrix24 fails
+          }
+        }
 
         toast({
           title: "Success!",
