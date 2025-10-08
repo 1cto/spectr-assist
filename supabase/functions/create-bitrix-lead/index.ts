@@ -12,9 +12,28 @@ serve(async (req) => {
   }
 
   try {
-    const { email, name } = await req.json();
+    const { email, name, utm_source, utm_medium, utm_campaign, utm_content, fbclid, landing_page } = await req.json();
 
     console.log('Creating Bitrix24 lead for:', email);
+
+    // Build lead fields with UTM parameters
+    const leadFields: any = {
+      TITLE: `New Registration: ${email}`,
+      NAME: name || email.split('@')[0],
+      EMAIL: [{ VALUE: email, VALUE_TYPE: 'WORK' }],
+      SOURCE_ID: 'WEB',
+      STATUS_ID: 'NEW',
+      OPENED: 'Y',
+      ASSIGNED_BY_ID: 1,
+    };
+
+    // Add UTM parameters if present
+    if (utm_source) leadFields.UTM_SOURCE = utm_source;
+    if (utm_medium) leadFields.UTM_MEDIUM = utm_medium;
+    if (utm_campaign) leadFields.UTM_CAMPAIGN = utm_campaign;
+    if (utm_content) leadFields.UTM_CONTENT = utm_content;
+    if (fbclid) leadFields.UF_CRM_FBCLID = fbclid;
+    if (landing_page) leadFields.UF_CRM_LANDING_PAGE = landing_page;
 
     // Call Bitrix24 API to create a lead
     const bitrixResponse = await fetch(
@@ -25,15 +44,7 @@ serve(async (req) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          fields: {
-            TITLE: `New Registration: ${email}`,
-            NAME: name || email.split('@')[0],
-            EMAIL: [{ VALUE: email, VALUE_TYPE: 'WORK' }],
-            SOURCE_ID: 'WEB',
-            STATUS_ID: 'NEW',
-            OPENED: 'Y',
-            ASSIGNED_BY_ID: 1,
-          }
+          fields: leadFields
         }),
       }
     );

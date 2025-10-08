@@ -26,6 +26,22 @@ export default function Auth() {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Capture and save UTM parameters from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const utmParams: Record<string, string> = {};
+    const paramsToCapture = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'fbclid', 'landing_page'];
+    
+    paramsToCapture.forEach(param => {
+      const value = urlParams.get(param);
+      if (value) {
+        utmParams[param] = value;
+      }
+    });
+    
+    if (Object.keys(utmParams).length > 0) {
+      sessionStorage.setItem('utm_params', JSON.stringify(utmParams));
+    }
+
     // Check if user is already authenticated
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -41,12 +57,19 @@ export default function Auth() {
         // Create lead in Bitrix24 for Google sign-in
         if (session.user.app_metadata.provider === 'google') {
           try {
+            const utmParamsStr = sessionStorage.getItem('utm_params');
+            const utmParams = utmParamsStr ? JSON.parse(utmParamsStr) : {};
+            
             await supabase.functions.invoke('create-bitrix-lead', {
               body: { 
                 email: session.user.email,
-                name: session.user.user_metadata?.full_name || session.user.user_metadata?.name
+                name: session.user.user_metadata?.full_name || session.user.user_metadata?.name,
+                ...utmParams
               }
             });
+            
+            // Clear UTM params after use
+            sessionStorage.removeItem('utm_params');
           } catch (bitrixError) {
             console.error('Failed to create CRM lead:', bitrixError);
             // Don't block sign-in if Bitrix24 fails
@@ -93,12 +116,19 @@ export default function Auth() {
         // Create lead in Bitrix24
         if (data?.user) {
           try {
+            const utmParamsStr = sessionStorage.getItem('utm_params');
+            const utmParams = utmParamsStr ? JSON.parse(utmParamsStr) : {};
+            
             await supabase.functions.invoke('create-bitrix-lead', {
               body: { 
                 email: data.user.email,
-                name: data.user.user_metadata?.full_name || data.user.user_metadata?.name
+                name: data.user.user_metadata?.full_name || data.user.user_metadata?.name,
+                ...utmParams
               }
             });
+            
+            // Clear UTM params after use
+            sessionStorage.removeItem('utm_params');
           } catch (bitrixError) {
             console.error('Failed to create CRM lead:', bitrixError);
             // Don't block registration if Bitrix24 fails
