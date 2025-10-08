@@ -159,7 +159,7 @@ export default function Auth() {
               ? "Sign up to access the StoryBot" 
               : "Sign in to access the StoryBot"}
           </CardDescription>
-          <div className="flex justify-center -mt-1">
+          <div className="flex justify-center -mt-0">
             <img src={Logo} alt="StoryBot Logo" className="h-8" />
           </div>
         </CardHeader>
