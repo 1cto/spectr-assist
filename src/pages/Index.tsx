@@ -108,21 +108,8 @@ const Index = () => {
         setFeatureContent(data.feature_after);
         console.log('[FeatureLoad] Feature content set successfully');
       } else {
-        console.log('[FeatureLoad] No feature data found - loading default template');
-        // Set default template for new users
-        const defaultFeature = `Feature: [Feature Name]
-  As a [user role]
-  I want to [goal]
-  So that [benefit]
-
-Background:
-  Given [initial context]
-
-Scenario: [Scenario Name]
-  Given [precondition]
-  When [action]
-  Then [expected result]`;
-        setFeatureContent(defaultFeature);
+        console.log('[FeatureLoad] No feature data found - leaving editor empty');
+        setFeatureContent('');
       }
     };
 
