@@ -155,8 +155,8 @@ export default function Auth() {
           </CardTitle>
           <CardDescription>
             {isSignUp 
-              ? "Sign up to access the Gherkin Feature Estimator" 
-              : "Sign in to access the Gherkin Feature Estimator"}
+              ? "Sign up to access the StoryBot" 
+              : "Sign in to access the StoryBot"}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
