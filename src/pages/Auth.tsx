@@ -48,7 +48,7 @@ export default function Auth() {
               }
             });
           } catch (bitrixError) {
-            console.error('Failed to create Bitrix24 lead:', bitrixError);
+            console.error('Failed to create CRM lead:', bitrixError);
             // Don't block sign-in if Bitrix24 fails
           }
         }
@@ -100,7 +100,7 @@ export default function Auth() {
               }
             });
           } catch (bitrixError) {
-            console.error('Failed to create Bitrix24 lead:', bitrixError);
+            console.error('Failed to create CRM lead:', bitrixError);
             // Don't block registration if Bitrix24 fails
           }
         }

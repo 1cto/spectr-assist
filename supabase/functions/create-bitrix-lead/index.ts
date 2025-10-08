@@ -41,11 +41,11 @@ serve(async (req) => {
     const bitrixData = await bitrixResponse.json();
 
     if (!bitrixResponse.ok) {
-      console.error('Bitrix24 API error:', bitrixData);
-      throw new Error('Failed to create lead in Bitrix24');
+      console.error('CRM API error:', bitrixData);
+      throw new Error('Failed to create lead in CRM');
     }
 
-    console.log('Bitrix24 lead created successfully:', bitrixData);
+    console.log('CRM lead created successfully:', bitrixData);
 
     return new Response(
       JSON.stringify({ success: true, leadId: bitrixData.result }),
