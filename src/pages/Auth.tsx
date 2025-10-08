@@ -38,6 +38,10 @@ export default function Auth() {
       }
     });
     
+     // If landing_page is not set, use current page URL
+    if (!utmParams.landing_page) {
+      utmParams.landing_page = window.location.hostname;
+    }
     if (Object.keys(utmParams).length > 0) {
       sessionStorage.setItem('utm_params', JSON.stringify(utmParams));
     }
