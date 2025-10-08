@@ -274,8 +274,7 @@ export default function Auth() {
             By continuing, you agree to our{" "}
             <a 
               href="/TermsConditions.pdf" 
-              target="_blank" 
-              rel="noopener noreferrer"
+              download="TermsConditions.pdf"
               className="text-primary hover:underline"
             >
               terms of service
@@ -283,8 +282,7 @@ export default function Auth() {
             and{" "}
             <a 
               href="/PrivacyPolicy.pdf" 
-              target="_blank" 
-              rel="noopener noreferrer"
+              download="PrivacyPolicy.pdf"
               className="text-primary hover:underline"
             >
               privacy policy
