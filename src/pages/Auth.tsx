@@ -276,7 +276,6 @@ export default function Auth() {
               href="/TermsConditions.pdf" 
               target="_blank" 
               rel="noopener noreferrer"
-              download="TermsConditions.pdf"
               className="text-primary hover:underline"
             >
               terms of service
@@ -286,7 +285,6 @@ export default function Auth() {
               href="/PrivacyPolicy.pdf" 
               target="_blank" 
               rel="noopener noreferrer"
-              download="PrivacyPolicy.pdf"
               className="text-primary hover:underline"
             >
               privacy policy
