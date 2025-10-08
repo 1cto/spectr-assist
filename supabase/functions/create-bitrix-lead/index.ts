@@ -18,7 +18,7 @@ serve(async (req) => {
 
     // Build lead fields with UTM parameters
     const leadFields: any = {
-      TITLE: `New Registration: ${email} | ${landing_page || 'Direct'}`,
+      TITLE: `Lead: ${email} | ${landing_page || 'Direct'}`,
       NAME: name || email.split('@')[0],
       EMAIL: [{ VALUE: email, VALUE_TYPE: 'WORK' }],
       SOURCE_ID: 'WEB',
