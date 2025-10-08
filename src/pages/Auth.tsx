@@ -150,16 +150,16 @@ export default function Auth() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-secondary/20 p-4">
       <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1 text-center">
+        <CardHeader className="space-y-1 text-center pb-2">
           <CardTitle className="text-2xl font-bold">
             {isSignUp ? "Create an account" : "Welcome back"}
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="pb-1">
             {isSignUp 
               ? "Sign up to access the StoryBot" 
               : "Sign in to access the StoryBot"}
           </CardDescription>
-          <div className="flex justify-start pt-2">
+          <div className="flex justify-center pt-1">
             <img src={Logo} alt="StoryBot Logo" className="h-8" />
           </div>
         </CardHeader>
