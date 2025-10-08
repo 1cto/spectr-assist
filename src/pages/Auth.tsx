@@ -9,7 +9,6 @@ import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
-import { Link } from "react-router-dom";
 import Logo from "@/assets/Logo1.svg";
 
 const authSchema = z.object({
@@ -273,13 +272,23 @@ export default function Auth() {
 
           <p id="legal-text" className="text-center text-sm text-muted-foreground">
             By continuing, you agree to our{" "}
-            <Link to="/terms" className="text-primary hover:underline">
+            <a 
+              href="/TermsConditions.pdf" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
               terms of service
-            </Link>{" "}
+            </a>{" "}
             and{" "}
-            <Link to="/privacy" className="text-primary hover:underline">
+            <a 
+              href="/PrivacyPolicy.pdf" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
               privacy policy
-            </Link>
+            </a>
             .
           </p>
         </CardContent>
