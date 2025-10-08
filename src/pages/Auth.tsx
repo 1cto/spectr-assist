@@ -151,14 +151,14 @@ export default function Auth() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-secondary/20 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl font-bold">
+          <CardTitle className="text-2xl font-bold flex items-center justify-center gap-2">
+            <img src={Logo} alt="StoryBot Logo" className="h-8" />
             {isSignUp ? "Create an account" : "Welcome back"}
           </CardTitle>
-          <CardDescription className="flex items-center justify-center gap-2">
+          <CardDescription>
             {isSignUp 
               ? "Sign up to access the StoryBot" 
               : "Sign in to access the StoryBot"}
-            <img src={Logo} alt="StoryBot Logo" className="h-6" />
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
