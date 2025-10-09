@@ -282,7 +282,7 @@ export default function Auth() {
             </button>
           </div>
 
-          <p id="legal-text" className="text-center text-sm text-muted-foreground">
+          <p id="legal-text" className="text-left text-sm text-muted-foreground">
             By continuing, you agree to our{" "}
             <a href="/TermsConditions.pdf" download="TermsConditions.pdf" className="text-primary hover:underline">
               terms of service
