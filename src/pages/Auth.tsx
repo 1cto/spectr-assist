@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
-import Logo from "@/assets/Logo1.svg";
+import Logo from "@/assets/storybot_logo.svg";
 const authSchema = z.object({
   email: z.string().trim().email({
     message: "Invalid email address"
