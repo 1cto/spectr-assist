@@ -273,7 +273,7 @@ export default function Auth() {
             Google
           </Button>
 
-          <div className="text-center">
+          <div className="text-left">
             <button id="btn-toggle-auth-mode" type="button" onClick={() => {
             setIsSignUp(!isSignUp);
             setError(null);
