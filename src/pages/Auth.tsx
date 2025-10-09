@@ -221,7 +221,7 @@ export default function Auth() {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1 text-left pb-2 py-[34px]">
           <div className="flex justify-start mb-2">
-            <img src={Logo} alt="StoryBot Logo" className="h-16" />
+            <img src={Logo} alt="StoryBot Logo" className="h-12" />
           </div>
           <CardTitle className="text-2xl font-bold">
             {isSignUp ? "Create an account" : "Welcome back"}
