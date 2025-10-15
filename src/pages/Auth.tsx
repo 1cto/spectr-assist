@@ -31,7 +31,7 @@ export default function Auth() {
     captureAndStoreUtmParams();
 
     // Check if user is already authenticated
-    const checkUser = async () => {
+    /*const checkUser = async () => {
       const {
         data: { session },
       } = await supabase.auth.getSession();
@@ -40,7 +40,7 @@ export default function Auth() {
       }
     };
     checkUser();
-
+*/
     // Listen for auth changes
     const {
       data: { subscription },
