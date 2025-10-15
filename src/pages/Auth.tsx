@@ -29,7 +29,33 @@ export default function Auth() {
   const { toast } = useToast();
   useEffect(() => {
     captureAndStoreUtmParams();
-  }, []);
+
+    // Check if user is already authenticated
+    const checkUser = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (session) {
+        navigate("/");
+      }
+    };
+    checkUser();
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" && session) {
+        navigate("/");
+        toast({
+          title: "Welcome!",
+          description: "You have successfully signed in.",
+        });
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate, toast]);
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
