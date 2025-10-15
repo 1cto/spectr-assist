@@ -45,7 +45,6 @@ export default function Auth() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
-      debugger;
       if (event === "SIGNED_IN" && session) {
         navigate("/", { replace: true });
         toast({
@@ -133,11 +132,10 @@ export default function Auth() {
       setError(null);
       const redirectUrl = `${window.location.origin}/`;
 
-      const { data, error } = await supabase.auth.signInWithOAuth({
+      const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo: redirectUrl,
-          skipBrowserRedirect: true,
         },
       });
       if (error) {
