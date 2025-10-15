@@ -30,22 +30,34 @@ export default function Auth() {
   useEffect(() => {
     captureAndStoreUtmParams();
 
-    // Check if user is already authenticated
-    /*const checkUser = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (session) {
-        navigate("/", { replace: true });
-      }
-    };
-    checkUser();
-*/
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === "SIGNED_IN" && session) {
+        // Check if this is a new user (signed up within last 10 seconds)
+        const userCreatedAt = new Date(session.user.created_at);
+        const now = new Date();
+        const isNewUser = (now.getTime() - userCreatedAt.getTime()) < 10000;
+
+        // Create Bitrix lead only for new Google sign ups
+        if (isNewUser && session.user.app_metadata.provider === "google") {
+          try {
+            const utmParamsStr = sessionStorage.getItem("utm_params");
+            const utmParams = utmParamsStr ? JSON.parse(utmParamsStr) : {};
+            await supabase.functions.invoke("create-bitrix-lead", {
+              body: {
+                email: session.user.email,
+                name: session.user.user_metadata?.full_name || session.user.user_metadata?.name,
+                ...utmParams,
+              },
+            });
+            sessionStorage.removeItem("utm_params");
+          } catch (bitrixError) {
+            console.error("Failed to create CRM lead:", bitrixError);
+          }
+        }
+
         navigate("/", { replace: true });
         toast({
           title: "Welcome!",
