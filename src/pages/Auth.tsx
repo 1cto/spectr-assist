@@ -36,7 +36,7 @@ export default function Auth() {
         data: { session },
       } = await supabase.auth.getSession();
       if (session) {
-        navigate("/");
+        navigate("/auth", { replace: true });
       }
     };
     checkUser();
@@ -46,7 +46,7 @@ export default function Auth() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_IN" && session) {
-        navigate("/");
+        navigate("/auth", { replace: true });
         toast({
           title: "Welcome!",
           description: "You have successfully signed in.",
