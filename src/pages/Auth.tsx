@@ -45,6 +45,7 @@ export default function Auth() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
+      debugger;
       if (event === "SIGNED_IN" && session) {
         navigate("/", { replace: true });
         toast({
