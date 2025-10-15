@@ -46,16 +46,6 @@ export default function Auth() {
       sessionStorage.setItem("utm_params", JSON.stringify(utmParams));
     }
 
-    // Check if user is already authenticated
-    const checkUser = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (session) {
-        navigate("/", { replace: true });
-      }
-    };
-    checkUser();
   }, [navigate]);
 
   const handleEmailAuth = async (e: React.FormEvent) => {
