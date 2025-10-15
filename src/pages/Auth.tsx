@@ -135,6 +135,7 @@ export default function Auth() {
         provider: "google",
         options: {
           redirectTo: redirectUrl,
+          skipBrowserRedirect: true,
         },
       });
       if (error) {
