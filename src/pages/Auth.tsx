@@ -19,6 +19,28 @@ const authSchema = z.object({
     message: "Password must be at least 6 characters",
   }),
 });
+
+// A helper function to create the lead
+const createBitrixLead = async (sessionUser: any) => {
+  try {
+    const utmParamsStr = sessionStorage.getItem("utm_params");
+    const utmParams = utmParamsStr ? JSON.parse(utmParamsStr) : {};
+
+    await supabase.functions.invoke("create-bitrix-lead", {
+      body: {
+        email: sessionUser.email,
+        name: sessionUser.user_metadata?.full_name || sessionUser.user_metadata?.name,
+        ...utmParams,
+      },
+    });
+
+    // Clear UTM params after successful use
+    sessionStorage.removeItem("utm_params");
+  } catch (bitrixError) {
+    console.error("Failed to create CRM lead:", bitrixError);
+    // Do not block auth flow if CRM fails
+  }
+};
 export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -35,29 +57,6 @@ export default function Auth() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === "SIGNED_IN" && session) {
-        // Check if this is a new user (signed up within last 10 seconds)
-        const userCreatedAt = new Date(session.user.created_at);
-        const now = new Date();
-        const isNewUser = (now.getTime() - userCreatedAt.getTime()) < 10000;
-
-        // Create Bitrix lead only for new Google sign ups
-        if (isNewUser && session.user.app_metadata.provider === "google") {
-          try {
-            const utmParamsStr = sessionStorage.getItem("utm_params");
-            const utmParams = utmParamsStr ? JSON.parse(utmParamsStr) : {};
-            await supabase.functions.invoke("create-bitrix-lead", {
-              body: {
-                email: session.user.email,
-                name: session.user.user_metadata?.full_name || session.user.user_metadata?.name,
-                ...utmParams,
-              },
-            });
-            sessionStorage.removeItem("utm_params");
-          } catch (bitrixError) {
-            console.error("Failed to create CRM lead:", bitrixError);
-          }
-        }
-
         navigate("/", { replace: true });
         toast({
           title: "Welcome!",
@@ -97,23 +96,7 @@ export default function Auth() {
 
         // Create lead in Bitrix24
         if (data?.user) {
-          try {
-            const utmParamsStr = sessionStorage.getItem("utm_params");
-            const utmParams = utmParamsStr ? JSON.parse(utmParamsStr) : {};
-            await supabase.functions.invoke("create-bitrix-lead", {
-              body: {
-                email: data.user.email,
-                name: data.user.user_metadata?.full_name || data.user.user_metadata?.name,
-                ...utmParams,
-              },
-            });
-
-            // Clear UTM params after use
-            sessionStorage.removeItem("utm_params");
-          } catch (bitrixError) {
-            console.error("Failed to create CRM lead:", bitrixError);
-            // Don't block registration if Bitrix24 fails
-          }
+          await createBitrixLead(data.user);
         }
         toast({
           title: "Success!",
@@ -142,12 +125,16 @@ export default function Auth() {
     try {
       setIsLoading(true);
       setError(null);
-      const redirectUrl = `${window.location.origin}/`;
+      const redirectUrl = `${window.location.origin}/auth/callback`;
 
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo: redirectUrl,
+          queryParams: {
+            access_type: "offline", // Request a refresh token from Google
+            prompt: "consent",
+          },
         },
       });
       if (error) {
