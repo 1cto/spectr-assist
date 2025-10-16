@@ -27,22 +27,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === "SIGNED_IN" && session) {
-      // This is the correct logic for closing the OAuth popup/redirect tab
+        // This is the correct logic for closing the OAuth popup/redirect tab
         if (window.opener) {
-            // If this tab was opened by another, communicate success and close itself.
-            // window.opener can then handle navigation/updates in the original tab.
-            try {
-                // Send a message to the original window (optional, but good practice)
-                window.opener.postMessage({ type: 'AUTH_SUCCESS' }, window.location.origin);
-                window.close(); // This call should now reliably close the window
-                return; // Stop execution
-            } catch (e) {
-                console.error("Failed to close window after OAuth success:", e);
-            }
+          // If this tab was opened by another, communicate success and close itself.
+          // window.opener can then handle navigation/updates in the original tab.
+          try {
+            // Send a message to the original window (optional, but good practice)
+            window.opener.postMessage({ type: "AUTH_SUCCESS" }, window.location.origin);
+            window.close(); // This call should now reliably close the window
+            return; // Stop execution
+          } catch (e) {
+            console.error("Failed to close window after OAuth success:", e);
+          }
         }
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false);
+      }
     });
 
     return () => subscription.unsubscribe();
