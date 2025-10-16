@@ -129,8 +129,15 @@ export default function Auth() {
 
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
+
         options: {
-          redirectTo: redirectUrl,
+          // The "popup" setting is crucial
+          //redirectTo: redirectUrl,
+          redirectTo: undefined, // Let the SDK handle the callback
+          shouldCreateUser: true, // Recommended
+          // This tells Supabase to use the pop-up flow
+          skipBrowserRedirect: false,
+
           queryParams: {
             access_type: "offline", // Request a refresh token from Google
             prompt: "consent",
