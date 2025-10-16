@@ -131,9 +131,6 @@ export default function Auth() {
         provider: "google",
         options: {
           redirectTo: redirectUrl,
-          shouldCreateUser: true, // Recommended
-          // This tells Supabase to use the pop-up flow
-          skipBrowserRedirect: false,
           queryParams: {
             access_type: "offline", // Request a refresh token from Google
             prompt: "consent",
