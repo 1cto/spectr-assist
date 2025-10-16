@@ -131,6 +131,7 @@ export default function Auth() {
         provider: "google",
         options: {
           redirectTo: redirectUrl,
+          skipBrowserRedirect: false,
           queryParams: {
             access_type: "offline", // Request a refresh token from Google
             prompt: "consent",
