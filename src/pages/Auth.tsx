@@ -39,6 +39,24 @@ const createBitrixLead = async (sessionUser: any) => {
   } // Clear UTM params after successful use
   sessionStorage.removeItem("utm_params");
 };
+// A helper function to create the lead
+const createBitrixLead_OAuth = async (email: string) => {
+  try {
+    const utmParamsStr = sessionStorage.getItem("utm_params");
+    const utmParams = utmParamsStr ? JSON.parse(utmParamsStr) : {};
+
+    await supabase.functions.invoke("create-bitrix-lead", {
+      body: {
+        email: email,
+        ...utmParams,
+      },
+    });
+  } catch (bitrixError) {
+    console.error("Failed to create CRM lead:", bitrixError);
+    // Do not block auth flow if CRM fails
+  } // Clear UTM params after successful use
+  sessionStorage.removeItem("utm_params");
+};
 
 // A helper function to create the lead
 const updateBitrixLead = async (sessionUser: any) => {
@@ -168,6 +186,11 @@ export default function Auth() {
           title: "Authentication Error",
           description: error.message,
         });
+      } else {
+        if (isSignUp) {
+          console.log("Sign UP");
+          await createBitrixLead_OAuth(email);
+        }
       }
     } catch (err: any) {
       const message = err.message || "An unexpected error occurred";
