@@ -25,7 +25,7 @@ const createBitrixLead = async (sessionUser: any) => {
   try {
     const utmParamsStr = sessionStorage.getItem("utm_params");
     const utmParams = utmParamsStr ? JSON.parse(utmParamsStr) : {};
-    console.log("create_lead");
+
     await supabase.functions.invoke("create-bitrix-lead", {
       body: {
         email: sessionUser.email,
@@ -36,23 +36,25 @@ const createBitrixLead = async (sessionUser: any) => {
   } catch (bitrixError) {
     console.error("Failed to create CRM lead:", bitrixError);
     // Do not block auth flow if CRM fails
-  }
+  } // Clear UTM params after successful use
+  sessionStorage.removeItem("utm_params");
 };
 
 // A helper function to create the lead
 const updateBitrixLead = async (sessionUser: any) => {
   try {
+    console.log("update");
     const utmParamsStr = sessionStorage.getItem("utm_params");
     const utmParams = utmParamsStr ? JSON.parse(utmParamsStr) : {};
     if (utmParamsStr !== "") {
-      await supabase.functions.invoke("update-bitrix-lead", {
+      await supabase.functions.invoke("update-lead-by-email-utms", {
         body: {
           email: sessionUser.email,
           name: sessionUser.user_metadata?.full_name || sessionUser.user_metadata?.name,
           ...utmParams,
         },
       });
-      console.log("update lead");
+
       // Clear UTM params after successful use
       sessionStorage.removeItem("utm_params");
     }
@@ -139,7 +141,7 @@ export default function Auth() {
         description: message,
       });
     } finally {
-      setIsLoading(false);
+      setIsLoading(true);
     }
   };
   const signInWithGoogle = async () => {
