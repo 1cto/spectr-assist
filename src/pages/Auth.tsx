@@ -41,6 +41,28 @@ const createBitrixLead = async (sessionUser: any) => {
     // Do not block auth flow if CRM fails
   }
 };
+
+// A helper function to create the lead
+const updateBitrixLead = async (sessionUser: any) => {
+  try {
+    const utmParamsStr = sessionStorage.getItem("utm_params");
+    const utmParams = utmParamsStr ? JSON.parse(utmParamsStr) : {};
+
+    await supabase.functions.invoke("update-bitrix-lead", {
+      body: {
+        email: sessionUser.email,
+        name: sessionUser.user_metadata?.full_name || sessionUser.user_metadata?.name,
+        ...utmParams,
+      },
+    });
+
+    // Clear UTM params after successful use
+    sessionStorage.removeItem("utm_params");
+  } catch (bitrixError) {
+    console.error("Failed to create CRM lead:", bitrixError);
+    // Do not block auth flow if CRM fails
+  }
+};
 export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -146,6 +168,7 @@ export default function Auth() {
           description: error.message,
         });
         setIsLoading(false);
+      } else {
       }
     } catch (err: any) {
       const message = err.message || "An unexpected error occurred";
