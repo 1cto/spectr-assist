@@ -20,12 +20,12 @@ serve(async (req) => {
       throw new Error("Email and name are required");
     }
 
-    console.log("Creating Bitrix24 lead for:", email, name);
+    console.log("Simple creating Bitrix24 lead for:", email, name);
 
     // Build lead fields
     const leadFields = {
-      TITLE: `Lead: ${name}`,
-      NAME: name,
+      TITLE: `Lead: ${email}`,
+      NAME: "",
       EMAIL: [{ VALUE: email, VALUE_TYPE: "WORK" }],
       SOURCE_ID: "WEB",
       STATUS_ID: "NEW",
@@ -51,7 +51,7 @@ serve(async (req) => {
       throw new Error("Failed to create lead in CRM");
     }
 
-    console.log("CRM lead created successfully:", bitrixData);
+    console.log("simple CRM lead created successfully:", bitrixData);
 
     return new Response(JSON.stringify({ success: true, leadId: bitrixData.result }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
