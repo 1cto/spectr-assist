@@ -42,23 +42,26 @@ const createBitrixLead = async (sessionUser: any) => {
 // A helper function to create the lead
 const finduser_OAuth = async (email: string) => {
   try {
-    const { data, error } = await supabase.functions.invoke("find-user-email", {
+   const {data, error} await supabase.functions.invoke("find-user-email", {
       body: {
         email: email,
-      },
+             },
     });
-    if (data?.exists) {
-      isSignIn = true;
+    if(data?.exists)
+    {
+      isSignIn=true;
       isSignUp = false;
-    } else {
-      isSignUp = true;
-      isSignIn = false;
     }
+    else{isSignUp=true;
+         isSignIn=false;
+        }
   } catch (bitrixError) {
     console.error("Failed to create CRM lead:", bitrixError);
     // Do not block auth flow if CRM fails
   } // Clear UTM params after successful use
+ 
 };
+
 
 export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
@@ -76,6 +79,7 @@ export default function Auth() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === "SIGNED_IN" && session) {
+       
         navigate("/", { replace: false });
         toast({
           title: "Welcome!",
@@ -145,20 +149,21 @@ export default function Auth() {
       setIsLoading(true);
       setError(null);
       const redirectUrl = `${window.location.origin}/`;
-      const { data } = await finduser_OAuth(email);
-      isSignUp = data.isSingUp;
-      if (isSignUp)
-        const { data, error } = await supabase.auth.signInWithOAuth({
-          provider: "google",
-          options: {
-            redirectTo: redirectUrl,
-            skipBrowserRedirect: false,
-            queryParams: {
-              access_type: "offline", // Request a refresh token from Google
-              prompt: "consent",
-            },
+      const {data, error} = await finduser_OAuth({email});
+      isSignUp=data.isSingUp;
+      if(isSignUp)
+        
+      const {data, error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: redirectUrl,
+          skipBrowserRedirect: false,
+          queryParams: {
+            access_type: "offline", // Request a refresh token from Google
+            prompt: "consent",
           },
-        });
+        },
+      });
       if (error) {
         setError(error.message);
         toast({
