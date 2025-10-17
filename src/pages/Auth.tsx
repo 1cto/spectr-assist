@@ -20,16 +20,16 @@ const authSchema = z.object({
   }),
 });
 
-// Revised helper function to accept only the email field
-const createBitrixLead = async (userEmail: string) => {
+// A helper function to create the lead
+const createBitrixLead = async (sessionUser: any) => {
   try {
     const utmParamsStr = sessionStorage.getItem("utm_params");
     const utmParams = utmParamsStr ? JSON.parse(utmParamsStr) : {};
 
     await supabase.functions.invoke("create-bitrix-lead", {
       body: {
-        email: userEmail, // Directly use the email field
-        // Remove 'name' since it's not available yet
+        email: sessionUser.email,
+        name: sessionUser.user_metadata?.full_name || sessionUser.user_metadata?.name,
         ...utmParams,
       },
     });
@@ -96,7 +96,7 @@ export default function Auth() {
 
         // Create lead in Bitrix24
         if (data?.user) {
-          await createBitrixLead(data.user.email);
+          await createBitrixLead(data.user);
         }
         toast({
           title: "Success!",
@@ -126,13 +126,12 @@ export default function Auth() {
       setIsLoading(true);
       setError(null);
       const redirectUrl = `${window.location.origin}/auth/callback`;
-      await createBitrixLead(email);
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo: redirectUrl,
-
-          flow: popup,
+          skipBrowserRedirect: true,
           queryParams: {
             access_type: "offline", // Request a refresh token from Google
             prompt: "consent",
