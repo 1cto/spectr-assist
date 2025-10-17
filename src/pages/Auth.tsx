@@ -79,7 +79,7 @@ export default function Auth() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === "SIGNED_IN" && session) {
-        navigate("/", { replace: true });
+        navigate("/", { replace: false });
         toast({
           title: "Welcome!",
           description: "You have successfully signed in.",
@@ -149,11 +149,11 @@ export default function Auth() {
       setError(null);
       const redirectUrl = `${window.location.origin}/auth/callback`;
 
-      const { error } = await supabase.auth.signInWithOAuth({
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo: redirectUrl,
-          skipBrowserRedirect: true,
+          skipBrowserRedirect: false,
           queryParams: {
             access_type: "offline", // Request a refresh token from Google
             prompt: "consent",
@@ -169,6 +169,9 @@ export default function Auth() {
         });
         setIsLoading(false);
       } else {
+        if (data?.user) {
+          await updateBitrixLead(data.user);
+        }
       }
     } catch (err: any) {
       const message = err.message || "An unexpected error occurred";
