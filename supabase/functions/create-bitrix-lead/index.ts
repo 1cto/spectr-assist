@@ -5,6 +5,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const BITRIX_WEBHOOK_URL = 'https://storymapper.bitrix24.com/rest/26/ft3bkdlsgtrf3bpm/';
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -37,7 +39,7 @@ serve(async (req) => {
 
     // Call Bitrix24 API to create a lead
     const bitrixResponse = await fetch(
-      'https://storymapper.bitrix24.com/rest/26/rum8iq0umq5uix6g/crm.lead.add.json',
+      `${BITRIX_WEBHOOK_URL}crm.lead.add.json`,
       {
         method: 'POST',
         headers: {
