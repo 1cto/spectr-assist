@@ -5,7 +5,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const BITRIX_WEBHOOK_URL = 'https://storymapper.bitrix24.com/rest/26/ft3bkdlsgtrf3bpm/';
+const BITRIX_WEBHOOK_URL = 'https://storymapper.bitrix24.com/rest/26/rum8iq0umq5uix6g/';
 
 serve(async (req) => {
   // Handle CORS preflight requests
