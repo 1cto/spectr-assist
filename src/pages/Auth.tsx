@@ -78,7 +78,7 @@ export default function Auth() {
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === "SIGNED_IN" && session) {
         await updateBitrixLead(session.user.email);
-        navigate("/", { replace: false });
+        navigate("/", { replace: true });
         toast({
           title: "Welcome!",
           description: "You have successfully signed in.",
