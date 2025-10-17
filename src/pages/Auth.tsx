@@ -56,9 +56,6 @@ export default function Auth() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === "SIGNED_IN" && session) {
-        if (session?.user) {
-          await createBitrixLead(session.user);
-        }
         navigate("/", { replace: false });
         toast({
           title: "Welcome!",
@@ -129,7 +126,7 @@ export default function Auth() {
       setError(null);
       const redirectUrl = `${window.location.origin}/`;
 
-      const { error } = await supabase.auth.signInWithOAuth({
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo: redirectUrl,
