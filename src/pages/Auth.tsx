@@ -19,17 +19,17 @@ const authSchema = z.object({
     message: "Password must be at least 6 characters",
   }),
 });
-
-// A helper function to create the lead
-const createBitrixLead = async (sessionUser: any) => {
+// Revised helper function to accept the necessary fields directly
+const createBitrixLead = async ({ email, name }: { email: string, name?: string | null }) => {
   try {
     const utmParamsStr = sessionStorage.getItem("utm_params");
     const utmParams = utmParamsStr ? JSON.parse(utmParamsStr) : {};
 
     await supabase.functions.invoke("create-bitrix-lead", {
       body: {
-        email: sessionUser.email,
-        name: sessionUser.user_metadata?.full_name || sessionUser.user_metadata?.name,
+        email: email, // Directly use the email field
+        // Use the passed name, or null/undefined if not available
+        name: name,   
         ...utmParams,
       },
     });
@@ -96,7 +96,7 @@ export default function Auth() {
 
         // Create lead in Bitrix24
         if (data?.user) {
-          await createBitrixLead(data.user);
+          await createBitrixLead(data.user.email);
         }
         toast({
           title: "Success!",
@@ -126,7 +126,9 @@ export default function Auth() {
       setIsLoading(true);
       setError(null);
       const redirectUrl = `${window.location.origin}/auth/callback`;
-
+      if (isSignUp) {
+      // 🔑 STEP 1: Initiate Lead Creation in the frontend
+      const{error}  = await createBitrixLead(email,null); 
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
