@@ -86,6 +86,11 @@ serve(async (req) => {
         status: 200,
       });
     } else {
+      const leadId = searchData.result[0].ID;
+      return new Response(JSON.stringify({ success: true, leadId: leadId }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
     }
   } catch (error) {
     console.error("Error in create-bitrix-lead function:", error);
