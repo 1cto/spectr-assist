@@ -33,9 +33,6 @@ const createBitrixLead = async (sessionUser: any) => {
         ...utmParams,
       },
     });
-
-    // Clear UTM params after successful use
-    sessionStorage.removeItem("utm_params");
   } catch (bitrixError) {
     console.error("Failed to create CRM lead:", bitrixError);
     // Do not block auth flow if CRM fails
@@ -47,17 +44,18 @@ const updateBitrixLead = async (sessionUser: any) => {
   try {
     const utmParamsStr = sessionStorage.getItem("utm_params");
     const utmParams = utmParamsStr ? JSON.parse(utmParamsStr) : {};
+    if (utmParamsStr !== "") {
+      await supabase.functions.invoke("update-bitrix-lead", {
+        body: {
+          email: sessionUser.email,
+          name: sessionUser.user_metadata?.full_name || sessionUser.user_metadata?.name,
+          ...utmParams,
+        },
+      });
 
-    await supabase.functions.invoke("update-bitrix-lead", {
-      body: {
-        email: sessionUser.email,
-        name: sessionUser.user_metadata?.full_name || sessionUser.user_metadata?.name,
-        ...utmParams,
-      },
-    });
-
-    // Clear UTM params after successful use
-    sessionStorage.removeItem("utm_params");
+      // Clear UTM params after successful use
+      sessionStorage.removeItem("utm_params");
+    }
   } catch (bitrixError) {
     console.error("Failed to create CRM lead:", bitrixError);
     // Do not block auth flow if CRM fails
@@ -79,6 +77,7 @@ export default function Auth() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === "SIGNED_IN" && session) {
+        await updateBitrixLead(session.user.email);
         navigate("/", { replace: false });
         toast({
           title: "Welcome!",
@@ -149,7 +148,7 @@ export default function Auth() {
       setError(null);
       const redirectUrl = `${window.location.origin}/auth/callback`;
 
-      const { data, error } = await supabase.auth.signInWithOAuth({
+      const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo: redirectUrl,
@@ -167,11 +166,6 @@ export default function Auth() {
           title: "Authentication Error",
           description: error.message,
         });
-        setIsLoading(false);
-      } else {
-        if (data?.user) {
-          await updateBitrixLead(data.user);
-        }
       }
     } catch (err: any) {
       const message = err.message || "An unexpected error occurred";
@@ -181,7 +175,8 @@ export default function Auth() {
         title: "Error",
         description: message,
       });
-      setIsLoading(false);
+    } finally {
+      setIsLoading(true);
     }
   };
   return (
