@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.create-bitrix-lead]
 verify_jwt = false
+
+[functions.update-lead-by-email-utms]
+verify_jwt = false
