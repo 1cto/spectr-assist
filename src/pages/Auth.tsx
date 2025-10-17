@@ -40,47 +40,29 @@ const createBitrixLead = async (sessionUser: any) => {
   sessionStorage.removeItem("utm_params");
 };
 // A helper function to create the lead
-const createBitrixLead_OAuth = async (email: string) => {
+const finduser_OAuth = async (email: string) => {
   try {
-    const utmParamsStr = sessionStorage.getItem("utm_params");
-    const utmParams = utmParamsStr ? JSON.parse(utmParamsStr) : {};
-
-    await supabase.functions.invoke("create-bitrix-lead", {
+   const {data, error} await supabase.functions.invoke("find-user-email", {
       body: {
         email: email,
-        ...utmParams,
-      },
+             },
     });
+    if(data?.exists)
+    {
+      isSignIn=true;
+      isSignUp = false;
+    }
+    else{isSignUp=true;
+         isSignIn=false;
+        }
   } catch (bitrixError) {
     console.error("Failed to create CRM lead:", bitrixError);
     // Do not block auth flow if CRM fails
   } // Clear UTM params after successful use
-  sessionStorage.removeItem("utm_params");
+ 
 };
 
-// A helper function to create the lead
-const updateBitrixLead = async (sessionUser: any) => {
-  try {
-    console.log("update");
-    const utmParamsStr = sessionStorage.getItem("utm_params");
-    const utmParams = utmParamsStr ? JSON.parse(utmParamsStr) : {};
-    if (utmParamsStr !== "") {
-      await supabase.functions.invoke("update-lead-by-email-utms", {
-        body: {
-          email: sessionUser.email,
-          name: sessionUser.user_metadata?.full_name || sessionUser.user_metadata?.name,
-          ...utmParams,
-        },
-      });
 
-      // Clear UTM params after successful use
-      sessionStorage.removeItem("utm_params");
-    }
-  } catch (bitrixError) {
-    console.error("Failed to create CRM lead:", bitrixError);
-    // Do not block auth flow if CRM fails
-  }
-};
 export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -97,7 +79,7 @@ export default function Auth() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === "SIGNED_IN" && session) {
-        await updateBitrixLead(session.user.email);
+       
         navigate("/", { replace: false });
         toast({
           title: "Welcome!",
@@ -167,8 +149,11 @@ export default function Auth() {
       setIsLoading(true);
       setError(null);
       const redirectUrl = `${window.location.origin}/`;
-
-      const { error } = await supabase.auth.signInWithOAuth({
+      const{data}=await finduser_OAuth(email);
+      isSignUp=data.isSingUp;
+      if(isSignUp)
+        
+      const {data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo: redirectUrl,
@@ -187,9 +172,9 @@ export default function Auth() {
           description: error.message,
         });
       } else {
-        if (isSignUp) {
+        if (data?.user && isSignUp) {
           console.log("Sign UP");
-          await createBitrixLead_OAuth(email);
+          await createBitrixLead(data.user);
         }
       }
     } catch (err: any) {
