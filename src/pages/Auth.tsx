@@ -25,7 +25,7 @@ const createBitrixLead = async (sessionUser: any) => {
   try {
     const utmParamsStr = sessionStorage.getItem("utm_params");
     const utmParams = utmParamsStr ? JSON.parse(utmParamsStr) : {};
-
+    console.log("create_lead");
     await supabase.functions.invoke("create-bitrix-lead", {
       body: {
         email: sessionUser.email,
@@ -52,7 +52,7 @@ const updateBitrixLead = async (sessionUser: any) => {
           ...utmParams,
         },
       });
-
+      console.log("update lead");
       // Clear UTM params after successful use
       sessionStorage.removeItem("utm_params");
     }
@@ -78,7 +78,7 @@ export default function Auth() {
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === "SIGNED_IN" && session) {
         await updateBitrixLead(session.user.email);
-        navigate("/", { replace: true });
+        navigate("/", { replace: false });
         toast({
           title: "Welcome!",
           description: "You have successfully signed in.",
