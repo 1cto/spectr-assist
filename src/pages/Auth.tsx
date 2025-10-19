@@ -56,7 +56,7 @@ export default function Auth() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === "SIGNED_IN" && session) {
-        navigate("/", { replace: false });
+        navigate("/", { replace: true });
         toast({
           title: "Welcome!",
           description: "You have successfully signed in.",
