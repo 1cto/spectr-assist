@@ -1,10 +1,10 @@
 import { useEffect } from "react";
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import AuthGuard from "@/components/AuthGuard";
 import Auth from "@/pages/Auth";
 import Index from "@/pages/Index";
 import NotFound from "@/pages/NotFound";
-import { AuthGuard } from "@/compoments/AuthGuard";
 
 function App() {
   const { user, loading } = useAuth();
@@ -23,8 +23,9 @@ function App() {
   return (
     <Routes>
       <Route path="/auth" element={<Auth />} />
-
-      <Route path="/" element={<Index />} />
+      <AuthGuard>
+        <Route path="/" element={<Index />} />
+      </AuthGuard>
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
