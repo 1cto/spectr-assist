@@ -1,10 +1,10 @@
 import { useEffect } from "react";
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import AuthGuard from "@/components/AuthGuard";
 import Auth from "@/pages/Auth";
 import Index from "@/pages/Index";
 import NotFound from "@/pages/NotFound";
+import { AuthGuard } from "@/components/AuthGuard";
 
 function App() {
   const { user, loading } = useAuth();
