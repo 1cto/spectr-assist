@@ -65,9 +65,7 @@ export default function Auth() {
       // --- ADDED: Handle SIGNED_OUT Event ---
       else if (event === "SIGNED_OUT") {
         // Clear the local state to trigger a re-render/context update
-        setSession(null);
-        setUser(null);
-        setIsLoading(false);
+
         navigate("/auth", { replace: true });
       }
     });
