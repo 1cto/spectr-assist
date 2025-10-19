@@ -50,6 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(null);
         setUser(null);
         setLoading(false);
+        window.location.href = "/auth";
 
         // 💡 Optional: Redirect the user to the login page after sign out.
         // You'd typically use the 'navigate' function from react-router-dom here.
