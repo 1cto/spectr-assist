@@ -62,6 +62,18 @@ export default function Auth() {
           description: "You have successfully signed in.",
         });
       }
+      // --- ADDED: Handle SIGNED_OUT Event ---
+      else if (event === "SIGNED_OUT") {
+        // Clear the local state to trigger a re-render/context update
+        setSession(null);
+        setUser(null);
+        setLoading(false);
+        window.location.href = "/auth";
+
+        // 💡 Optional: Redirect the user to the login page after sign out.
+        // You'd typically use the 'navigate' function from react-router-dom here.
+        // Example: window.location.href = '/auth';
+      }
     });
 
     return () => subscription.unsubscribe();
