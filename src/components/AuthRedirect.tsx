@@ -16,6 +16,10 @@ function App() {
     if (!loading && user && location.pathname === "/auth") {
       navigate("/", { replace: true });
     }
+    if (!loading && !user) {
+      console.log("Log out from redirect component");
+      navigate("/auth", { replace: true });
+    }
     // If not loading and no user, and on a protected route, navigate to login
     // This is often handled better by a <ProtectedRoute> component.
   }, [user, loading, navigate, location.pathname]);
