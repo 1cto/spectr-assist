@@ -1,9 +1,9 @@
-import { useEffect } from 'react';
-import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth'; 
-import Auth from '@/pages/Auth'; 
-import Index from '@/pages/Index';
-import NotFound from '@/pages/NotFound';
+import { useEffect } from "react";
+import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import Auth from "@/pages/Auth";
+import Index from "@/pages/Index";
+import NotFound from "@/pages/NotFound";
 
 function App() {
   const { user, loading } = useAuth();
@@ -12,8 +12,8 @@ function App() {
 
   useEffect(() => {
     // Only navigate away from the login page if not loading AND user exists
-    if (!loading && user && location.pathname === '/auth') {
-      navigate('/', { replace: true });
+    if (!loading && user && location.pathname === "/auth") {
+      navigate("/", { replace: true });
     }
     // If not loading and no user, and on a protected route, navigate to login
     // This is often handled better by a <ProtectedRoute> component.
@@ -22,7 +22,14 @@ function App() {
   return (
     <Routes>
       <Route path="/auth" element={<Auth />} />
-      <Route path="/" element={<Index />} />
+      <Route
+        path="/"
+        element={
+          <AuthGuard>
+            <Index />
+          </AuthGuard>
+        }
+      />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
