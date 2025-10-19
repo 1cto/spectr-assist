@@ -9,7 +9,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 // 🔑 CORRECTION 1: Import the AuthProvider component from its defining file (e.g., context file)
 // Assuming AuthProvider is defined in '@/context/AuthContext' for proper separation from the hook.
 import { AuthProvider } from "@/hooks/useAuth";
-
 // Application Components
 
 import { AuthRedirect } from "@/components/AuthRedirect";
