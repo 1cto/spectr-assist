@@ -11,7 +11,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/useAuth";
 
 // Application Components
-import AuthRedirect from "@/hooks/useAuth";
+
+import { AuthRedirect } from "@/components/AuthRedirect";
 
 const queryClient = new QueryClient();
 
