@@ -3,6 +3,7 @@ import { ChatPanel, ChatPanelRef } from "@/components/ChatPanel";
 import { FeatureEditor } from "@/components/FeatureEditor";
 import { QualityPanel } from "@/components/QualityPanel";
 import { AuthGuard } from "@/components/AuthGuard";
+import { useNavigate, useLocation } from "react-router-dom";
 
 import { UserMenu } from "@/components/UserMenu";
 import { supabase } from "@/integrations/supabase/client";
@@ -49,27 +50,6 @@ const Index = () => {
       navigate("/", { replace: true });
     }
   }, [user, loading, navigate, location.pathname]);
-
-  return (
-    <Routes>
-      <Route path="/auth" element={<Auth />} />
-
-      {/* 🔑 Protected Route: The AuthGuard now protects the Index component */}
-      <Route
-        path="/"
-        element={
-          <AuthGuard>
-            <Index />
-          </AuthGuard>
-        }
-      />
-
-      {/* Example of adding a new protected route: */}
-      {/* <Route path="/profile" element={<AuthGuard><Profile /></AuthGuard>} /> */}
-
-      <Route path="*" element={<NotFound />} />
-    </Routes>
-  );
 
   const startWaiting = useCallback(() => {
     // Kick off mobile progress immediately
