@@ -44,8 +44,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(session?.user ?? null);
         setLoading(false);
       } else if (event === "SIGNED_OUT") {
-        window.location.href = "/auth";
         setLoading(false);
+        window.location.href = "/auth";
       }
     });
 
@@ -55,6 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = async () => {
     await supabase.auth.signOut();
     setUser(null);
+    setSession(null);
   };
 
   const value = {
