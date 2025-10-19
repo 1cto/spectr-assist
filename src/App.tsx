@@ -2,16 +2,16 @@ import { BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 // UI Components
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster as Sonner } from "/components/ui/sonner";
+import { Toaster } from "/components/ui/toaster";
+import { TooltipProvider } from "/components/ui/tooltip";
 
 // 🔑 CORRECTION 1: Import the AuthProvider component from its defining file (e.g., context file)
 // Assuming AuthProvider is defined in '@/context/AuthContext' for proper separation from the hook.
-import { AuthProvider } from "@/context/AuthContext";
+import { AuthProvider } from "/context/AuthContext";
 
 // Application Components
-import AuthRedirect from "@/components/AuthRedirect";
+import AuthRedirect from "/components/AuthRedirect";
 
 const queryClient = new QueryClient();
 
