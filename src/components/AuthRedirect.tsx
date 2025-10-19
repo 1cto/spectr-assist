@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import Auth from "@/pages/Auth";
 import Index from "@/pages/Index";
 import NotFound from "@/pages/NotFound";
+import { AuthGuard } from "@/compoments/AuthGuard";
 
 function App() {
   const { user, loading } = useAuth();
@@ -22,14 +23,8 @@ function App() {
   return (
     <Routes>
       <Route path="/auth" element={<Auth />} />
-      <Route
-        path="/"
-        element={
-          <AuthGuard>
-            <Index />
-          </AuthGuard>
-        }
-      />
+
+      <Route path="/" element={<Index />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
