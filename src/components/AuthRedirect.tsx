@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import Auth from "@/pages/Auth";
 import Index from "@/pages/Index";
 import NotFound from "@/pages/NotFound";
+import AuthGuard from "@/components/AuthGuard";
 
 function App() {
   const { user, loading } = useAuth();
