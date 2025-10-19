@@ -13,6 +13,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
 
   useEffect(() => {
     if (!loading && !user) {
+      cosole.log("Log out authguard");
       navigate("/auth", { replace: true });
     }
   }, [user, loading, navigate]);
