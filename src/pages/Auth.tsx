@@ -68,10 +68,7 @@ export default function Auth() {
         setSession(null);
         setUser(null);
         setLoading(false);
-        navigate("/auth, { replace: true });
-        
-
-        
+        navigate("/auth", { replace: true });
       }
     });
 
