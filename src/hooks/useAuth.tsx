@@ -47,6 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(null);
         setUser(null);
         setLoading(false);
+        window.location.href = "/auth";
       }
     });
 
