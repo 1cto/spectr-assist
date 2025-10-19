@@ -14,6 +14,7 @@ function App() {
   useEffect(() => {
     // Only navigate away from the login page if not loading AND user exists
     if (!loading && user && location.pathname === "/auth") {
+      console.log("Log in authredirect");
       navigate("/", { replace: true });
     }
     if (!loading && !user) {
