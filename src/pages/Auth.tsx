@@ -67,7 +67,7 @@ export default function Auth() {
         // Clear the local state to trigger a re-render/context update
         setSession(null);
         setUser(null);
-        setLoading(false);
+        setIsLoading(false);
         navigate("/auth", { replace: true });
       }
     });

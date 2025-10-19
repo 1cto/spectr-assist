@@ -43,7 +43,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
-      } else {
+      } else if (event === "SIGNED_OUT") {
+        // Clear the local state to trigger a re-render/context update
+        setSession(null);
+        setUser(null);
+        setLoading(false);
+        navigate("/auth", { replace: true });
       }
     });
 
