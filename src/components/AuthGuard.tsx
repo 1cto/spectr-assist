@@ -29,7 +29,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
   }
 
   if (!user) {
-    return null;
+    navigate("/auth", { replace: true });
   }
 
   return <>{children}</>;
