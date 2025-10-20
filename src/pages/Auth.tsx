@@ -81,7 +81,6 @@ export default function Auth() {
           },
         });
         if (error) {
-          console.log(error);
           throw error;
         }
 
@@ -89,8 +88,6 @@ export default function Auth() {
         if (data?.user) {
           console.log(data.user.email);
           await createBitrixLead(data.user);
-        } else {
-          console.log("33333333333333333333333");
         }
         setIsLoading(false);
         toast({
@@ -103,19 +100,17 @@ export default function Auth() {
           password,
         });
         if (error) {
-          console.log(error);
           throw error;
         } else setIsLoading(false);
       }
     } catch (err: any) {
-      console.log("78787878778");
       const message = err.message || "An unexpected error occurred";
       setError(message);
       setIsLoading(false);
 
       toast({
         variant: "destructive",
-        title: "Authentication Error11111",
+        title: "Authentication Error",
         description: message,
       });
     }
