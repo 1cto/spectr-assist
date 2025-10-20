@@ -38,7 +38,7 @@ export default function Auth() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === "SIGNED_IN" && session) {
-         navigate("/", { replace: true });
+        navigate("/", { replace: true });
         toast({
           title: "Welcome!",
           description: "You have successfully signed in.",
@@ -115,7 +115,6 @@ export default function Auth() {
         title: "Authentication Error",
         description: message,
       });
-    } 
     }
   };
   const signInWithGoogle = async () => {
