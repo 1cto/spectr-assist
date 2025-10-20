@@ -38,6 +38,14 @@ export default function Auth() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === "SIGNED_IN" && session) {
+        const lastProvider = session.user.app_metadata.provider;
+
+        // Check if the provider is Google (or "email" for email sign-up/in)
+        if (session.user && lastProvider === "google") {
+          console.log("auth_lead_create");
+          await createBitrixLead(session.user);
+        }
+
         navigate("/", { replace: true });
         toast({
           title: "Welcome!",
