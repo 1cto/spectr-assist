@@ -81,6 +81,7 @@ export default function Auth() {
           },
         });
         if (error) {
+          console.error(error);
           throw error;
         }
 
@@ -100,6 +101,7 @@ export default function Auth() {
           password,
         });
         if (error) {
+          console.error(error);
           throw error;
         }
         setIsLoading(false);
