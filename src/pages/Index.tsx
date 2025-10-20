@@ -49,6 +49,9 @@ const Index = () => {
     if (!loading && user && location.pathname === "/auth") {
       navigate("/", { replace: true });
     }
+    if (!loading && !user) {
+      navigate("/auth", { replace: true });
+    }
   }, [user, loading, navigate, location.pathname]);
 
   const startWaiting = useCallback(() => {
