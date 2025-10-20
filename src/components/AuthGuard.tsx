@@ -13,7 +13,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
 
   useEffect(() => {
     if (!loading && !user) {
-      console.log("Log out authguard");
+      //console.log("Log out authguard");
       navigate("/auth", { replace: true });
     }
   }, [user, loading, navigate]);
@@ -30,7 +30,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
   }
 
   if (!user) {
-    console.log("Log_out redirect");
+    //console.log("Log_out redirect");
     navigate("/auth", { replace: true });
   }
 
