@@ -11,6 +11,8 @@ import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 import Logo from "@/assets/storybot_logo.svg";
 import { captureAndStoreUtmParams } from "@/lib/utils";
+import { createBitrixLead } from "@/lib/utils";
+
 const authSchema = z.object({
   email: z.string().trim().email({
     message: "Invalid email address",
@@ -19,26 +21,6 @@ const authSchema = z.object({
     message: "Password must be at least 6 characters",
   }),
 });
-
-// A helper function to create the lead
-const createBitrixLead = async (sessionUser: any) => {
-  try {
-    const utmParamsStr = sessionStorage.getItem("utm_params");
-    const utmParams = utmParamsStr ? JSON.parse(utmParamsStr) : {};
-
-    await supabase.functions.invoke("create-bitrix-lead", {
-      body: {
-        email: sessionUser.email,
-        name: sessionUser.user_metadata?.full_name || sessionUser.user_metadata?.name,
-        ...utmParams,
-      },
-    });
-  } catch (bitrixError) {
-    console.error("Failed to create CRM lead:", bitrixError);
-    // Do not block auth flow if CRM fails
-  } // Clear UTM params after successful use
-  sessionStorage.removeItem("utm_params");
-};
 
 export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);

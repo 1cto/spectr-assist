@@ -1,7 +1,7 @@
 import { useState, useEffect, createContext, useContext, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-
+import { createBitrixLead } from "@/lib/utils";
 interface AuthContextType {
   user: User | null;
   session: Session | null;
