@@ -81,7 +81,6 @@ export default function Auth() {
           },
         });
         if (error) {
-          setIsLoading(false);
           throw error;
         }
 
@@ -101,7 +100,6 @@ export default function Auth() {
           password,
         });
         if (error) {
-          setIsLoading(false);
           throw error;
         }
         setIsLoading(false);
