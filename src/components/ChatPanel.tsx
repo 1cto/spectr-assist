@@ -126,7 +126,7 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
     const loadingCh = supabase
       .channel(`loading-state-${sessionId}`, { config: { broadcast: { self: true }}})
       .on('broadcast', { event: 'metrics-received' }, () => {
-        console.log('ChatPanel: metrics-received event fired', {
+       // console.log('ChatPanel: metrics-received event fired', {
           waitingRef: waitingRef.current,
           metricsEventHandled: metricsEventHandledRef.current,
           isTyping,
@@ -135,12 +135,12 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
         
         // Guard against duplicate events
         if (!waitingRef.current || metricsEventHandledRef.current) {
-          console.log('ChatPanel: Skipping - already handled or not waiting');
+        //  console.log('ChatPanel: Skipping - already handled or not waiting');
           return;
         }
         
         metricsEventHandledRef.current = true;
-        console.log('ChatPanel: Starting typing indicator');
+     //   console.log('ChatPanel: Starting typing indicator');
 
         // Start typing indicator
         setIsTyping(true);
@@ -164,11 +164,11 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
             const elapsed = Date.now() - startTime;
             const remaining = Math.max(0, minDuration - elapsed);
             
-            console.log('ChatPanel: Response ready, showing after delay:', remaining);
+            //console.log('ChatPanel: Response ready, showing after delay:', remaining);
             setTimeout(() => {
               const responseContent = pendingResponseRef.current;
               if (responseContent) {
-                console.log('ChatPanel: Displaying response:', responseContent.substring(0, 50));
+               // console.log('ChatPanel: Displaying response:', responseContent.substring(0, 50));
                 setMessages(prev => {
                   const withoutTyping = prev.filter(msg => !msg.isTyping);
                   return [...withoutTyping, {
@@ -202,7 +202,7 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
         setTimeout(() => {
           clearInterval(checkInterval);
           if (waitingRef.current && !pendingResponseRef.current) {
-            console.log('ChatPanel: Timeout - no response received');
+            //console.log('ChatPanel: Timeout - no response received');
             setMessages(prev => prev.filter(msg => !msg.isTyping));
             setIsTyping(false);
             setWaitingForResponse(false);
@@ -215,7 +215,7 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
     loadingChannelRef.current = loadingCh;
 
     return () => {
-      console.log('ChatPanel: Cleaning up loading-state channel');
+      //console.log('ChatPanel: Cleaning up loading-state channel');
       if (loadingCh) supabase.removeChannel(loadingCh);
     };
   }, [sessionId]);
@@ -367,7 +367,7 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
         ? webhookResponse.output 
         : (typeof webhookResponse === 'string' ? webhookResponse : "I received your message and processed it successfully.");
       
-      console.log('ChatPanel: Storing response in pendingResponseRef:', chatContent.substring(0, 50));
+    //  console.log('ChatPanel: Storing response in pendingResponseRef:', chatContent.substring(0, 50));
       // Store the response to show after metrics-received
       pendingResponseRef.current = chatContent;
       
@@ -515,7 +515,7 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
         
         // Update feature content if provided
         if (webhookResponse && typeof webhookResponse === 'object' && webhookResponse.feature) {
-          console.log('ChatPanel (ref): Feature update detected');
+         // console.log('ChatPanel (ref): Feature update detected');
           onFeatureChange(webhookResponse.feature);
           // Signal feature received
           loadingChannelRef.current?.send({
@@ -524,7 +524,7 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
             payload: { ts: Date.now(), sessionId },
           });
         } else {
-          console.log('ChatPanel (ref): No feature update, showing response directly');
+        //  console.log('ChatPanel (ref): No feature update, showing response directly');
           // No feature update - show response after typing delay
           setIsTyping(true);
           const typingMessage: Message = {
