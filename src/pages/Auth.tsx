@@ -98,7 +98,10 @@ export default function Auth() {
           email,
           password,
         });
-        if (error) throw error;
+        if (error) {
+          setIsLoading(false);
+          throw error;
+        }
       }
     } catch (err: any) {
       const message = err.message || "An unexpected error occurred";
@@ -118,7 +121,7 @@ export default function Auth() {
       setError(null);
       const redirectUrl = `${window.location.origin}/`;
 
-      const { data, error } = await supabase.auth.signInWithOAuth({
+      const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo: redirectUrl,
@@ -131,6 +134,7 @@ export default function Auth() {
       });
       if (error) {
         setError(error.message);
+        setIsLoading(false);
         toast({
           variant: "destructive",
           title: "Authentication Error",
