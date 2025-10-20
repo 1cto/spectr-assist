@@ -215,7 +215,7 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
     loadingChannelRef.current = loadingCh;
 
     return () => {
-      //console.log('ChatPanel: Cleaning up loading-state channel');
+      console.log('ChatPanel: Cleaning up loading-state channel');
       if (loadingCh) supabase.removeChannel(loadingCh);
     };
   }, [sessionId]);
