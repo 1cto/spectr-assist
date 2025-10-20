@@ -106,6 +106,8 @@ export default function Auth() {
     } catch (err: any) {
       const message = err.message || "An unexpected error occurred";
       setError(message);
+      setIsLoading(false);
+
       toast({
         variant: "destructive",
         title: "Authentication Error",
