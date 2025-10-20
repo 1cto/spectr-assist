@@ -135,12 +135,12 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
         
         // Guard against duplicate events
         if (!waitingRef.current || metricsEventHandledRef.current) {
-        //  console.log('ChatPanel: Skipping - already handled or not waiting');
+          console.log('ChatPanel: Skipping - already handled or not waiting');
           return;
         }
         
         metricsEventHandledRef.current = true;
-     //   console.log('ChatPanel: Starting typing indicator');
+        console.log('ChatPanel: Starting typing indicator');
 
         // Start typing indicator
         setIsTyping(true);
@@ -164,7 +164,7 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
             const elapsed = Date.now() - startTime;
             const remaining = Math.max(0, minDuration - elapsed);
             
-            //console.log('ChatPanel: Response ready, showing after delay:', remaining);
+            console.log('ChatPanel: Response ready, showing after delay:', remaining);
             setTimeout(() => {
               const responseContent = pendingResponseRef.current;
               if (responseContent) {
@@ -202,7 +202,7 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
         setTimeout(() => {
           clearInterval(checkInterval);
           if (waitingRef.current && !pendingResponseRef.current) {
-            //console.log('ChatPanel: Timeout - no response received');
+            console.log('ChatPanel: Timeout - no response received');
             setMessages(prev => prev.filter(msg => !msg.isTyping));
             setIsTyping(false);
             setWaitingForResponse(false);
@@ -524,7 +524,7 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(({ featureCont
             payload: { ts: Date.now(), sessionId },
           });
         } else {
-        //  console.log('ChatPanel (ref): No feature update, showing response directly');
+          console.log('ChatPanel (ref): No feature update, showing response directly');
           // No feature update - show response after typing delay
           setIsTyping(true);
           const typingMessage: Message = {
