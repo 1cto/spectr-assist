@@ -17,10 +17,10 @@ serve(async (req) => {
   try {
     const { email, name, utm_source, utm_medium, utm_campaign, utm_content, fbclid, landing_page } = await req.json();
     // Search for Lead by Email
-    const searchUrl = `${BITRIX_WEBHOOK_URL}crm.lead.list.json`;
+    const searchUrl = `${BITRIX_WEBHOOK_URL_BASE}crm.lead.list.json`;
     const searchBody = {
       filter: {
-        "FM.EMAIL.VALUE": email,
+        "=EMAIL.VALUE": email,
       },
       select: ["ID"],
     };
