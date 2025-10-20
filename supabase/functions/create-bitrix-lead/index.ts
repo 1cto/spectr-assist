@@ -25,7 +25,7 @@ serve(async (req) => {
       select: ["ID"],
     };
 
-    console.log("Searching for lead with email:", email);
+    //console.log("Searching for lead with email:", email);
 
     const searchResponse = await fetch(searchUrl, {
       method: "POST",
@@ -41,7 +41,7 @@ serve(async (req) => {
     }
 
     if (!searchData.result || searchData.result.length === 0) {
-      console.log("Creating Bitrix24 lead for:", email);
+      //console.log("Creating Bitrix24 lead for:", email);
 
       // Build lead fields with UTM parameters
       const leadFields: any = {
