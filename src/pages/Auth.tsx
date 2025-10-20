@@ -87,6 +87,7 @@ export default function Auth() {
 
         // Create lead in Bitrix24
         if (data?.user) {
+          console.log(data.user.email);
           await createBitrixLead(data.user);
         }
         toast({
