@@ -115,7 +115,7 @@ export default function Auth() {
 
       toast({
         variant: "destructive",
-        title: "Authentication Error",
+        title: "Authentication Error11111",
         description: message,
       });
     }
