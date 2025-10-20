@@ -53,7 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setLoading(false);
       } else if (event === "SIGNED_OUT") {
         setLoading(false);
-        window.location.href = "/auth";
+        // window.location.href = "/auth";
       }
     });
 
