@@ -55,12 +55,18 @@ serve(async (req) => {
       };
 
       // Add UTM parameters if present
-      if (utm_source) leadFields.UTM_SOURCE = utm_source;
+      if (utm_source) leadFields.SOURCE_ID = utm_source;
       if (utm_medium) leadFields.UTM_MEDIUM = utm_medium;
       if (utm_campaign) leadFields.UTM_CAMPAIGN = utm_campaign;
       if (utm_content) leadFields.UTM_CONTENT = utm_content;
-      if (fbclid) leadFields.UF_FBCLID = fbclid;
-      if (landing_page) leadFields.UF_LANDING_PAGE = landing_page;
+      if (fbclid) {
+        leadFields.UF_FBCLID = fbclid;
+        leadFields.COMMENTS = fbclid;
+      }
+      if (landing_page) {
+        leadFields.UF_LANDING_PAGE = landing_page;
+        leadFields.UTM_SOURCE = landing_page;
+      }
 
       // Call Bitrix24 API to create a lead
       const bitrixResponse = await fetch(`${BITRIX_WEBHOOK_URL}crm.lead.add.json`, {
