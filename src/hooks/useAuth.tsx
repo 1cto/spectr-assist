@@ -27,6 +27,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === "SIGNED_IN" && session) {
+        const lastProvider = session.user.app_metadata.provider;
+
+        // Check if the provider is Google (or "email" for email sign-up/in)
+        if (session.user && lastProvider === "google") {
+          console.log("auth_lead_create");
+          await createBitrixLead(session.user);
+        }
+
         // This is the correct logic for closing the OAuth popup/redirect tab
         if (window.opener) {
           // If this tab was opened by another, communicate success and close itself.
