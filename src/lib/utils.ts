@@ -12,7 +12,7 @@ export const createBitrixLead = async (sessionUser: User) => {
   try {
     const utmParamsStr = sessionStorage.getItem("utm_params");
     const utmParams = utmParamsStr ? JSON.parse(utmParamsStr) : {};
-
+    console.log("create_bitrix_lead");
     await supabase.functions.invoke("create-bitrix-lead", {
       body: {
         email: sessionUser.email,
@@ -23,8 +23,10 @@ export const createBitrixLead = async (sessionUser: User) => {
   } catch (bitrixError) {
     console.error("Failed to create CRM lead:", bitrixError);
     // Do not block auth flow if CRM fails
-  } // Clear UTM params after successful use
-  sessionStorage.removeItem("utm_params");
+  } finally {
+    // Clear UTM params after successful use
+    sessionStorage.removeItem("utm_params");
+  }
 };
 
 export function captureAndStoreUtmParams() {
