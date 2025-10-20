@@ -6,7 +6,7 @@ const corsHeaders = {
 };
 
 const BITRIX_WEBHOOK_URL = "https://storymapper.bitrix24.com/rest/26/rum8iq0umq5uix6g/";
-const BITRIX_WEBHOOK_URL_BASE = "https://storymapper.bitrix24.com/rest/26/ft3bkdlsgtrf3bpm/";
+const BITRIX_WEBHOOK_URL_BASE = "https://storymapper.bitrix24.com/rest/26/6cj7fij1bbb1mbuv/";
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -20,7 +20,7 @@ serve(async (req) => {
     const searchUrl = `${BITRIX_WEBHOOK_URL_BASE}crm.lead.list.json`;
     const searchBody = {
       filter: {
-        "=EMAIL.VALUE": email,
+        EMAIL: email,
       },
       select: ["ID"],
     };
