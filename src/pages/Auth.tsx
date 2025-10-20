@@ -38,7 +38,7 @@ export default function Auth() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === "SIGNED_IN" && session) {
-        // navigate("/", { replace: true });
+         navigate("/", { replace: true });
         toast({
           title: "Welcome!",
           description: "You have successfully signed in.",
@@ -93,6 +93,7 @@ export default function Auth() {
           title: "Success!",
           description: "Please check your email to confirm your account.",
         });
+        setIsLoading(false);
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,
@@ -102,6 +103,7 @@ export default function Auth() {
           setIsLoading(false);
           throw error;
         }
+        setIsLoading(false);
       }
     } catch (err: any) {
       const message = err.message || "An unexpected error occurred";
@@ -113,8 +115,7 @@ export default function Auth() {
         title: "Authentication Error",
         description: message,
       });
-    } finally {
-      setIsLoading(false);
+    } 
     }
   };
   const signInWithGoogle = async () => {
