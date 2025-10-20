@@ -68,6 +68,7 @@ export default function Auth() {
       });
       if (!validation.success) {
         setError(validation.error.errors[0].message);
+        setIsLoading(false);
         return;
       }
       if (isSignUp) {
@@ -79,7 +80,10 @@ export default function Auth() {
             emailRedirectTo: redirectUrl,
           },
         });
-        if (error) throw error;
+        if (error) {
+          setIsLoading(false);
+          throw error;
+        }
 
         // Create lead in Bitrix24
         if (data?.user) {
@@ -105,7 +109,7 @@ export default function Auth() {
         description: message,
       });
     } finally {
-      setIsLoading(true);
+      setIsLoading(false);
     }
   };
   const signInWithGoogle = async () => {
@@ -142,7 +146,7 @@ export default function Auth() {
         description: message,
       });
     } finally {
-      setIsLoading(true);
+      setIsLoading(false);
     }
   };
   return (
