@@ -29,10 +29,10 @@ export function AuthGuard({ children }: AuthGuardProps) {
     );
   }
 
-  if (!user) {
+  /*if (!user) {
     console.log("Log_out redirect");
     navigate("/auth", { replace: true });
   }
-
+*/
   return <>{children}</>;
 }
