@@ -17,44 +17,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    // Set up auth state listener FIRST (before getSession)
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      // Synchronous state updates only - no async operations!
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
-    });
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      // Handle signed in event
       if (event === "SIGNED_IN" && session) {
-        const lastProvider = session.user.app_metadata.provider;
+        // Defer async operations with setTimeout to prevent deadlock
+        setTimeout(() => {
+          const lastProvider = session.user.app_metadata.provider;
+          if (session.user && lastProvider === "google") {
+            console.log("auth_lead_create2");
+            createBitrixLead(session.user);
+          }
+        }, 0);
 
-        // Check if the provider is Google (or "email" for email sign-up/in)
-        if (session.user && lastProvider === "google") {
-          console.log("auth_lead_create2");
-          await createBitrixLead(session.user);
-        }
-
-        // This is the correct logic for closing the OAuth popup/redirect tab
+        // Handle OAuth popup closure
         if (window.opener) {
-          // If this tab was opened by another, communicate success and close itself.
-          // window.opener can then handle navigation/updates in the original tab.
           try {
-            // Send a message to the original window (optional, but good practice)
             window.opener.postMessage({ type: "AUTH_SUCCESS" }, window.location.origin);
-            window.close(); // This call should now reliably close the window
-            return; // Stop execution
+            window.close();
+            return;
           } catch (e) {
             console.error("Failed to close window after OAuth success:", e);
           }
         }
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
-      } else if (event === "SIGNED_OUT") {
-        setLoading(false);
-        // window.location.href = "/auth";
       }
+    });
+
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
