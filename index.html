@@ -8,20 +8,17 @@
 
         // This block ensures GTM is only loaded if the 'TEST' parameter is NOT present
         if(!params_tm.has('TEST')){
-
           // 1. Loader for G-NLRM0F2NHM (Primary Container)
           (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
           new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
           j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
           })(window,document,'script','dataLayer','G-NLRM0F2NHM');
-
       } else {
         console.log('Google Tag Manager is disabled on this domain:', window.location.hostname);
       }
     </script>
     <!-- End Google Tag Manager -->
-    <!-- Meta Pixel Code   -->
 
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -55,7 +52,6 @@
       ></iframe
     ></noscript>
 
-    <!-- End Meta Pixel Code ID: 3296299934005067-->
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
