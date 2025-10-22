@@ -31,7 +31,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         // Check if the provider is Google (or "email" for email sign-up/in)
         if (session.user && lastProvider === "google") {
-          console.log("auth_lead_create");
+          console.log("auth_lead_create2");
           await createBitrixLead(session.user);
         }
 
