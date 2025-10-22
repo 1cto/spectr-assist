@@ -126,10 +126,10 @@ export default function Auth() {
         options: {
           redirectTo: redirectUrl,
           skipBrowserRedirect: false,
-          queryParams: {
-            access_type: "offline", // Request a refresh token from Google
-            prompt: "consent",
-          },
+          //queryParams: {
+          // access_type: "offline", // Request a refresh token from Google
+          //  prompt: "consent",
+          //},
         },
       });
       if (error) {
