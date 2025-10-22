@@ -5,17 +5,29 @@
     <script>
       if (window.location.hostname === 'bot.storymapper.io') {
         const params_tm = new URLSearchParams(document.location.search);
-        if(!params_tm.has('TEST')){
-        (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-        'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-        })(window,document,'script','dataLayer','G-NLRM0F2NHM');
-      }
 
-          } else {
-               console.log('Google Tag Manager is disabled on this domain:', window.location.hostname);
-          }
+        // This block ensures GTM is only loaded if the 'TEST' parameter is NOT present
+        if(!params_tm.has('TEST')){
+
+          // 1. Loader for G-NLRM0F2NHM (Primary Container)
+          (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+          new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+          j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+          'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+          })(window,document,'script','dataLayer','G-NLRM0F2NHM');
+
+          // 2. Loader for GT-NS9RSQ2D (Secondary Container)
+          // NOTE: We change the data layer name to 'dataLayer2' to isolate event data.
+          (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+          new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+          j=d.createElement(s),dl=l!='dataLayer2'?'&l='+l:'';j.async=true;j.src=
+          'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+          })(window,document,'script','dataLayer2','GT-NS9RSQ2D');
+        }
+
+      } else {
+        console.log('Google Tag Manager is disabled on this domain:', window.location.hostname);
+      }
     </script>
     <!-- End Google Tag Manager -->
     <!-- Meta Pixel Code -->
