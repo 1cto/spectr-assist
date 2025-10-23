@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom"; // Import BrowserRouter directly
-import useGtmVirtualPageView from "./useGtmVirtualPageView.tsx"; // Import the hook
+import useGtmVirtualPageView from "./hooks/useGtmVirtualPageView.tsx"; // Import the hook
 // UI Components
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
