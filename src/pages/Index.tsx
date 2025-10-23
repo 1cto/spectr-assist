@@ -431,6 +431,18 @@ const Index = () => {
           )}
         </div>
 
+        {/* Floating Connect Jira Button */}
+        <button
+          id="connect-jira-btn"
+          className={`fixed ${isMobile ? 'bottom-24 right-4' : 'bottom-8 right-8'} z-40 bg-accent hover:bg-accent/90 text-accent-foreground font-medium px-6 py-3 rounded-full shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-105`}
+          onClick={() => {
+            // TODO: Implement Jira connection logic
+            console.log('Connect Jira clicked');
+          }}
+        >
+          Connect Jira
+        </button>
+
         {/* Mobile Bottom Tab Bar */}
         {isMobile && (
           <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50">
