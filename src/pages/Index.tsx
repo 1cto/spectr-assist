@@ -434,7 +434,15 @@ const Index = () => {
         {/* Floating Connect Jira Button */}
         <button
           id="connect-jira-btn"
-          className={`fixed ${isMobile ? (activeTab === 'chat' ? 'bottom-44' : 'bottom-24') : 'bottom-8'} right-4 md:right-8 z-40 bg-accent hover:bg-accent/90 text-accent-foreground font-medium px-6 py-3 rounded-full shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-105`}
+          className={`fixed ${
+            isMobile 
+              ? activeTab === 'chat' 
+                ? 'bottom-44' 
+                : activeTab === 'document'
+                  ? 'bottom-32'
+                  : 'bottom-24'
+              : 'bottom-8'
+          } right-4 md:right-8 z-40 bg-accent hover:bg-accent/90 text-accent-foreground font-medium px-6 py-3 rounded-full shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-105`}
           onClick={() => {
             // TODO: Implement Jira connection logic
             console.log('Connect Jira clicked');
