@@ -468,7 +468,7 @@ const Index = () => {
           }}
         >
           <span>Connect Jira</span>
-          <DotLottieReact src={jiraAnimation} loop autoplay className="w-6 h-6" />
+          <DotLottieReact src={jiraAnimation} loop autoplay className="w-6 h-6 flex items-center" />
         </button>
 
         {/* Mobile Bottom Tab Bar */}
