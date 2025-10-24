@@ -36,7 +36,17 @@
                console.log('Facebook Manager is disabled on this domain:', window.location.hostname);
            }
     </script>
-
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+  var signInButton = document.getElementById('sign-in-btn');
+  if (signInButton) {
+    signInButton.addEventListener('click', function() {
+      fbq('track', 'Lead');
+      console.log('Lead event sent');
+    });
+  }
+});
+</script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>BA Requirements Studio - Professional Feature File Creation</title>
