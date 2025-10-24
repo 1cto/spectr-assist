@@ -443,9 +443,26 @@ const Index = () => {
                   : 'bottom-24'
               : 'bottom-8'
           } right-4 md:right-8 z-40 bg-accent hover:bg-accent/90 text-accent-foreground font-medium px-6 py-3 rounded-full shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-105`}
-          onClick={() => {
-            // TODO: Implement Jira connection logic
-            console.log('Connect Jira clicked');
+          onClick={async () => {
+            if (!user?.email) {
+              console.error('No user email available');
+              return;
+            }
+            
+            try {
+              console.log('Calling upd_lead_status for:', user.email);
+              const { data, error } = await supabase.functions.invoke('upd_lead_status', {
+                body: { email: user.email }
+              });
+              
+              if (error) {
+                console.error('Error calling upd_lead_status:', error);
+              } else {
+                console.log('upd_lead_status response:', data);
+              }
+            } catch (err) {
+              console.error('Exception calling upd_lead_status:', err);
+            }
           }}
         >
           Connect Jira

@@ -14,3 +14,6 @@ verify_jwt = false
 
 [functions.create-simple-lead]
 verify_jwt = false
+
+[functions.upd_lead_status]
+verify_jwt = false
