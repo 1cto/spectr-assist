@@ -12,8 +12,9 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { MessageSquare, FileText, BarChart3 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import logo from "@/assets/logo.svg";
-import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import jiraAnimation from "@/assets/Jira_Version_1.lottie";
+import { updateLeadStatus } from "@/lib/utils";
 
 const Index = () => {
   const { user, loading } = useAuth();
@@ -437,33 +438,38 @@ const Index = () => {
         <button
           id="connect-jira-btn"
           className={`fixed ${
-            isMobile 
-              ? activeTab === 'chat' 
-                ? 'bottom-44' 
-                : activeTab === 'document'
-                  ? 'bottom-32'
-                  : 'bottom-24'
-              : 'bottom-8'
+            isMobile
+              ? activeTab === "chat"
+                ? "bottom-44"
+                : activeTab === "document"
+                  ? "bottom-32"
+                  : "bottom-24"
+              : "bottom-8"
           } right-4 md:right-8 z-40 bg-white hover:bg-gray-50 text-black font-medium px-8 py-3 rounded-full shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-105 flex items-center gap-2 whitespace-nowrap`}
           onClick={async () => {
             if (!user?.email) {
-              console.error('No user email available');
+              console.error("No user email available");
+              toast({
+                description: "You must be logged in to connect to Jira.",
+                variant: "destructive",
+              });
               return;
             }
-            
+
             try {
-              console.log('Calling upd_lead_status for:', user.email);
-              const { data, error } = await supabase.functions.invoke('upd_lead_status', {
-                body: { email: user.email }
+              // CALL THE DEFINED FUNCTION
+              const result = await updateLeadStatus(user.email);
+
+              // Success feedback
+              toast({
+                description: `Successfully requested Jira connection.`,
               });
-              
-              if (error) {
-                console.error('Error calling upd_lead_status:', error);
-              } else {
-                console.log('upd_lead_status response:', data);
-              }
             } catch (err) {
-              console.error('Exception calling upd_lead_status:', err);
+              console.error("Exception calling upd_lead_status:", err);
+              toast({
+                description: err.message,
+                variant: "destructive",
+              });
             }
           }}
         >
