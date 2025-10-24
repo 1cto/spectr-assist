@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 
 declare module '*.lottie' {
-  const content: any;
-  export default content;
+  const src: string;
+  export default src;
 }

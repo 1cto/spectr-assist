@@ -28,6 +28,7 @@ const Index = () => {
     value: 0,
   });
   const [savedEstimation, setSavedEstimation] = useState<any>(null);
+  const [jiraAnimationData, setJiraAnimationData] = useState<any>(null);
   const [startSignal, setStartSignal] = useState(0);
   const loadingChannelRef = useRef<any>(null);
   const chatPanelRef = useRef<ChatPanelRef>(null);
@@ -45,6 +46,14 @@ const Index = () => {
   useEffect(() => {
     userRef.current = user;
   }, [user]);
+
+  // Load Jira animation
+  useEffect(() => {
+    fetch(jiraAnimation)
+      .then(response => response.json())
+      .then(data => setJiraAnimationData(data))
+      .catch(err => console.error('Error loading Jira animation:', err));
+  }, []);
 
   useEffect(() => {
     // Only navigate away from the login page if not loading AND user exists
@@ -468,7 +477,9 @@ const Index = () => {
           }}
         >
           <span>Connect Jira</span>
-          <Lottie animationData={jiraAnimation} loop={true} className="w-6 h-6" />
+          {jiraAnimationData && (
+            <Lottie animationData={jiraAnimationData} loop={true} className="w-6 h-6" />
+          )}
         </button>
 
         {/* Mobile Bottom Tab Bar */}
