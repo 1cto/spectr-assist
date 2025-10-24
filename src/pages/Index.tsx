@@ -444,7 +444,7 @@ const Index = () => {
                   ? 'bottom-32'
                   : 'bottom-24'
               : 'bottom-8'
-          } right-4 md:right-8 z-40 bg-accent hover:bg-accent/90 text-accent-foreground font-medium px-6 py-3 rounded-full shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-105`}
+          } right-4 md:right-8 z-40 bg-white hover:bg-gray-50 text-black font-medium px-8 py-3 rounded-full shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-105 flex items-center gap-2 whitespace-nowrap`}
           onClick={async () => {
             if (!user?.email) {
               console.error('No user email available');
@@ -468,7 +468,7 @@ const Index = () => {
           }}
         >
           <span>Connect Jira</span>
-          <DotLottieReact src={jiraAnimation} loop autoplay className="w-6 h-6 flex items-center" />
+          <DotLottieReact src={jiraAnimation} loop autoplay className="w-6 h-6" />
         </button>
 
         {/* Mobile Bottom Tab Bar */}
