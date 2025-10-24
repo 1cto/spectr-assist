@@ -12,6 +12,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { MessageSquare, FileText, BarChart3 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import logo from "@/assets/logo.svg";
+import Lottie from "lottie-react";
+import jiraAnimation from "@/assets/Jira_Version_1.lottie";
 
 const Index = () => {
   const { user, loading } = useAuth();
@@ -465,7 +467,8 @@ const Index = () => {
             }
           }}
         >
-          Connect Jira
+          <span>Connect Jira</span>
+          <Lottie animationData={jiraAnimation} loop={true} className="w-6 h-6" />
         </button>
 
         {/* Mobile Bottom Tab Bar */}
