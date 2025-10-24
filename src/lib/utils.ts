@@ -29,7 +29,7 @@ export const createBitrixLead = async (sessionUser: User) => {
   }
 };
 // A helper function to update lead status
-export const updateBitrixLead = async (useremail: string) => {
+export const updateLeadStatus = async (useremail: string) => {
   try {
     console.log("update_bitrix_lead");
     await supabase.functions.invoke("upd_bitrix_lead", {
