@@ -28,6 +28,23 @@ export const createBitrixLead = async (sessionUser: User) => {
     //sessionStorage.removeItem("utm_params");
   }
 };
+// A helper function to update lead status
+export const updateBitrixLead = async (useremail: string) => {
+  try {
+    console.log("update_bitrix_lead");
+    await supabase.functions.invoke("upd_bitrix_lead", {
+      body: {
+        email: useremail,
+      },
+    });
+  } catch (bitrixError) {
+    console.error("Failed to update CRM lead:", bitrixError);
+    // Do not block auth flow if CRM fails
+  } finally {
+    // Clear UTM params after successful use
+    //sessionStorage.removeItem("utm_params");
+  }
+};
 
 export function captureAndStoreUtmParams() {
   const urlParams = new URLSearchParams(window.location.search);
