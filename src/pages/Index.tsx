@@ -33,6 +33,7 @@ const Index = () => {
   });
   const [savedEstimation, setSavedEstimation] = useState<any>(null);
   const [startSignal, setStartSignal] = useState(0);
+  const [isJiraConnected, setIsJiraConnected] = useState(false);
   const loadingChannelRef = useRef<any>(null);
   const chatPanelRef = useRef<ChatPanelRef>(null);
   const sessionId = useRef(`session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
@@ -158,6 +159,25 @@ const Index = () => {
     };
 
     loadLastFeature();
+  }, [user]);
+
+  // Check if user has already connected Jira
+  useEffect(() => {
+    const checkJiraConnection = async () => {
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from("user_jira_connections")
+        .select("id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (!error && data) {
+        setIsJiraConnected(true);
+      }
+    };
+
+    checkJiraConnection();
   }, [user]);
 
   // Save feature to database
@@ -440,6 +460,7 @@ const Index = () => {
         {/* Floating Connect Jira Button */}
         <button
           id="connect-jira-btn"
+          disabled={isJiraConnected}
           className={`fixed ${
             isMobile
               ? activeTab === "chat"
@@ -448,8 +469,13 @@ const Index = () => {
                   ? "bottom-32"
                   : "bottom-24"
               : "bottom-8"
-          } right-4 md:right-8 z-40 bg-white hover:bg-gray-50 text-black font-medium px-8 py-3 rounded-full shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-105 flex items-center gap-2 whitespace-nowrap`}
+          } right-4 md:right-8 z-40 ${
+            isJiraConnected
+              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+              : "bg-white hover:bg-gray-50 text-black hover:shadow-xl hover:scale-105"
+          } font-medium px-8 py-3 rounded-full shadow-lg transition-all duration-200 flex items-center gap-2 whitespace-nowrap`}
           onClick={async () => {
+            if (isJiraConnected) return;
             if (!user?.email) {
               console.error("No user email available");
               toast({
@@ -460,11 +486,22 @@ const Index = () => {
             }
 
             try {
-              // 1. Fire the function and await completion, but do not capture the result.
-              // This makes the return type effectively 'void' for TypeScript in this scope.
+              // Save to database that user has connected Jira
+              const { error: insertError } = await supabase
+                .from("user_jira_connections")
+                .insert({ user_id: user.id });
+
+              if (insertError) {
+                console.error("Error saving Jira connection:", insertError);
+                throw insertError;
+              }
+
+              // Update local state
+              setIsJiraConnected(true);
+
+              // Fire the function and await completion
               await updateLeadStatus(user.email);
 
-              // 2. Provide a generic success toast since we aren't checking for lead_id.
               console.log("Jira connection request successfully sent.");
 
               toast({
