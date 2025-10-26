@@ -19,6 +19,7 @@ import jiraAnimation from "@/assets/Jira_Version_1.lottie";
 
 const Index = () => {
   const { user, loading } = useAuth();
+  const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
   const [featureContent, setFeatureContent] = useState("");
@@ -31,6 +32,7 @@ const Index = () => {
   });
   const [savedEstimation, setSavedEstimation] = useState<any>(null);
   const [startSignal, setStartSignal] = useState(0);
+
   const loadingChannelRef = useRef<any>(null);
   const chatPanelRef = useRef<ChatPanelRef>(null);
   const sessionId = useRef(`session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
