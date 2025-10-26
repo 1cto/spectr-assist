@@ -1,14 +1,21 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.58.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 const BITRIX_WEBHOOK_URL_BASE = "https://storymapper.bitrix24.com/rest/26/ft3bkdlsgtrf3bpm/";
 const BITRIX_WEBHOOK_URL_UPD = "https://storymapper.bitrix24.com/rest/26/htdv6akw0d2hkr26/";
 
 serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response("OK", {
+      headers: corsHeaders,
+      status: 200, // MUST return 200 OK for preflight success
+    });
+  }
+
   // 2. Check for POST method (the actual data request)
   if (req.method !== "POST") {
     return new Response(JSON.stringify({ error: "Invalid request method" }), {
