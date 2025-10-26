@@ -9,11 +9,9 @@ const BITRIX_WEBHOOK_URL_BASE = "https://storymapper.bitrix24.com/rest/26/ft3bkd
 const BITRIX_WEBHOOK_URL_UPD = "https://storymapper.bitrix24.com/rest/26/htdv6akw0d2hkr26/";
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
-    return new Response("OK", {
-      headers: corsHeaders,
-      status: 200, // MUST return 200 OK for preflight success
-    });
+    return new Response(null, { headers: corsHeaders });
   }
 
   // 2. Check for POST method (the actual data request)
@@ -32,10 +30,7 @@ serve(async (req) => {
 
     if (!email) {
       console.error("No email provided");
-      return new Response(JSON.stringify({ error: "Email is required" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      throw new Error("Lead Email is required");
     }
 
     console.log("Updating lead status for email:", email);
@@ -47,6 +42,12 @@ serve(async (req) => {
       },
       select: ["ID"],
     };
+    const searchResponse = await fetch(searchUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(searchBody),
+    });
+
     if (!searchResponse.ok || searchData.error) {
       console.error("CRM search error:", searchData);
       throw new Error(`CRM search failed: ${searchData.error_description || JSON.stringify(searchData)}`);
@@ -54,10 +55,7 @@ serve(async (req) => {
 
     if (!searchData.result || searchData.result.length === 0) {
       console.log("Lead not found for email:", email);
-      return new Response(JSON.stringify({ success: false, message: `Lead not found for email: ${email}` }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
-      });
+      throw new Error(`Lead not found for email ${email}`);
     }
 
     const leadId = searchData.result[0].ID;
