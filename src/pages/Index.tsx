@@ -454,8 +454,8 @@ const Index = () => {
             }
 
             try {
-                  await 
-                 
+              await updateLeadStatus(user.email);
+
               if (error) {
                 console.error("Error calling upd_lead_status:", error);
               } else {
