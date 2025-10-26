@@ -32,7 +32,7 @@ export const createBitrixLead = async (sessionUser: User) => {
 export const updateLeadStatus = async (useremail: string) => {
   try {
     console.log("update_bitrix_lead begin");
-    await supabase.functions.invoke("upd_bitrix_lead", {
+    await supabase.functions.invoke("upd_lead_status", {
       body: {
         email: useremail,
       },
