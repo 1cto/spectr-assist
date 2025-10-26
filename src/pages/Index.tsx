@@ -22,6 +22,7 @@ const Index = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
+
   const [featureContent, setFeatureContent] = useState("");
   const [activeTab, setActiveTab] = useState<"chat" | "document" | "quality">("chat");
   const [hasDocumentUpdate, setHasDocumentUpdate] = useState(false);
@@ -32,7 +33,6 @@ const Index = () => {
   });
   const [savedEstimation, setSavedEstimation] = useState<any>(null);
   const [startSignal, setStartSignal] = useState(0);
-
   const loadingChannelRef = useRef<any>(null);
   const chatPanelRef = useRef<ChatPanelRef>(null);
   const sessionId = useRef(`session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
@@ -460,23 +460,24 @@ const Index = () => {
             }
 
             try {
-              // Correct: Await the function call and capture the successful result.
-              // The updateLeadStatus function is expected to throw on any error (Bitrix or Supabase).
-              const result = await updateLeadStatus(user.email);
+              // 1. Fire the function and await completion, but do not capture the result.
+              // This makes the return type effectively 'void' for TypeScript in this scope.
+              await updateLeadStatus(user.email);
 
-              console.log("upd_lead_status response:", result);
+              // 2. Provide a generic success toast since we aren't checking for lead_id.
+              console.log("Jira connection request successfully sent.");
 
               toast({
-                description: `Jira connection request sent successfully! Lead ID: ${result.lead_id}`,
+                description: `Jira connection request sent successfully.`,
               });
             } catch (err) {
-              // Correct: Catch ALL errors (network, Supabase, Bitrix API) thrown by updateLeadStatus
-              console.error("Exception calling updateLeadStatus:", err); // Safely get the error message
+              // 3. Catch ALL errors thrown by the function (Supabase, Bitrix API, network).
+              console.error("Exception calling updateLeadStatus:", err);
 
               const errorMessage = err instanceof Error ? err.message : "An unknown error occurred.";
 
               toast({
-                description: `Failed to request Jira connection: ${errorMessage}`,
+                description: `Failed to request Jira connection. Details: ${errorMessage}`,
                 variant: "destructive",
               });
             }
