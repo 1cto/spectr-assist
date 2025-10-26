@@ -21,7 +21,6 @@ const Index = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const { toast } = useToast();
   const [featureContent, setFeatureContent] = useState("");
   const [activeTab, setActiveTab] = useState<"chat" | "document" | "quality">("chat");
   const [hasDocumentUpdate, setHasDocumentUpdate] = useState(false);
@@ -451,19 +450,33 @@ const Index = () => {
           onClick={async () => {
             if (!user?.email) {
               console.error("No user email available");
+              toast({
+                description: "You must be logged in to connect to Jira.",
+                variant: "destructive",
+              });
               return;
             }
 
             try {
-              await updateLeadStatus(user.email);
+              // Correct: Await the function call and capture the successful result.
+              // The updateLeadStatus function is expected to throw on any error (Bitrix or Supabase).
+              const result = await updateLeadStatus(user.email);
 
-              if (error) {
-                console.error("Error calling upd_lead_status:", error);
-              } else {
-                console.log("upd_lead_status response:", data);
-              }
+              console.log("upd_lead_status response:", result);
+
+              toast({
+                description: `Jira connection request sent successfully! Lead ID: ${result.lead_id}`,
+              });
             } catch (err) {
-              console.error("Exception calling upd_lead_status:", err);
+              // Correct: Catch ALL errors (network, Supabase, Bitrix API) thrown by updateLeadStatus
+              console.error("Exception calling updateLeadStatus:", err); // Safely get the error message
+
+              const errorMessage = err instanceof Error ? err.message : "An unknown error occurred.";
+
+              toast({
+                description: `Failed to request Jira connection: ${errorMessage}`,
+                variant: "destructive",
+              });
             }
           }}
         >
