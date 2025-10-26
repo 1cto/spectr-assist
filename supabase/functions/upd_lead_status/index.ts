@@ -5,20 +5,20 @@ const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+const BITRIX_WEBHOOK_URL_BASE = "https://storymapper.bitrix24.com/rest/26/ft3bkdlsgtrf3bpm/";
+const BITRIX_WEBHOOK_URL_UPD = "https://storymapper.bitrix24.com/rest/26/htdv6akw0d2hkr26/";
 
 serve(async (req) => {
-  // 1. Handle the OPTIONS (CORS preflight) request
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders, status: 200 });
-  }
-
   // 2. Check for POST method (the actual data request)
   if (req.method !== "POST") {
     return new Response(JSON.stringify({ error: "Invalid request method" }), {
       status: 405,
-      headers: { "Content-Type": "application/json", ...CORS_HEADERS },
+      headers: { "Content-Type": "application/json", ...corsHeaders },
     });
   }
+
+  const updateFields: any = {};
+  updateFields.STATUS_ID = "UC_0AOSV2";
 
   try {
     const { email } = await req.json();
@@ -32,16 +32,57 @@ serve(async (req) => {
     }
 
     console.log("Updating lead status for email:", email);
+    // Search for Lead by Email
+    const searchUrl = `${BITRIX_WEBHOOK_URL_BASE}crm.lead.list.json`;
+    const searchBody = {
+      filter: {
+        "EMAIL.VALUE": email,
+      },
+      select: ["ID"],
+    };
+    if (!searchResponse.ok || searchData.error) {
+      console.error("CRM search error:", searchData);
+      throw new Error(`CRM search failed: ${searchData.error_description || JSON.stringify(searchData)}`);
+    }
 
-    // Initialize Supabase client
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    if (!searchData.result || searchData.result.length === 0) {
+      console.log("Lead not found for email:", email);
+      return new Response(JSON.stringify({ success: false, message: `Lead not found for email: ${email}` }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
 
-    // TODO: Add your lead status update logic here
-    // Example: Update in database, call external API, etc.
+    const leadId = searchData.result[0].ID;
+    console.log("Found lead ID:", leadId);
 
-    console.log("Lead status updated successfully for:", email);
+    // Update the Found Lead
+    const updateUrl = `${BITRIX_WEBHOOK_URL_UPD}crm.lead.update.json`;
+
+    const updateResponse = await fetch(updateUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        id: leadId,
+        fields: updateFields,
+      }),
+    });
+
+    const updateData = await updateResponse.json();
+
+    if (!updateResponse.ok || updateData.error) {
+      console.error("CRM API update error:", updateData);
+      throw new Error(`CRM update failed: ${updateData.error_description || JSON.stringify(updateData)}`);
+    }
+
+    console.log(`CRM lead ID ${leadId} updated successfully with new UTMs.`);
+
+    return new Response(JSON.stringify({ success: true, leadId: leadId, result: updateData.result }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 200,
+    });
 
     return new Response(
       JSON.stringify({
