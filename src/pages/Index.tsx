@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { MessageSquare, FileText, BarChart3 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import logo from "@/assets/logo.svg";
+import { updateLeadStatus } from "@/lib/utils";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import jiraAnimation from "@/assets/Jira_Version_1.lottie";
 
@@ -453,11 +454,8 @@ const Index = () => {
             }
 
             try {
-              console.log("Calling upd_lead_status for:", user.email);
-              const { data, error } = await supabase.functions.invoke("upd_lead_status", {
-                body: { email: user.email },
-              });
-
+                  await 
+                 
               if (error) {
                 console.error("Error calling upd_lead_status:", error);
               } else {
