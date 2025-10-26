@@ -450,19 +450,33 @@ const Index = () => {
           onClick={async () => {
             if (!user?.email) {
               console.error("No user email available");
+              toast({
+                description: "Please log in to connect to Jira.",
+                variant: "destructive",
+              });
               return;
             }
 
             try {
-              await updateLeadStatus(user.email);
+              // 1. Await the function call and capture the successful return value
+              const result = await updateLeadStatus(user.email);
 
-              if (error) {
-                console.error("Error calling upd_lead_status:", error);
-              } else {
-                console.log("upd_lead_status response:", data);
-              }
+              // 2. Handle success (if the promise resolves)
+              console.log("upd_lead_status response:", result);
+              toast({
+                description: `Jira connection requested successfully! Lead ID: ${result.lead_id}`,
+              });
             } catch (err) {
-              console.error("Exception calling upd_lead_status:", err);
+              // 3. Handle errors (if the promise rejects/throws)
+              console.error("Exception calling updateLeadStatus:", err);
+
+              // Use an assertion or type check since err is 'unknown' in a catch block
+              const errorMessage = err instanceof Error ? err.message : "An unknown error occurred.";
+
+              toast({
+                description: `Failed to request Jira connection: ${errorMessage}`,
+                variant: "destructive",
+              });
             }
           }}
         >
