@@ -31,7 +31,7 @@ export const createBitrixLead = async (sessionUser: User) => {
 // A helper function to update lead status
 export const updateLeadStatus = async (useremail: string) => {
   try {
-    console.log("update_bitrix_lead");
+    console.log("update_bitrix_lead begin");
     await supabase.functions.invoke("upd_bitrix_lead", {
       body: {
         email: useremail,
@@ -42,7 +42,7 @@ export const updateLeadStatus = async (useremail: string) => {
     // Do not block auth flow if CRM fails
   } finally {
     // Clear UTM params after successful use
-    //sessionStorage.removeItem("utm_params");
+    console.log("update_bitrix_lead end");
   }
 };
 
