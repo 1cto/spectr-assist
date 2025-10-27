@@ -12,7 +12,7 @@ export const createBitrixLead = async (sessionUser: User) => {
   try {
     const utmParamsStr = sessionStorage.getItem("utm_params");
     const utmParams = utmParamsStr ? JSON.parse(utmParamsStr) : {};
-    console.log("create_bitrix_lead1");
+    console.log("create_bitrix_lead4");
     await supabase.functions.invoke("create-bitrix-lead", {
       body: {
         email: sessionUser.email,

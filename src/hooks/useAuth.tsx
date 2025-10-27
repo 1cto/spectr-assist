@@ -32,7 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setTimeout(() => {
           const lastProvider = session.user.app_metadata.provider;
           if (session.user && lastProvider === "google") {
-            console.log("auth_lead_create2");
+            console.log("auth_lead_create21");
             createBitrixLead(session.user);
           }
         }, 0);
