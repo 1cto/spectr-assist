@@ -32,6 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setTimeout(() => {
           const lastProvider = session.user.app_metadata.provider;
           if (session.user && lastProvider === "google" ) {
+            console.log(session.user.id);
             if(!session.user.id || session.user.id==""){
             console.log("auth_lead_create");
             createBitrixLead(session.user);
