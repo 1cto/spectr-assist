@@ -31,9 +31,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Defer async operations with setTimeout to prevent deadlock
         setTimeout(() => {
           const lastProvider = session.user.app_metadata.provider;
-          if (session.user && lastProvider === "google") {
-            console.log("auth_lead_create21");
+          if (session.user && lastProvider === "google" ) {
+            if(!session.user.id || session.user.id==""){
+            console.log("auth_lead_create");
             createBitrixLead(session.user);
+            }
           }
         }, 0);
 
