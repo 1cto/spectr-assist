@@ -89,7 +89,7 @@ export default function Auth() {
           console.log(data.user.email);
           await createBitrixLead(data.user);
           // Mark this as a new registration
-          localStorage.setItem('isNewRegistration', 'true');
+          localStorage.setItem("isNewRegistration", "true");
         }
         setIsLoading(false);
         toast({
@@ -122,9 +122,6 @@ export default function Auth() {
       setIsLoading(true);
       setError(null);
       const redirectUrl = `${window.location.origin}/`;
-
-      // Mark as registration if in sign up mode
-      
 
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
