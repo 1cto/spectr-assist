@@ -37,16 +37,16 @@
            }
     </script>
     <script>
-document.addEventListener('DOMContentLoaded', function() {
-  var signInButton = document.getElementById('btn-email-auth');
-  if (signInButton) {
-    signInButton.addEventListener('click', function() {
-      fbq('track', 'Lead');
-      console.log('Lead event sent');
-    });
-  }
-});
-</script>
+      document.addEventListener('DOMContentLoaded', function() {
+        var signInButton = document.getElementById('btn-email-auth');
+        if (signInButton) {
+          signInButton.addEventListener('click', function() {
+            fbq('track', 'Lead');
+            console.log('Lead event sent');
+          });
+        }
+      });
+    </script>
     <meta charset="UTF-8" />
     <link rel="icon" href="/storybot-favicon.ico" type="image/x-icon" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -89,6 +89,5 @@ document.addEventListener('DOMContentLoaded', function() {
 
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <script src="https://server.fillout.com/embed/v1/"></script>
   </body>
 </html>
