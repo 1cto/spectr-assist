@@ -180,6 +180,24 @@ const Index = () => {
     checkJiraConnection();
   }, [user]);
 
+  // Show Fillout form for new registrations
+  useEffect(() => {
+    const isNewRegistration = localStorage.getItem('isNewRegistration');
+    
+    if (isNewRegistration === 'true' && user) {
+      // Clear the flag
+      localStorage.removeItem('isNewRegistration');
+      
+      // Wait a bit for the page to fully load, then trigger the popup
+      setTimeout(() => {
+        const filloutButton = document.querySelector('[data-fillout-id="sJasutqxqKus"]') as HTMLElement;
+        if (filloutButton) {
+          filloutButton.click();
+        }
+      }, 1000);
+    }
+  }, [user]);
+
   // Save feature to database
   const saveFeatureToDb = async (
     featureBefore: string,
@@ -584,6 +602,18 @@ const Index = () => {
           </div>
         )}
       </div>
+
+      {/* Hidden Fillout form for new registrations */}
+      <div 
+        id="fillout-registration-form"
+        data-fillout-id="sJasutqxqKus" 
+        data-fillout-embed-type="popup" 
+        data-fillout-dynamic-resize 
+        data-fillout-button-color="#51E6AA" 
+        data-fillout-inherit-parameters 
+        data-fillout-popup-size="medium"
+        style={{ display: 'none' }}
+      />
     </AuthGuard>
   );
 };
