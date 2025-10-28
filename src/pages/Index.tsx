@@ -185,34 +185,26 @@ const Index = () => {
     if (!user) return;
 
     // Check if user was created recently (within last 2 minutes = 120000ms)
-    const userCreatedAt = new Date(user.created_at).getTime();
-    const now = Date.now();
-    const isNewUser = (now - userCreatedAt) < 120000;
-    
+   
     // Also check localStorage flag for immediate detection
     const isNewRegistration = localStorage.getItem('isNewRegistration');
     
-    if ((isNewUser || isNewRegistration === 'true')) {
+     if (isNewRegistration === 'true' && user) {
       // Clear the flag
       localStorage.removeItem('isNewRegistration');
       
-      // Mark that we've shown the form to this user
-      const shownFormKey = `fillout_shown_${user.id}`;
-      const hasShownForm = localStorage.getItem(shownFormKey);
+      // Wait a bit for the page to fully load, then trigger the popup
+      setTimeout(() => {
+        const filloutButton = document.querySelector('[data-fillout-id="sJasutqxqKus"]') as HTMLElement;
+        if (filloutButton) {
+          filloutButton.click();
+        }
+      }, 1000);      // Clear the flag
       
-      if (!hasShownForm) {
-        localStorage.setItem(shownFormKey, 'true');
-        
-        // Wait a bit for the page to fully load, then trigger the popup
-        setTimeout(() => {
-          const filloutButton = document.querySelector('[data-fillout-id="sJasutqxqKus"]') as HTMLElement;
-          if (filloutButton) {
-            filloutButton.click();
-          }
-        }, 1000);
+      
+      
       }
-    }
-  }, [user]);
+      }, [user]);
 
   // Save feature to database
   const saveFeatureToDb = async (
