@@ -35,7 +35,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             if (!session.user.id || session.user.id == "") {
               console.log("auth_lead_create");
               createBitrixLead(session.user);
-              
+                        // Mark this as a new registration
+               localStorage.setItem('isNewRegistration', 'true');
             }
           }
         }, 0);
