@@ -413,7 +413,7 @@ const Index = () => {
               bottom: "20px",
               left: "20px",
               // Use your conditional state for visibility
-              display: isRegistered ? "block" : "none",
+              display: "block",
             }}
           ></div>
           {/* Mobile: Single Panel View */}
