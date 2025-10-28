@@ -184,27 +184,21 @@ const Index = () => {
   useEffect(() => {
     if (!user) return;
 
-    // Check if user was created recently (within last 2 minutes = 120000ms)
-   
-    // Also check localStorage flag for immediate detection
     const isNewRegistration = localStorage.getItem('isNewRegistration');
     
-     if (isNewRegistration === 'true' && user) {
+    if (isNewRegistration === 'true') {
       // Clear the flag
       localStorage.removeItem('isNewRegistration');
       
-      // Wait a bit for the page to fully load, then trigger the popup
+      // Wait for Fillout script to load and trigger the popup
       setTimeout(() => {
-        const filloutButton = document.querySelector('[data-fillout-id="sJasutqxqKus"]') as HTMLElement;
+        const filloutButton = document.getElementById('fillout-trigger-button') as HTMLElement;
         if (filloutButton) {
           filloutButton.click();
         }
-      }, 1000);      // Clear the flag
-      
-      
-      
-      }
-      }, [user]);
+      }, 1500);
+    }
+  }, [user]);
 
   // Save feature to database
   const saveFeatureToDb = async (
@@ -611,9 +605,9 @@ const Index = () => {
         )}
       </div>
 
-      {/* Hidden Fillout form for new registrations */}
-      <div 
-        id="fillout-registration-form"
+      {/* Hidden Fillout form trigger button for new registrations */}
+      <button 
+        id="fillout-trigger-button"
         data-fillout-id="sJasutqxqKus" 
         data-fillout-embed-type="popup" 
         data-fillout-dynamic-resize 
@@ -621,7 +615,9 @@ const Index = () => {
         data-fillout-inherit-parameters 
         data-fillout-popup-size="medium"
         style={{ display: 'none' }}
-      />
+      >
+        Open Form
+      </button>
     </AuthGuard>
   );
 };
