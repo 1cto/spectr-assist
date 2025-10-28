@@ -208,7 +208,36 @@ const Index = () => {
 
     checkJiraConnection();
   }, [user]);
+// NEW useEffect to handle the automatic click/open
+  useEffect(() => {
+    if (isRegistered) {
+      // 2. Button is now in the DOM. Wait briefly for the Fillout script to bind the click handler.
+      const timer = setTimeout(() => {
+        const filloutButton = document.getElementById("fillout-trigger-button") as HTMLElement;
 
+        if (filloutButton) {
+          console.log("Attempting to auto-click Fillout button.");
+
+          // 3. Programmatically click the button to trigger the popup.
+          filloutButton.click();
+
+          // 4. IMPORTANT: Clean up the flags/state *after* the click attempt.
+          localStorage.removeItem("isNewRegistration");
+
+          // Optional: Hide the button immediately after clicking it if you don't want it visible post-open.
+          // setIsRegistered(false);
+        }
+      }, 1000); // 500ms delay gives the Fillout script time to bind its listeners.
+
+      return () => clearTimeout(timer);
+    }
+  }, [isRegistered]); // This effect runs whenever isRegistered changes.
+  // Show Fillout form for new registrations
+  useEffect(() => {
+    if (!user) {
+      console.log("no user");
+      return;
+    }
   // Show Fillout form for new registrations
   useEffect(() => {
     if (!user) return;
