@@ -189,11 +189,12 @@ const Index = () => {
     if (isNewRegistration === "true" && user) {
       // Clear the flag
       localStorage.removeItem("isNewRegistration");
-
+      console.log("popup");
       // Show the Fillout button
       const filloutButton = document.getElementById("fillout-trigger-button") as HTMLElement;
       if (filloutButton) {
         filloutButton.style.display = "block";
+        filloutButton.click();
       }
     }
   }, [user]);
