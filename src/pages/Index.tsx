@@ -193,7 +193,9 @@ const Index = () => {
       // Show the Fillout button
       const filloutButton = document.getElementById("fillout-trigger-button") as HTMLElement;
       if (filloutButton) {
-        filloutButton.style.display = "block";
+        sondole.log("popup!!!!");
+        filloutButton.click();
+        filloutButton.style.display = "none";
       }
     }
   }, [user]);
@@ -619,6 +621,8 @@ const Index = () => {
           </div>
         )}
       </div>
+
+      {/* Hidden Fillout form trigger button for new registrations */}
     </AuthGuard>
   );
 };
