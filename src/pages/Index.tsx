@@ -184,16 +184,16 @@ const Index = () => {
   useEffect(() => {
     if (!user) return;
 
-    const isNewRegistration = localStorage.getItem('isNewRegistration');
-    
-    if (isNewRegistration === 'true' && user) {
+    const isNewRegistration = localStorage.getItem("isNewRegistration");
+
+    if (isNewRegistration === "true" && user) {
       // Clear the flag
-      localStorage.removeItem('isNewRegistration');
-      
+      localStorage.removeItem("isNewRegistration");
+
       // Show the Fillout button
-      const filloutButton = document.getElementById('fillout-trigger-button') as HTMLElement;
+      const filloutButton = document.getElementById("fillout-trigger-button") as HTMLElement;
       if (filloutButton) {
-        filloutButton.style.display = 'block';
+        filloutButton.style.display = "block";
       }
     }
   }, [user]);
@@ -298,12 +298,12 @@ const Index = () => {
           setFeatureContent(newFeature);
 
           // Save to database with current values from refs
-        //  await saveFeatureToDb(
-         //   previousFeature,
-         //   newFeature,
-        //    payload.payload.userMessage || "",
-        //    payload.payload.comment || "",
-        //  );
+          //  await saveFeatureToDb(
+          //   previousFeature,
+          //   newFeature,
+          //    payload.payload.userMessage || "",
+          //    payload.payload.comment || "",
+          //  );
 
           // Notify Feature File that feature has been received to stop spinner and start QM spinner
           loadingChannelRef.current?.send({
@@ -350,7 +350,7 @@ const Index = () => {
           setOverallScore(payload.payload.overall);
 
           // Save estimation to database
-       //   await saveEstimationToDb(payload.payload);
+          //   await saveEstimationToDb(payload.payload);
 
           // Broadcast metrics-received to stop the progress bar
           loadingChannelRef.current?.send({
@@ -505,9 +505,7 @@ const Index = () => {
 
             try {
               // Save to database that user has connected Jira
-              const { error: insertError } = await supabase
-                .from("user_jira_connections")
-                .insert({ user_id: user.id });
+              const { error: insertError } = await supabase.from("user_jira_connections").insert({ user_id: user.id });
 
               if (insertError) {
                 console.error("Error saving Jira connection:", insertError);
@@ -604,18 +602,16 @@ const Index = () => {
       </div>
 
       {/* Hidden Fillout form trigger button for new registrations */}
-      <button 
+      <div
         id="fillout-trigger-button"
-        data-fillout-id="sJasutqxqKus" 
-        data-fillout-embed-type="popup" 
-        data-fillout-dynamic-resize 
-        data-fillout-button-color="#51E6AA" 
-        data-fillout-inherit-parameters 
+        data-fillout-id="sJasutqxqKus"
+        data-fillout-embed-type="popup"
+        data-fillout-dynamic-resize
+        data-fillout-button-color="#51E6AA"
+        data-fillout-inherit-parameters
         data-fillout-popup-size="medium"
-        style={{ display: 'none' }}
-      >
-        Open Form
-      </button>
+        style={{ display: "none" }}
+      ></div>
     </AuthGuard>
   );
 };
