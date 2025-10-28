@@ -192,10 +192,10 @@ const Index = () => {
 
       // Show the Fillout button
       const filloutButton = document.getElementById("fillout-trigger-button") as HTMLElement;
+      console.log("popup");
       if (filloutButton) {
-        sondole.log("popup!!!!");
         filloutButton.click();
-        filloutButton.style.display = "none";
+        filloutButton.style.display = "block";
       }
     }
   }, [user]);
