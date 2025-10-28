@@ -182,19 +182,35 @@ const Index = () => {
 
   // Show Fillout form for new registrations
   useEffect(() => {
+    if (!user) return;
+
+    // Check if user was created recently (within last 2 minutes = 120000ms)
+    const userCreatedAt = new Date(user.created_at).getTime();
+    const now = Date.now();
+    const isNewUser = (now - userCreatedAt) < 120000;
+    
+    // Also check localStorage flag for immediate detection
     const isNewRegistration = localStorage.getItem('isNewRegistration');
     
-    if (isNewRegistration === 'true' && user) {
+    if ((isNewUser || isNewRegistration === 'true')) {
       // Clear the flag
       localStorage.removeItem('isNewRegistration');
       
-      // Wait a bit for the page to fully load, then trigger the popup
-      setTimeout(() => {
-        const filloutButton = document.querySelector('[data-fillout-id="sJasutqxqKus"]') as HTMLElement;
-        if (filloutButton) {
-          filloutButton.click();
-        }
-      }, 1000);
+      // Mark that we've shown the form to this user
+      const shownFormKey = `fillout_shown_${user.id}`;
+      const hasShownForm = localStorage.getItem(shownFormKey);
+      
+      if (!hasShownForm) {
+        localStorage.setItem(shownFormKey, 'true');
+        
+        // Wait a bit for the page to fully load, then trigger the popup
+        setTimeout(() => {
+          const filloutButton = document.querySelector('[data-fillout-id="sJasutqxqKus"]') as HTMLElement;
+          if (filloutButton) {
+            filloutButton.click();
+          }
+        }, 1000);
+      }
     }
   }, [user]);
 
