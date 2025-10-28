@@ -192,9 +192,7 @@ const Index = () => {
 
       // Show the Fillout button
       const filloutButton = document.getElementById("fillout-trigger-button") as HTMLElement;
-      console.log("popup");
       if (filloutButton) {
-        filloutButton.click();
         filloutButton.style.display = "block";
       }
     }
@@ -417,7 +415,9 @@ const Index = () => {
               // Use your conditional state for visibility
               display: "block",
             }}
-          ></div>
+          >
+            Open form
+          </div>
           {/* Mobile: Single Panel View */}
           {isMobile ? (
             <div className="flex-1 overflow-hidden">
