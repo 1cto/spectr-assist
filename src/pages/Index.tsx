@@ -405,7 +405,16 @@ const Index = () => {
             data-fillout-button-color="#51E6AA"
             data-fillout-inherit-parameters
             data-fillout-popup-size="medium"
-            style={{ display: "none" }}
+            // 👇 APPLY THESE STYLES
+            style={{
+              position: "fixed",
+              zIndex: 9999,
+              // Example placement (adjust as needed)
+              bottom: "20px",
+              left: "20px",
+              // Use your conditional state for visibility
+              display: isRegistered ? "block" : "none",
+            }}
           ></div>
           {/* Mobile: Single Panel View */}
           {isMobile ? (
