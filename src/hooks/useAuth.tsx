@@ -32,14 +32,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setTimeout(() => {
           const lastProvider = session.user.app_metadata.provider;
           if (session.user && lastProvider === "google") {
-            // Check if user was just created (within last 5 seconds)
-            const userCreatedAt = new Date(session.user.created_at).getTime();
-            const now = Date.now();
-            const isNewUser = (now - userCreatedAt) < 5000;
-            
-            if (isNewUser) {
+           
               console.log("auth_lead_create");
-              createBitrixLead(session.user);
+              await createBitrixLead(session.user);
             }
           }
         }, 0);
