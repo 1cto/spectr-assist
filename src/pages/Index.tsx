@@ -280,12 +280,12 @@ const Index = () => {
           setFeatureContent(newFeature);
 
           // Save to database with current values from refs
-          await saveFeatureToDb(
-            previousFeature,
-            newFeature,
-            payload.payload.userMessage || "",
-            payload.payload.comment || "",
-          );
+        //  await saveFeatureToDb(
+         //   previousFeature,
+         //   newFeature,
+        //    payload.payload.userMessage || "",
+        //    payload.payload.comment || "",
+        //  );
 
           // Notify Feature File that feature has been received to stop spinner and start QM spinner
           loadingChannelRef.current?.send({
@@ -332,7 +332,7 @@ const Index = () => {
           setOverallScore(payload.payload.overall);
 
           // Save estimation to database
-          await saveEstimationToDb(payload.payload);
+       //   await saveEstimationToDb(payload.payload);
 
           // Broadcast metrics-received to stop the progress bar
           loadingChannelRef.current?.send({
