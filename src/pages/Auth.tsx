@@ -86,10 +86,11 @@ export default function Auth() {
 
         // Create lead in Bitrix24
         if (data?.user) {
-          console.log(data.user.email);
+          console.log(data.user.email,"new user");
           await createBitrixLead(data.user);
           // Mark this as a new registration
           localStorage.setItem("isNewRegistration", "true");
+          
         }
         setIsLoading(false);
         toast({
