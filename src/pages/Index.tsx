@@ -186,17 +186,15 @@ const Index = () => {
 
     const isNewRegistration = localStorage.getItem('isNewRegistration');
     
-    if (isNewRegistration === 'true') {
+    if (isNewRegistration === 'true' && user) {
       // Clear the flag
       localStorage.removeItem('isNewRegistration');
       
-      // Wait for Fillout script to load and trigger the popup
-      setTimeout(() => {
-        const filloutButton = document.getElementById('fillout-trigger-button') as HTMLElement;
-        if (filloutButton) {
-          filloutButton.click();
-        }
-      }, 1500);
+      // Show the Fillout button
+      const filloutButton = document.getElementById('fillout-trigger-button') as HTMLElement;
+      if (filloutButton) {
+        filloutButton.style.display = 'block';
+      }
     }
   }, [user]);
 
