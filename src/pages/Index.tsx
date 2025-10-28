@@ -189,12 +189,11 @@ const Index = () => {
     if (isNewRegistration === "true" && user) {
       // Clear the flag
       localStorage.removeItem("isNewRegistration");
-      console.log("popup");
+
       // Show the Fillout button
       const filloutButton = document.getElementById("fillout-trigger-button") as HTMLElement;
       if (filloutButton) {
         filloutButton.style.display = "block";
-        filloutButton.click();
       }
     }
   }, [user]);
@@ -398,6 +397,16 @@ const Index = () => {
 
         {/* Main Content */}
         <div className="flex-1 flex overflow-hidden pb-16 lg:pb-0">
+          <div
+            id="fillout-trigger-button"
+            data-fillout-id="sJasutqxqKus"
+            data-fillout-embed-type="popup"
+            data-fillout-dynamic-resize
+            data-fillout-button-color="#51E6AA"
+            data-fillout-inherit-parameters
+            data-fillout-popup-size="medium"
+            style={{ display: "none" }}
+          ></div>
           {/* Mobile: Single Panel View */}
           {isMobile ? (
             <div className="flex-1 overflow-hidden">
@@ -603,16 +612,6 @@ const Index = () => {
       </div>
 
       {/* Hidden Fillout form trigger button for new registrations */}
-      <div
-        id="fillout-trigger-button"
-        data-fillout-id="sJasutqxqKus"
-        data-fillout-embed-type="popup"
-        data-fillout-dynamic-resize
-        data-fillout-button-color="#51E6AA"
-        data-fillout-inherit-parameters
-        data-fillout-popup-size="medium"
-        style={{ display: "none" }}
-      ></div>
     </AuthGuard>
   );
 };
