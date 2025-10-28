@@ -415,7 +415,10 @@ const Index = () => {
               // Use your conditional state for visibility
               display: "block",
             }}
-          ></div>
+          >
+            {" "}
+            **Complete Registration**
+          </div>
           {/* Mobile: Single Panel View */}
           {isMobile ? (
             <div className="flex-1 overflow-hidden">
