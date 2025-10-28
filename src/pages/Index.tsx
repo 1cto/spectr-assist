@@ -397,7 +397,7 @@ const Index = () => {
 
         {/* Main Content */}
         <div className="flex-1 flex overflow-hidden pb-16 lg:pb-0">
-          <div
+          <button
             id="fillout-trigger-button"
             data-fillout-id="sJasutqxqKus"
             data-fillout-embed-type="popup"
@@ -415,10 +415,7 @@ const Index = () => {
               // Use your conditional state for visibility
               display: "block",
             }}
-          >
-            {" "}
-            **Complete Registration**
-          </div>
+          ></button>
           {/* Mobile: Single Panel View */}
           {isMobile ? (
             <div className="flex-1 overflow-hidden">
