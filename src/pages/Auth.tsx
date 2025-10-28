@@ -124,6 +124,11 @@ export default function Auth() {
       setError(null);
       const redirectUrl = `${window.location.origin}/`;
 
+      // Mark as new registration if in signup mode
+      if (isSignUp) {
+        localStorage.setItem("isNewRegistration", "true");
+      }
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
