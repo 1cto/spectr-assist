@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthGuard } from "@/components/AuthGuard";
+import { UserMenu } from "@/components/UserMenu";
 import logo from "@/assets/logo.svg";
 
 const Fillout = () => {
