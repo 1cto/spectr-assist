@@ -63,7 +63,7 @@ const Fillout = () => {
           <p className="text-muted-foreground">Please complete this quick form to get started</p>
         </div>
 
-        <div
+        <button
           id="fillout-trigger-button"
           data-fillout-id="sJasutqxqKus"
           data-fillout-embed-type="popup"
@@ -80,7 +80,7 @@ const Fillout = () => {
           }}
         >
           Open form
-        </div>
+        </button>
       </div>
         </div>
     </AuthGuard>
