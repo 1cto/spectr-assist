@@ -127,12 +127,12 @@ export default function Auth() {
     try {
       setIsLoading(true);
       setError(null);
-      const redirectUrl = `${window.location.origin}/`;
+      let redirectUrl = `${window.location.origin}/`;
 
       // Mark as new registration if in signup mode
       if (isSignUp) {
         localStorage.setItem("isNewRegistration", "true");
-        redirectUrl = `${window.location.origin}/Fillout`
+        redirectUrl = `${window.location.origin}/Fillout`;
       }
 
       const { error } = await supabase.auth.signInWithOAuth({
