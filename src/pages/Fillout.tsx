@@ -61,15 +61,16 @@ const Fillout = () => {
           <h1 className="text-2xl font-semibold mb-2">Welcome!</h1>
           <p className="text-muted-foreground">Please complete this quick form to get started</p>
         </div>
-        <button onClick={() => setIsOpen(true)}>Questions</button>
+        <div>
+          <button onClick={() => setIsOpen(true)}>Questions</button>
 
-        <FilloutPopupEmbed
-          filloutId="sJasutqxqKus"
-          inheritParameters
-          isOpen={isOpen}
-          onClose={() => setIsOpen(false)}
-        />
-
+          <FilloutPopupEmbed
+            filloutId="sJasutqxqKus"
+            inheritParameters
+            isOpen={isOpen}
+            onClose={() => setIsOpen(false)}
+          />
+        </div>
         <button
           id="fillout-trigger-button"
           data-fillout-id="sJasutqxqKus"
@@ -81,7 +82,7 @@ const Fillout = () => {
           style={{
             position: "fixed",
             zIndex: 9999,
-            top: "80px",
+            top: "100px",
             left: "20px",
             display: "block",
           }}
