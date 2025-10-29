@@ -463,9 +463,9 @@ const Index = () => {
               zIndex: 9999,
               bottom: "20px",
               left: "20px",
-              display: "none",
+              display: "block",
             }}
-          ></div>
+          >Open form</div>
           {/* Mobile: Single Panel View */}
           {isMobile ? (
             <div className="flex-1 overflow-hidden">
