@@ -12,7 +12,7 @@ import { z } from "zod";
 import Logo from "@/assets/storybot_logo.svg";
 import { captureAndStoreUtmParams } from "@/lib/utils";
 import { createBitrixLead } from "@/lib/utils";
-import "@fillout/react/style.css";
+import "@fillout/react";
 
 const authSchema = z.object({
   email: z.string().trim().email({
