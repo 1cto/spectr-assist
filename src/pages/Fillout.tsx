@@ -2,14 +2,14 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthGuard } from "@/components/AuthGuard";
 import { UserMenu } from "@/components/UserMenu";
-import { FilloutPopupEmbed } from "@fillout/react";
-import { useState } from "react";
-import "@fillout/react/style.css";
 import logo from "@/assets/logo.svg";
+import { FilloutPopupEmbed } from "@fillout/react";
+
+
 
 const Fillout = () => {
   const navigate = useNavigate();
-
+const [isOpen, setIsOpen] = useState(false);
   useEffect(() => {
     // Handle Fillout messages
     const handleFilloutMessage = (event: MessageEvent) => {
@@ -65,7 +65,19 @@ const Fillout = () => {
             <h1 className="text-2xl font-semibold mb-2">Welcome!</h1>
           <p className="text-muted-foreground">Please complete this quick form to get started</p>
         </div>
+<button onClick={() => setIsOpen(true)}>Questions</button>
 
+      {isOpen && (
+        <FilloutPopupEmbed
+          filloutId="sJasutqxqKus"
+          inheritParameters
+          size="medium"
+          color="#51E6AA"
+           text="Questions"
+          onClose={() => setIsOpen(false)}
+        />
+      )}
+    </>
         <button
           id="fillout-trigger-button"
           data-fillout-id="sJasutqxqKus"
@@ -84,8 +96,6 @@ const Fillout = () => {
         >
           Open form
         </button>
-
-        
       </div>
         </div>
     </AuthGuard>

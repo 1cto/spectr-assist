@@ -12,7 +12,6 @@ import { z } from "zod";
 import Logo from "@/assets/storybot_logo.svg";
 import { captureAndStoreUtmParams } from "@/lib/utils";
 import { createBitrixLead } from "@/lib/utils";
-import "@fillout/react";
 
 const authSchema = z.object({
   email: z.string().trim().email({
@@ -47,12 +46,8 @@ export default function Auth() {
         });
       }
         else {
-          navigate("/", { replace: true });
-          toast({
-            title: "Welcome!",
-            description: "You have successfully signed in."
-          });
-        }
+         navigate("/", { replace: true });
+      }
       }
       // --- ADDED: Handle SIGNED_OUT Event ---
       else if (event === "SIGNED_OUT") {
