@@ -38,21 +38,20 @@ export default function Auth() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === "SIGNED_IN" && session) {
-        if(!localStorage.getItem("isNewRegistration")){
+        if (!localStorage.getItem("isNewRegistration")) {
           navigate("/", { replace: true });
           toast({
-          title: "Welcome!",
-          description: "You have successfully signed in.",
-        });
-      }
-        else {
-         navigate("/", { replace: true });
-      }
+            title: "Welcome!",
+            description: "You have successfully signed in.",
+          });
+        } else {
+          navigate(`/Fillout?email=${session.user.email}`, { replace: true });
+        }
       }
       // --- ADDED: Handle SIGNED_OUT Event ---
       else if (event === "SIGNED_OUT") {
         // Clear the local state to trigger a re-render/context update
-
+        localStorage.clear();
         navigate("/auth", { replace: true });
       }
     });
@@ -77,7 +76,7 @@ export default function Auth() {
         return;
       }
       if (isSignUp) {
-        const redirectUrl = `${window.location.origin}/`;
+        let redirectUrl = `${window.location.origin}/Fillout?email=${email}`;
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
@@ -91,11 +90,10 @@ export default function Auth() {
 
         // Create lead in Bitrix24
         if (data?.user) {
-          console.log(data.user.email,"new user");
+          console.log(data.user.email, "new user");
           await createBitrixLead(data.user);
           // Mark this as a new registration
           localStorage.setItem("isNewRegistration", "true");
-          
         }
         setIsLoading(false);
         toast({
@@ -132,7 +130,7 @@ export default function Auth() {
       // Mark as new registration if in signup mode
       if (isSignUp) {
         localStorage.setItem("isNewRegistration", "true");
-        redirectUrl = `${window.location.origin}/`;
+        redirectUrl = `${window.location.origin}/Fillout?email=${email}`;
       }
 
       const { error } = await supabase.auth.signInWithOAuth({
