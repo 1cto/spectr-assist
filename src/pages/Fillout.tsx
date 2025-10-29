@@ -9,32 +9,35 @@ const Fillout = () => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(true);
   useEffect(() => {
-    // 2. Add an extra useEffect to ensure the state is set to true 
+    // 2. Add an extra useEffect to ensure the state is set to true
     //    even if the initial state somehow gets overridden before the render cycle.
     //    (Though setting it to 'true' in useState is usually sufficient).
     //    This can be safely removed or kept simple:
     if (isOpen === false) {
       setIsOpen(true);
     }
-  useEffect(() => {
     // Handle Fillout messages
     const handleFilloutMessage = (event: MessageEvent) => {
+      // The @fillout/react component manages its own closure, but we keep this
+      // for the external window message that Fillout sends upon completion/closure.
       if (typeof event.data === "string" && event.data.includes("fillout:close")) {
         console.log("[Fillout] Form closed or completed, redirecting to home");
         localStorage.setItem("hasCompletedFillout", "true");
+        // We close the local state before navigating to prevent double render issues
+        setIsOpen(false);
         navigate("/", { replace: true });
       }
     };
 
     window.addEventListener("message", handleFilloutMessage);
 
-    
+    // ⚠️ Removed the manual setTimeout/click logic, as it's not needed
+    // when using the FilloutPopupEmbed component with isOpen={true}.
+
     return () => {
       window.removeEventListener("message", handleFilloutMessage);
-      clearTimeout(timer);
     };
   }, [navigate]);
-
   return (
     <div className="h-screen bg-background flex flex-col">
       <header className="bg-gradient-panel px-4 sm:px-6 py-3 sm:py-4">
@@ -62,7 +65,8 @@ const Fillout = () => {
           <p className="text-muted-foreground">Please complete this quick form to get started</p>
         </div>
         <div>
-         
+          <button onClick={() => setIsOpen(true)}>Questions</button>
+
           <FilloutPopupEmbed
             filloutId="sJasutqxqKus"
             inheritParameters
@@ -70,7 +74,6 @@ const Fillout = () => {
             onClose={() => setIsOpen(false)}
           />
         </div>
-        
       </div>
     </div>
   );
