@@ -53,7 +53,8 @@ const Index = () => {
   useEffect(() => {
     // Only navigate away from the login page if not loading AND user exists
     if (!loading && user && location.pathname === "/auth") {
-      navigate("/", { replace: true });
+      if (localStorage.getItem("isNewRegistration")) navigate(`/fillout?email=${user.email}`, { replace: true });
+      else navigate(`/`, { replace: true });
     }
     if (!loading && !user) {
       navigate("/auth", { replace: true });
@@ -278,7 +279,6 @@ const Index = () => {
           // Update local state
           setFeatureContent(newFeature);
 
-          
           // Notify Feature File that feature has been received to stop spinner and start QM spinner
           loadingChannelRef.current?.send({
             type: "broadcast",

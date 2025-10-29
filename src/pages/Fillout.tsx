@@ -16,7 +16,7 @@ const Fillout = () => {
     setIsOpen(false); // Close the modal locally
     navigate("/", { replace: true }); // Redirect to home
   };
-  
+
   useEffect(() => {
     // 2. Add an extra useEffect to ensure the state is set to true
     //    even if the initial state somehow gets overridden before the render cycle.
@@ -44,43 +44,40 @@ const Fillout = () => {
     };
   }, [navigate, isOpen]);
   return (
-    <div className="h-screen bg-background flex flex-col">
-      <header className="bg-gradient-panel px-4 sm:px-6 py-3 sm:py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 sm:gap-4">
-            <img src={logo} alt="StoryBot" className="h-8 sm:h-12" />
-            <div>
-              <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block max-w-[300px]">
-                Transform Natural Language Tasks into Structured Given-When-Then Statements
-              </p>
+    <AuthGuard>
+      <div className="h-screen bg-background flex flex-col">
+        <header className="bg-gradient-panel px-4 sm:px-6 py-3 sm:py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 sm:gap-4">
+              <img src={logo} alt="StoryBot" className="h-8 sm:h-12" />
+              <div>
+                <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block max-w-[300px]">
+                  Transform Natural Language Tasks into Structured Given-When-Then Statements
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
+                <div className="w-2 h-2 bg-estimate-low rounded-full"></div>
+                <span className="hidden sm:inline">Ready</span>
+              </div>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
-              <div className="w-2 h-2 bg-estimate-low rounded-full"></div>
-              <span className="hidden sm:inline">Ready</span>
-            </div>
+        </header>
+
+        <div className="h-screen bg-background flex flex-col items-center justify-center p-4">
+          <div className="text-center mb-8">
+            <h1 className="text-2xl font-semibold mb-2">Welcome!</h1>
+            <p className="text-muted-foreground">Please complete this quick form to get started</p>
           </div>
-        </div>
-      </header>
+          <div>
+            <button onClick={() => setIsOpen(true)}>Open form</button>
 
-      <div className="h-screen bg-background flex flex-col items-center justify-center p-4">
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-semibold mb-2">Welcome!</h1>
-          <p className="text-muted-foreground">Please complete this quick form to get started</p>
-        </div>
-        <div>
-          <button onClick={() => setIsOpen(true)}>Open form</button>
-
-          <FilloutPopupEmbed
-            filloutId="sJasutqxqKus"
-            inheritParameters
-            isOpen={isOpen}
-            onClose={handleFormClosure}
-          />
+            <FilloutPopupEmbed filloutId="sJasutqxqKus" inheritParameters isOpen={isOpen} onClose={handleFormClosure} />
+          </div>
         </div>
       </div>
-    </div>
+    </AuthGuard>
   );
 };
 
