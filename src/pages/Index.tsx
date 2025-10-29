@@ -208,7 +208,7 @@ const Index = () => {
 
     checkJiraConnection();
   }, [user]);
-// NEW useEffect to handle the automatic click/open
+  // NEW useEffect to handle the automatic click/open
   useEffect(() => {
     if (isRegistered) {
       // 2. Button is now in the DOM. Wait briefly for the Fillout script to bind the click handler.
@@ -233,12 +233,7 @@ const Index = () => {
     }
   }, [isRegistered]); // This effect runs whenever isRegistered changes.
   // Show Fillout form for new registrations
-  useEffect(() => {
-    if (!user) {
-      console.log("no user");
-      return;
-    }
-  // Show Fillout form for new registrations
+
   useEffect(() => {
     if (!user) return;
 
