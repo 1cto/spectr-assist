@@ -46,7 +46,14 @@ export default function Auth() {
         });
       }
         else {
-         navigate("/Fillout", { replace: true });
+        // navigate("/Fillout", { replace: true });navigate("/", { replace: true });
+          toast({
+          title: "Welcome!",
+          description: "You have successfully signed in."
+          navigate("/", { replace: true });
+          toast({
+          title: "Welcome!",
+          description: "You have successfully signed in."
       }
       }
       // --- ADDED: Handle SIGNED_OUT Event ---
@@ -77,7 +84,7 @@ export default function Auth() {
         return;
       }
       if (isSignUp) {
-        const redirectUrl = `${window.location.origin}/Fillout`;
+        const redirectUrl = `${window.location.origin}/`;
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
@@ -132,7 +139,7 @@ export default function Auth() {
       // Mark as new registration if in signup mode
       if (isSignUp) {
         localStorage.setItem("isNewRegistration", "true");
-        redirectUrl = `${window.location.origin}/Fillout`;
+        redirectUrl = `${window.location.origin}/`;
       }
 
       const { error } = await supabase.auth.signInWithOAuth({

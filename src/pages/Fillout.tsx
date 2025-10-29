@@ -2,6 +2,9 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthGuard } from "@/components/AuthGuard";
 import { UserMenu } from "@/components/UserMenu";
+import { FilloutPopupEmbed } from "@fillout/react";
+import { useState } from "react";
+import "@fillout/react/style.css";
 import logo from "@/assets/logo.svg";
 
 const Fillout = () => {
@@ -81,6 +84,8 @@ const Fillout = () => {
         >
           Open form
         </button>
+
+        
       </div>
         </div>
     </AuthGuard>
