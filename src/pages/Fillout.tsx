@@ -52,7 +52,7 @@ const Fillout = () => {
                 <div className="w-2 h-2 bg-estimate-low rounded-full"></div>
                 <span className="hidden sm:inline">Ready</span>
               </div>
-              <UserMenu />
+            
             </div>
           </div>
         </header>
