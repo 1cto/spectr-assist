@@ -7,7 +7,15 @@ import { FilloutPopupEmbed } from "@fillout/react";
 
 const Fillout = () => {
   const navigate = useNavigate();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
+  useEffect(() => {
+    // 2. Add an extra useEffect to ensure the state is set to true 
+    //    even if the initial state somehow gets overridden before the render cycle.
+    //    (Though setting it to 'true' in useState is usually sufficient).
+    //    This can be safely removed or kept simple:
+    if (isOpen === false) {
+      setIsOpen(true);
+    }
   useEffect(() => {
     // Handle Fillout messages
     const handleFilloutMessage = (event: MessageEvent) => {
@@ -20,15 +28,7 @@ const Fillout = () => {
 
     window.addEventListener("message", handleFilloutMessage);
 
-    // Auto-click the fillout button after script loads
-    const timer = setTimeout(() => {
-      const filloutButton = document.getElementById("fillout-trigger-button") as HTMLElement;
-      if (filloutButton) {
-        console.log("[Fillout] Auto-clicking fillout button");
-        filloutButton.click();
-      }
-    }, 1000);
-
+    
     return () => {
       window.removeEventListener("message", handleFilloutMessage);
       clearTimeout(timer);
@@ -62,8 +62,7 @@ const Fillout = () => {
           <p className="text-muted-foreground">Please complete this quick form to get started</p>
         </div>
         <div>
-          <button onClick={() => setIsOpen(true)}>Questions</button>
-
+         
           <FilloutPopupEmbed
             filloutId="sJasutqxqKus"
             inheritParameters
@@ -71,6 +70,7 @@ const Fillout = () => {
             onClose={() => setIsOpen(false)}
           />
         </div>
+        
       </div>
     </div>
   );
