@@ -71,24 +71,6 @@ const Fillout = () => {
             onClose={() => setIsOpen(false)}
           />
         </div>
-        <button
-          id="fillout-trigger-button"
-          data-fillout-id="sJasutqxqKus"
-          data-fillout-embed-type="popup"
-          data-fillout-dynamic-resize
-          data-fillout-button-color="#51E6AA"
-          data-fillout-inherit-parameters
-          data-fillout-popup-size="medium"
-          style={{
-            position: "fixed",
-            zIndex: 9999,
-            top: "100px",
-            left: "20px",
-            display: "block",
-          }}
-        >
-          Open form
-        </button>
       </div>
     </div>
   );
