@@ -71,10 +71,7 @@ const Fillout = () => {
             filloutId="sJasutqxqKus"
             inheritParameters
             isOpen={isOpen}
-            onClose={() => {setIsOpen(false);
-                            localStorage.setItem("hasCompletedFillout", "true");
-                            navigate("/", { replace: true });
-                           }
+            onClose={() => setIsOpen(false)}
           />
         </div>
       </div>
