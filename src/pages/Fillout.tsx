@@ -4,7 +4,7 @@ import { AuthGuard } from "@/components/AuthGuard";
 import { UserMenu } from "@/components/UserMenu";
 import logo from "@/assets/logo.svg";
 import { FilloutPopupEmbed } from "@fillout/react";
-import "@fillout/react/style.css";
+
 
 const Fillout = () => {
   const navigate = useNavigate();
