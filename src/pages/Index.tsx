@@ -278,14 +278,7 @@ const Index = () => {
           // Update local state
           setFeatureContent(newFeature);
 
-          // Save to database with current values from refs
-          //  await saveFeatureToDb(
-          //   previousFeature,
-          //   newFeature,
-          //    payload.payload.userMessage || "",
-          //    payload.payload.comment || "",
-          //  );
-
+          
           // Notify Feature File that feature has been received to stop spinner and start QM spinner
           loadingChannelRef.current?.send({
             type: "broadcast",
