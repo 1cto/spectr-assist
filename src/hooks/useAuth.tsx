@@ -36,6 +36,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               console.log("auth_lead_create");
               createBitrixLead(session.user);
               localStorage.setItem("isNewRegistration", "true");
+              
             }
           }
         }, 0);

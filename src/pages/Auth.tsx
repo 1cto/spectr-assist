@@ -38,11 +38,16 @@ export default function Auth() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === "SIGNED_IN" && session) {
-        navigate("/", { replace: true });
-        toast({
+        if(!localStorage.getItem("isNewRegistration")){
+          navigate("/", { replace: true });
+          toast({
           title: "Welcome!",
           description: "You have successfully signed in.",
         });
+      }
+        else {
+         navigate("/Fillout", { replace: true });
+      }
       }
       // --- ADDED: Handle SIGNED_OUT Event ---
       else if (event === "SIGNED_OUT") {
@@ -127,7 +132,7 @@ export default function Auth() {
       // Mark as new registration if in signup mode
       if (isSignUp) {
         localStorage.setItem("isNewRegistration", "true");
-        redirectUrl = `${window.location.origin}/Fillout`;
+        redirectUrl = `${window.location.origin}/Fillout`
       }
 
       const { error } = await supabase.auth.signInWithOAuth({
