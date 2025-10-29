@@ -359,7 +359,7 @@ const Index = () => {
         <header className="bg-gradient-panel px-4 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 sm:gap-4">
-              <img src={logo} alt="BA Requirements Studio" className="h-8 sm:h-12" />
+              <img src={logo} alt="StoryBot" className="h-8 sm:h-12" />
               <div>
                 <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block max-w-[300px]">
                   Transform Natural Language Tasks into Structured Given-When-Then Statements
