@@ -3,6 +3,7 @@ import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import Auth from "@/pages/Auth";
 import Index from "@/pages/Index";
+import Fillout from "@/pages/Fillout";
 import NotFound from "@/pages/NotFound";
 import { AuthGuard } from "@/components/AuthGuard";
 
@@ -12,17 +13,22 @@ function App() {
   const location = useLocation();
 
   useEffect(() => {
+    const isNewRegistration = localStorage.getItem("isNewRegistration");
+    
+    // Redirect new registrations to fillout page
+    if (!loading && user && isNewRegistration === "true" && location.pathname !== "/fillout") {
+      localStorage.removeItem("isNewRegistration");
+      navigate("/fillout", { replace: true });
+      return;
+    }
+    
     // Only navigate away from the login page if not loading AND user exists
     if (!loading && user && location.pathname === "/auth") {
-      // console.log("Log in authredirect");
       navigate("/", { replace: true });
     }
     if (!loading && !user) {
-      //  console.log("Log out from redirect component");
       navigate("/auth", { replace: true });
     }
-    // If not loading and no user, and on a protected route, navigate to login
-    // This is often handled better by a <ProtectedRoute> component.
   }, [user, loading, navigate, location.pathname]);
 
   return (
@@ -34,6 +40,15 @@ function App() {
         element={
           <AuthGuard>
             <Index />
+          </AuthGuard>
+        }
+      />
+
+      <Route
+        path="/fillout"
+        element={
+          <AuthGuard>
+            <Fillout />
           </AuthGuard>
         }
       />

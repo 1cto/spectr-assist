@@ -41,7 +41,6 @@ const Index = () => {
   const previousFeatureContent = useRef(featureContent);
   const featureContentRef = useRef(featureContent);
   const userRef = useRef(user);
-  const [isRegistered, setIsRegistered] = useState(false);
   // Keep refs in sync with state
   useEffect(() => {
     featureContentRef.current = featureContent;
@@ -112,35 +111,6 @@ const Index = () => {
     }
     previousFeatureContent.current = featureContent;
   }, [featureContent, activeTab, isMobile]);
-  useEffect(() => {
-    // 1. Function to handle window messages
-    const handleFilloutMessage = (event: MessageEvent) => {
-      // IMPORTANT: Always verify the origin in a production environment
-      // The Fillout form will communicate its state via a postMessage.
-
-      // Check if the message is from Fillout and indicates a close or submission.
-      // The specific event name depends on Fillout's implementation (e.g., 'fillout:close' or 'fillout:submit').
-      // We'll listen for a generic event indicating closure/completion.
-
-      if (typeof event.data === "string" && event.data.includes("fillout:close")) {
-        console.log("[Fillout Listener] Fillout form closed or completed.");
-
-        // 2. Hide the button
-        setIsRegistered(false);
-
-        // 3. Set a persistent flag in localStorage
-        localStorage.setItem("hasCompletedFillout", "true");
-      }
-    };
-
-    // 4. Attach the listener when the component mounts
-    window.addEventListener("message", handleFilloutMessage);
-
-    // 5. Clean up the listener when the component unmounts
-    return () => {
-      window.removeEventListener("message", handleFilloutMessage);
-    };
-  }, []); // Empty dependency array means this runs once on mount
 
   // Clear badge when switching to document tab
   useEffect(() => {
@@ -207,48 +177,6 @@ const Index = () => {
     };
 
     checkJiraConnection();
-  }, [user]);
-  // NEW useEffect to handle the automatic click/open
-  useEffect(() => {
-    if (isRegistered) {
-      // 2. Button is now in the DOM. Wait briefly for the Fillout script to bind the click handler.
-      const timer = setTimeout(() => {
-        const filloutButton = document.getElementById("fillout-trigger-button") as HTMLElement;
-
-        if (filloutButton) {
-          console.log("Attempting to auto-click Fillout button.");
-
-          // 3. Programmatically click the button to trigger the popup.
-          filloutButton.click();
-
-          // 4. IMPORTANT: Clean up the flags/state *after* the click attempt.
-          localStorage.removeItem("isNewRegistration");
-
-          // Optional: Hide the button immediately after clicking it if you don't want it visible post-open.
-          // setIsRegistered(false);
-        }
-      }, 1000); // 500ms delay gives the Fillout script time to bind its listeners.
-
-      return () => clearTimeout(timer);
-    }
-  }, [isRegistered]); // This effect runs whenever isRegistered changes.
-  // Show Fillout form for new registrations
-
-  useEffect(() => {
-    if (!user) return;
-
-    const isNewRegistration = localStorage.getItem("isNewRegistration");
-
-    if (isNewRegistration === "true" && user) {
-      // Clear the flag
-      localStorage.removeItem("isNewRegistration");
-
-      // Show the Fillout button
-      const filloutButton = document.getElementById("fillout-trigger-button") as HTMLElement;
-      if (filloutButton) {
-        filloutButton.style.display = "block";
-      }
-    }
   }, [user]);
 
   // Save feature to database
@@ -450,22 +378,6 @@ const Index = () => {
 
         {/* Main Content */}
         <div className="flex-1 flex overflow-hidden pb-16 lg:pb-0">
-          <div
-            id="fillout-trigger-button"
-            data-fillout-id="sJasutqxqKus"
-            data-fillout-embed-type="popup"
-            data-fillout-dynamic-resize
-            data-fillout-button-color="#51E6AA"
-            data-fillout-inherit-parameters
-            data-fillout-popup-size="medium"
-            style={{
-              position: "fixed",
-              zIndex: 9999,
-              bottom: "20px",
-              left: "20px",
-              display: "block",
-            }}
-          >Open form</div>
           {/* Mobile: Single Panel View */}
           {isMobile ? (
             <div className="flex-1 overflow-hidden">
