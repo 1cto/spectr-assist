@@ -37,7 +37,7 @@ const Fillout = () => {
     <AuthGuard>
       <div className="h-screen bg-background flex flex-col items-center justify-center p-4">
         <div className="text-center mb-8">
-          <img src={logo} alt="BA Requirements Studio" className="h-16 mx-auto mb-4" />
+          <img src={logo} alt="StoryBot" className="h-16 mx-auto mb-4" />
           <h1 className="text-2xl font-semibold mb-2">Welcome!</h1>
           <p className="text-muted-foreground">Please complete this quick form to get started</p>
         </div>
@@ -53,7 +53,7 @@ const Fillout = () => {
           style={{
             position: "fixed",
             zIndex: 9999,
-            bottom: "20px",
+            top: "20px",
             left: "20px",
             display: "block",
           }}
