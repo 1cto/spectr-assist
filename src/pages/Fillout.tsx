@@ -65,13 +65,16 @@ const Fillout = () => {
           <p className="text-muted-foreground">Please complete this quick form to get started</p>
         </div>
         <div>
-          <button onClick={() => setIsOpen(true)}>Questions</button>
+          <button onClick={() => setIsOpen(true)}>Open form</button>
 
           <FilloutPopupEmbed
             filloutId="sJasutqxqKus"
             inheritParameters
             isOpen={isOpen}
-            onClose={() => setIsOpen(false)}
+            onClose={() => {setIsOpen(false);
+                            localStorage.setItem("hasCompletedFillout", "true");
+                            navigate("/", { replace: true });
+                           }
           />
         </div>
       </div>
