@@ -77,6 +77,7 @@ export default function Auth() {
       }
       if (isSignUp) {
         let redirectUrl = `${window.location.origin}/Fillout?email=${email}`;
+        localStorage.setItem("isNewRegistration", "true");
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
@@ -93,7 +94,6 @@ export default function Auth() {
           console.log(data.user.email, "new user");
           await createBitrixLead(data.user);
           // Mark this as a new registration
-          localStorage.setItem("isNewRegistration", "true");
         }
         setIsLoading(false);
         toast({
