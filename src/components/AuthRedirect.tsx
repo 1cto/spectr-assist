@@ -14,14 +14,14 @@ function App() {
 
   useEffect(() => {
     const isNewRegistration = localStorage.getItem("isNewRegistration");
-    
+
     // Redirect new registrations to fillout page
     if (!loading && user && isNewRegistration === "true" && location.pathname !== "/fillout") {
       localStorage.removeItem("isNewRegistration");
-      navigate("/fillout", { replace: true });
+      navigate(`/fillout?email=${email}`, { replace: true });
       return;
     }
-    
+
     // Only navigate away from the login page if not loading AND user exists
     if (!loading && user && location.pathname === "/auth") {
       navigate("/", { replace: true });
