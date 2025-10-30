@@ -18,7 +18,7 @@ function App() {
     // Redirect new registrations to fillout page
     if (!loading && user && isNewRegistration === "true" && location.pathname !== "/fillout") {
       localStorage.removeItem("isNewRegistration");
-      navigate(`/fillout?email=${email}`, { replace: true });
+      navigate(`/fillout?email=${user.email}`, { replace: true });
       return;
     }
 
