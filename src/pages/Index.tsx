@@ -3,8 +3,7 @@ import { ChatPanel, ChatPanelRef } from "@/components/ChatPanel";
 import { FeatureEditor } from "@/components/FeatureEditor";
 import { QualityPanel } from "@/components/QualityPanel";
 import { AuthGuard } from "@/components/AuthGuard";
-import { useNavigate, useLocation } from "react-router-dom";
-
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { UserMenu } from "@/components/UserMenu";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";

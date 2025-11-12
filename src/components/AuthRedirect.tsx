@@ -11,7 +11,7 @@ function App() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-
+  const [searchParams] = useSearchParams();
   useEffect(() => {
     const isNewRegistration = localStorage.getItem("isNewRegistration");
 
