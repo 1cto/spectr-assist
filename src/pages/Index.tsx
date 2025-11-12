@@ -56,7 +56,15 @@ const Index = () => {
       else navigate(`/`, { replace: true });
     }
     if (!loading && !user) {
-      navigate("/auth", { replace: true });
+      const currentQueryString = searchParams.toString();
+
+      // 2. Build the new path: '/auth' + '?' + 'param1=value1&param2=value2'
+      // We only add the '?' if there are actually parameters to prevent an empty '?'
+      const newPath = currentQueryString ? `/auth?${currentQueryString}` : "/auth";
+
+      // 3. Navigate to the new path, replacing the current entry in the history
+      navigate(newPath, { replace: true });
+      // navigate("/auth", { replace: true });
     }
   }, [user, loading, navigate, location.pathname]);
 
