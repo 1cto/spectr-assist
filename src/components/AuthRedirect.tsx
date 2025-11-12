@@ -37,7 +37,7 @@ function App() {
       navigate(newPath, { replace: true });
       //   navigate("/auth", { replace: true });
     }
-  }, [user, loading, navigate, location.pathname]);
+  }, [user, loading, navigate, location.pathname, searchParams]);
 
   return (
     <Routes>

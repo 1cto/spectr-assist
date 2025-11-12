@@ -21,6 +21,7 @@ const Index = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
 
   const [featureContent, setFeatureContent] = useState("");
   const [activeTab, setActiveTab] = useState<"chat" | "document" | "quality">("chat");
@@ -66,7 +67,7 @@ const Index = () => {
       navigate(newPath, { replace: true });
       // navigate("/auth", { replace: true });
     }
-  }, [user, loading, navigate, location.pathname]);
+  }, [user, loading, navigate, location.pathname, searchParams]);
 
   const startWaiting = useCallback(() => {
     // Kick off mobile progress immediately
